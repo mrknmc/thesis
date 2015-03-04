@@ -155,7 +155,7 @@ There are several core concepts used by Storm and hence by extension Storm-MC as
 \begin{description}
   \item[Spout] A spout is a component that represents the source of a data-stream. Typically, a spout reads from a message broker such as RabbitMQ or Kafka but can also generate its own stream or read from somewhere like the Twitter streaming API.
   \item[Bolt] A bolt is a component that takes a data-stream as an input and transforms it into a different stream for its output. A bolt can perform a range of functions e.g. filter out tuples based on some criteria or perform a join of two different input streams.
-  \item[Topology] The programmer connects these components in a directed acyclic graph (called topology) which describes how the components interact with each other. The topology is then submitted to the Storm library.
+  \item[Topology] The programmer connects these components in a directed acyclic graph called topology which describes how the components interact with each other. The topology is then submitted to Storm.
 \end{description}
 
 \begin{figure}[!htb]
@@ -165,11 +165,22 @@ There are several core concepts used by Storm and hence by extension Storm-MC as
 	\label{fig:topology}
 \end{figure}
 
-\newpage
+\section{Additional Concepts}
+
+\begin{description}
+  \item[Stream] A stream is defined as an unbounded sequence of tuples. Streams can be thought of as edges connecting the bolts and spouts which act as vertices.
+  \item[Tuple] A tuple wraps named fields and their values. The values of fields can be of different types. When a component emits a tuple to a stream it sends that tuple to every bolt subscribed to the stream.
+  \item[Stream Grouping] Every bolt needs to have a type of stream grouping associated with it. This grouping decides the means of distributing the tuples coming from its input streams amongst the instances of the bolt task.
+  	  %% TODO: Maybe list Grouping types
+\end{description}
+
+All the components of a Storm topology execute in parallel. A user can specify how much parallelism he wants associated with every component and Storm spawns the necessary number of threads.
 
 \section{Storm Architecture}
 
-The Storm cluster uses a Master-Worker pattern. There is one node called the Nimbus node which delegates and orchestrates the work and there are Worker nodes which execute the source code representing components.
+%% TODO: Maybe highlight similarities to Hadoop
+
+The Storm cluster uses a Master-Worker pattern. The master node runs a daemon called Nimbus which receives topologies submitted by clients, makes task assignments to worker nodes and monitors them for failure. The worker nodes run a daemon called Supervisor which spawns worker processes which execute the tasks assigned to them. Lastly, the cluster contains a number of Zookeeper nodes which coordinate the communication between the master and the workers.
 
 \subsection{Nimbus Node}
 
@@ -185,16 +196,6 @@ The Nimbus node is fault tolerant
 
 \subsection{Worker Nodes}
 
-The worker nodes receive an assignment from the master node, spawn number of processes as specified by the configuration and do the actual stream processing.
-%% TODO: Describe what worker nodes do.
-
-\subsection{Zookeeper Nodes}
-
-The Zookeeper nodes can be thought of as the glue of the network. They ensure that messages are delivered.
-%% TODO: Describe how zookeeper nodes work.
-
-\section{Inside a Worker Node}
-
 The innards of a Worker node are as follows:
 
 \begin{description}
@@ -207,6 +208,11 @@ The innards of a Worker node are as follows:
 	\item[Task] \hfill \\
 	A task performs the actual data processing. However, within an executor thread all the tasks are executed sequentially. The main reason for having tasks is that the number of tasks stays the same throughout the lifetime of a topology but the number of executors can change (via rebalancing). Thus if some worker nodes in the cluster go down, the topology can continue executing with the same number of tasks as before.
 \end{description}
+
+\subsection{Zookeeper Nodes}
+
+The Zookeeper nodes can be thought of as the glue of the network. They ensure that messages are delivered.
+%% TODO: Describe how zookeeper nodes work.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
