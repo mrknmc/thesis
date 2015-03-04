@@ -180,7 +180,7 @@ All the components of a Storm topology execute in parallel. A user can specify h
 
 %% TODO: Maybe highlight similarities to Hadoop
 
-The Storm cluster uses a Master-Worker pattern. The master node runs a daemon called Nimbus which receives topologies submitted by clients, makes task assignments to worker nodes and monitors them for failure. The worker nodes run a daemon called Supervisor which spawns worker processes which execute the tasks assigned to them. Lastly, the cluster contains a number of Zookeeper nodes which coordinate the communication between the master and the workers.
+The Storm cluster uses a Master-Worker pattern. The master node runs a daemon called Nimbus which receives topologies submitted by clients, makes task assignments to worker nodes, and monitors them for failure. The worker nodes run a daemon called Supervisor which spawns worker processes which execute the tasks assigned to them. Lastly, the cluster contains a number of Zookeeper nodes which coordinate the communication between the master and the workers.
 
 \subsection{Nimbus Node}
 
@@ -200,19 +200,23 @@ The innards of a Worker node are as follows:
 
 \begin{description}
 	\item[Supervisor] \hfill \\
-	A supervisor is a deamon process, run under supervision, that launches worker processes. This daemon is what the programmer runs on a worker node and it is the topmost layer.
+	A supervisor is a daemon process, run under supervision, that launches worker processes. This daemon is what the user runs on a worker node to make it part of the cluster.
 	\item[Worker] \hfill \\
 	A worker is a process that is assigned a port and listens to tuple messages on a socket associated with the port. Whenever it receives a tuple, it puts it on a queue where it is picked up by one or more executors of the worker process.
 	\item[Executor] \hfill \\
-	An executor controls the parallelism within a worker process. Every executor runs in a separate thread. Their job is to pick up tuples from the receiving queue, perform the function of a component they represent, and put the transformed tuples on the transfer queue, ready to be sent along to the next component. An executor runs one (the usual case) or more tasks.
+	An executor controls the parallelism within a worker process. Every executor runs in a separate thread. Its job is to pick up tuples from the receiving queue, perform the function of a component they represent, and put the transformed tuples on the transfer queue, ready to be sent along to the next component. An executor runs one (the usual case) or more tasks.
 	\item[Task] \hfill \\
-	A task performs the actual data processing. However, within an executor thread all the tasks are executed sequentially. The main reason for having tasks is that the number of tasks stays the same throughout the lifetime of a topology but the number of executors can change (via rebalancing). Thus if some worker nodes in the cluster go down, the topology can continue executing with the same number of tasks as before.
+	A task performs the actual data processing. However, within an executor thread all the tasks are executed sequentially. The main reason for having tasks is that the number of tasks stays the same throughout the lifetime of a topology but the number of executors can change (by rebalancing). Thus if some worker nodes in the cluster go down, the topology can continue executing with the same number of tasks as before.
 \end{description}
 
 \subsection{Zookeeper Nodes}
 
-The Zookeeper nodes can be thought of as the glue of the network. They ensure that messages are delivered.
 %% TODO: Describe how zookeeper nodes work.
+The Zookeeper nodes can be thought of as the glue of the network. They ensure that messages are delivered.
+
+\section{Serialisation}
+
+Since Storm topologies execute on a cluster all the components need to be serialisable. This is achieved with Apache Thrift. Thus, components are defined as Thrift objects and Thrift generates all the Java serialisation code automatically.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -224,6 +228,37 @@ The Zookeeper nodes can be thought of as the glue of the network. They ensure th
 
 \chapter{Design}
 
+The design of Storm-MC was ported over from Apache Storm. Clearly, however, some differences had to be made to take advantage of a multi-core machine performance. This chapter explains the design of Storm-MC.
+
+\section{Apache Storm on Multi-core}
+
+To begin, we discuss why Apache Storm does not perform well on a single machine. When running on multi-core architectures, Storm runs in local mode. There are several reasons why the local mode is not as performant as it could be.
+
+\begin{description}
+	\item[Multi-process Nature of Storm] \hfill \\
+	In general, multi-process applications suffer overhead from inter-process communication and are generally slower than their multi-threaded counterparts\cite{gluck_optimization_????}.
+	%% TODO: This could be another disadvantage
+%	\item[Serialisable components] \hfill \\
+	\item[Redundant threads] \hfill \\
+	Storm runs many threads which are only useful in distributed context. Indeed, during our experiments we found that a topology with 8 executors was being executed with 64 threads. This included threads which were used as timeout timers or to send heartbeats and were unnecessary in a multi-core setting. Obviously, not all of them were executing in parallel but there is clearly room for reduction.
+	%% TODO: Probably a link here
+	%% TODO: Maybe include Thread Dump
+	%% TODO: Also mention Acker not even running
+	%% TODO: Maybe mention how many threads with Storm-MC
+\end{description}
+
+\section{Storm-MC Architecture}
+
+The overall architecture of Storm-MC can be seen in figure.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.7]{pdf/storm_mc_arch.pdf}
+	\caption{Storm-MC Architecture.}
+	\label{fig:architecture}
+\end{figure}
+
+\subsection{Main Process}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
