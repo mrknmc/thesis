@@ -9,6 +9,8 @@
 \setsansfont[Mapping=tex-text,Numbers=OldStyle,Scale=MatchLowercase]{Gill Sans}
 \setmonofont[Mapping=tex-text,Scale=MatchLowercase]{Inconsolata}
 
+\usepackage{epsfig}
+
 % ENSURE CHAPTERS WORK IN PDF VIEWERS
 \usepackage[]{hyperref}
 \hypersetup{
@@ -151,13 +153,19 @@ In this chapter we give background information necessary to understand the desig
 There are several core concepts used by Storm and hence by extension Storm-MC as well. The concepts are put together to form a simple API that allows the user to break down a computation into separate components and then define how these components interact with each other.
 
 \begin{description}
-  \item[Topology] \hfill \\
-  The programmer breaks the computation down into a network of components (called topology) which describes how the components interact with each other. Every topology can be represented as a directed acyclic graph. The topology is then submitted to the Storm library.
-  \item[Spout] \hfill \\
-  A spout is a source of a data-stream of a network. Typically, a spout reads from a message broker such as RabbitMQ or Kafka but can also generate its own stream or read from somewhere like the Twitter streaming API.
-  \item[Bolt] \hfill \\
-  A bolt takes a data-stream as an input and transforms it into a different stream as its output. A bolt can perform a range of functions e.g. filter out tuples based on some criteria or perform a join of two different input streams.
+  \item[Spout] A spout is a component that represents the source of a data-stream. Typically, a spout reads from a message broker such as RabbitMQ or Kafka but can also generate its own stream or read from somewhere like the Twitter streaming API.
+  \item[Bolt] A bolt is a component that takes a data-stream as an input and transforms it into a different stream for its output. A bolt can perform a range of functions e.g. filter out tuples based on some criteria or perform a join of two different input streams.
+  \item[Topology] The programmer connects these components in a directed acyclic graph (called topology) which describes how the components interact with each other. The topology is then submitted to the Storm library.
 \end{description}
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.3]{pdf/topology.pdf}
+	\caption{An example topology.}
+	\label{fig:topology}
+\end{figure}
+
+\newpage
 
 \section{Storm Architecture}
 
