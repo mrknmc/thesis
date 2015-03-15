@@ -12,7 +12,7 @@
 
 
 % DISPLAY TODOS
-% \usepackage[disable]{todonotes}
+%\usepackage[disable]{todonotes}
 \usepackage[draft,bordercolor=white,backgroundcolor=yellow!60,linecolor=black,colorinlistoftodos]{todonotes}
 
 
@@ -162,17 +162,17 @@ In chapter 1, blah blah.
 
 \chapter{Background}
 
-In this chapter we give background information necessary to understand the design of Storm-MC. To ensure API compatibility with Apache Storm, Storm-MC was developed in Java and Clojure.
+In this chapter we give background information necessary to understand the design of Storm-MC. Apache Storm is developed in a mix of Java and Clojure. As mentioned by the author of Storm in \cite{Marz_2014}, writing the Storm interfaces in Java ensured large potential user-base while writing the implementation in Clojure increased productivity.
+
+To ensure API compatibility with Storm, Storm-MC was developed using the same languages. This allowed for great code reuse and not getting slowed down by re-implementing functionality already present in Storm in a different language.
 
 \section{Core Concepts}
 
-There are several core concepts used by Storm and hence by extension Storm-MC as well. The concepts are put together to form a simple API that allows the user to break down a computation into separate components and define how these components interact with each other.
-
-\todo{The three core concepts of Storm are:}
+There are several core concepts used by Storm and hence by extension Storm-MC as well. These concepts are put together to form a simple API that allows the user to break down a computation into separate components and define how these components interact with each other. The three core concepts of Storm are:
 
 \begin{description}
   \item[Spout] \hfill \\
-  A spout is a component that represents the source of a data-stream. Typically, a spout reads from a message broker such as RabbitMQ or Kafka but can also generate its own stream or read from somewhere like the Twitter streaming API.
+  A spout is a component that represents the source of a data-stream. Typically, a spout reads from a message broker such as RabbitMQ \cite{RabbitMQ} or Apache Kafka \cite{ApacheKafka} but can also generate its own stream or read from somewhere like the Twitter streaming API.
   \item[Bolt] \hfill \\
   A bolt is a component that transforms tuples from its input data stream and emits them to its output data stream. A bolt can perform a range of functions e.g. filter out tuples based on some criteria or perform a join of two different input streams.
   \item[Topology] \hfill \\
@@ -188,7 +188,7 @@ There are several core concepts used by Storm and hence by extension Storm-MC as
 	\label{fig:wordcount_topology}
 \end{figure}
 
-A classic example used to explain Storm topologies is the WordCount topology. In this topology, there is a spout generating random sentences, a bolt splitting the sentences on white-space, and a bolt counting occurrences of every word. Figure \ref{fig:wordcount_topology} shows how we could represent this topology graphically.
+A classic example used to explain Storm topologies is the WordCount topology. In this topology, there is a spout generating random sentences, a bolt splitting the sentences on white space, and a bolt counting occurrences of every word. Figure \ref{fig:wordcount_topology} shows how we could represent this topology graphically.
 
 This may seem as a simplistic example but it is useful when demonstrating how easy it is to implement a working topology using the Storm API.
 
@@ -198,7 +198,7 @@ This may seem as a simplistic example but it is useful when demonstrating how ea
 \label{listing:wordcount_topology}
 \end{listing}
 
-Listing \ref{listing:wordcount_topology} shows how the topology is put together to form a graph of components. Storm uses the Builder design pattern to build up the topology which is then submitted to the pseudo cluster. The last argument to the setBolt/setSpout method is the number of parallel tasks we want Storm to execute for the respective component.
+Listing \ref{listing:wordcount_topology} shows how the topology is put together to form a graph of components. Storm uses the Builder design pattern to build up the topology which is then submitted to Storm for execution. The last argument to the setBolt/setSpout method is the number of parallel tasks we want Storm to execute for the respective component.
 
 \newpage
 
@@ -241,75 +241,82 @@ Finally, listing \ref{listing:wordcount_count} shows how a bolt that counts the 
 
 \begin{description}
   \item[Stream] \hfill \\
-  A stream is defined as an unbounded sequence of tuples. Streams can be thought of as edges connecting bolts and spouts (vertices) of a topology.
+  A stream is defined as an unbounded sequence of tuples. Streams can be thought of as edges of a topology connecting bolts and spouts (vertices).
   \item[Tuple] \hfill \\
   A tuple wraps named fields and their values. The values of fields can be of different types. When a component emits a tuple to a stream it sends that tuple to every bolt subscribed to the stream.
   \item[Stream Grouping] \hfill \\
   Every bolt needs to have a type of stream grouping associated with it. This grouping decides the means of distributing the tuples coming from the bolt's input streams amongst the instances of the bolt task. Following are the possible types of stream grouping:
   \begin{description}
-  	\item[Shuffle] Randomly partitions the tuples among consumer tasks.
-  	\item[Fields] Hashes on a subset of the tuple attributes/fields.
-  	\item[All] Replicates the entire stream to all the consumer tasks.
-  	\item[Direct] The producer of the tuple decides which task of the consumer will receive this tuple.
-  	\item[Global] Sends the entire stream to a single bolt.
-  	\item[Local or Shuffle] Prefers sending to executors in the same worker process, if that is not possible it is the same as shuffle.
+  	\item[Shuffle] Randomly partitions the tuples among all the bolt tasks.
+  	\item[Fields] Hashes on a subset of the tuple fields.
+  	\item[All] Replicates the entire stream to all the bolt tasks.
+  	\item[Direct] The producer of the tuple decides which task of the bolt will receive this tuple.
+  	\item[Global] Sends the entire stream to a single bolt task.
+  	\item[Local or Shuffle] Prefers sending to executors in the same worker process, if that is not possible it uses the same strategy as shuffle.
   \end{description}
 \end{description}
 
-Users are also able to specify their own custom grouping by implementing the CustomStreamGrouping interface.
+Users are also able to specify their own custom grouping by implementing the \texttt{CustomStreamGrouping} interface.
 
 \todo{Explain why you would want to do that.}
 
 All the components of a Storm topology execute in parallel. The user can specify how much parallelism he wants associated with every component and Storm spawns the necessary number of threads. This is done through a configuration file, defined in YAML, which is submitted along with the topology.
 
+\todo{talk more about config}
+
 \section{Storm Architecture}
 
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.5]{pdf/storm_arch.pdf}
+	\caption{Apache Storm Architecture.}
+	\label{fig:storm_arch}
+\end{figure}
+
 \todo{Maybe highlight similarities to Hadoop}
-\todo{Link to Master-Worker paper here?}
 
-A Storm cluster adopts the Master-Worker pattern. To set up a Storm topology, the user launches daemon processes on nodes of the cluster and submits the topology to the master node, also called Nimbus. The worker nodes receive task assignments from the master and execute on them. The coordination between the master node and the worker nodes is handled by nodes running Apache Zookeeper.
-
-\todo{Link to Apache Zookeper here?}
+A Storm cluster adopts the Master-Worker pattern. To set up a Storm topology, the user launches daemon processes on nodes of the cluster and submits the topology to the master node, also called Nimbus. The worker nodes receive task assignments from the master and execute on them. The coordination between the master node and the worker nodes is handled by nodes running Apache Zookeeper \cite{ApacheZookeeper}. Figure \ref{fig:storm_arch} shows a graphical representation of Storm Architecture.
 
 \subsection{Nimbus Node}
 
 The master node runs a server daemon called Nimbus. The main role of Nimbus is to receive topology submissions from clients. Upon receiving a topology submission, Nimbus takes the following steps:
 
 \begin{description}
-	\item[Validating the topology.] The topology is validated using a validator to ensure that the submitted topology is valid before trying to execute it. The user can implement his own validator or use the default validator provided by Storm.
-	\item[Distributing the topology source code.] Nimbus ensures that the workers involved in the topology computation have the source code by sending it over the network.
-	\item[Scheduling the topology.] Nimbus runs a scheduler that distributes the work among workers of the cluster. Similarly to validation, the user can implement his own scheduler or use the default scheduler provided by Storm. The default scheduler uses a Round-robin strategy.
-		\todo{Confirm that above is actually Round-robin.}
-	\item[Activating the topology.] Nimbus transitions the topology to active state which means the worker nodes can start executing it.
-	\item[Monitoring the topology.] Nimbus continues to monitor the topology by reading heartbeats sent by the worker nodes to ensure that it is executing as expected. 
+	\item[Validate the topology] \hfill \\
+	The topology is validated using a validator to ensure that the submitted topology is valid before trying to execute it. The user can implement his own validator or use the default validator provided by Storm.
+	\item[Distribute the topology source code] \hfill \\
+	Nimbus ensures that the workers involved in the topology computation have the source code by sending it over the network.
+	\item[Schedule the topology] \hfill \\
+	Nimbus runs a scheduler that distributes the work among workers of the cluster. Similarly to validation, the user can implement his own scheduler or use the default scheduler provided by Storm. The default scheduler uses a simple Round-robin strategy.
+	\item[Activate the topology] \hfill \\
+	Nimbus transitions the topology to active state which tells the worker nodes to start executing it.
+	\item[Monitor the topology] \hfill \\
+	Nimbus continues to monitor the topology by reading heartbeats sent by the worker nodes to ensure that the topology is executing as expected and worker nodes have not failed.
 \end{description}
 
-\todo{Is listing the steps involved the right way to explain it?}
 
-Nimbus is an Apache Thrift service (more on Thrift in section \ref{sec:serialisation}) that listens to commands submitted by clients and modifies the state of a cluster accordingly. Following are commands supported by Nimbus:
-
-\todo{Link to Apache Thrift here?}
+Nimbus is an Apache Thrift \cite{ApacheThrift} service (more on Thrift in section \ref{sec:serialisation}) that listens to commands submitted by clients and modifies the state of a cluster accordingly. Following are the commands supported by Nimbus:
 
 \begin{description}
 	\item[Submit a topology] \hfill \\
-	Clients can submit a topology defined in a jar file. The Nimbus service then ensures that the topology configuration and resources are distributed across the cluster and starts executing the topology.
+	Clients can submit a topology defined in a Java Archive (JAR) file. The Nimbus service then ensures that the topology configuration and resources are distributed across the cluster and starts executing the topology.
 	\item[Kill a topology] \hfill \\
 	Nimbus can stop running a topology and remove it from the cluster. The cluster can still continue executing other topologies.
 	\item[Activate/deactivate a topology] \hfill \\
-	Topologies can be deactivated and reactivated by Nimbus. This could be useful if the spout temporarily cannot produce a stream.
+	Topologies can be deactivated and reactivated by Nimbus. This could be useful if the spout temporarily cannot produce a stream and the user does not want the cluster to execute idly.
 	\item[Rebalance a topology] \hfill \\
 	Nimbus can rebalance a topology across more nodes. Thus if the number of nodes in the cluster changes the user can increase or decrease the number of nodes involved in the topology.
 \end{description}
 
-\todo{Is listing this really necessary?}
+%\todo{Is listing this really necessary?}
 
 \subsection{Worker Nodes}
 
-The worker nodes run a daemon called Supervisor. There are 4 abstractions which control the parallelism of a worker node.
+The worker nodes run a daemon called Supervisor. There are 4 layers of abstraction which control the parallelism of a worker node.
 
 \begin{description}
 	\item[Supervisor] \hfill \\
-	A supervisor is a daemon process the user runs on a worker node to make it part of the cluster. It launches worker processes and assigns them a port they can receive messages on. A worker node runs only one supervisor process.
+	A supervisor is a daemon process the user runs on a worker node to make it part of the cluster. It launches worker processes and assigns them a port they can receive messages on. Furthermore, it monitors the worker processes and restarts them if they fail. A worker node runs only one supervisor process.
 	\item[Worker] \hfill \\
 	A worker process is assigned a port and listens to tuple messages on a socket associated with the port. A worker launches executor threads as required by the topology. Whenever it receives a tuple, it puts it on a queue where it is picked up by one or more executors of the worker process.
 	
@@ -317,21 +324,41 @@ The worker nodes run a daemon called Supervisor. There are 4 abstractions which 
 	\item[Executor] \hfill \\
 	An executor controls the parallelism within a worker process. Every executor runs in a separate thread. An executor's job is to pick up tuples from the receiver queue of the worker, perform the task of a component it represents, and put the transformed tuples on the transfer queue of the worker. There can be many executors running inside one worker and an executor performs one (the usual case) or more tasks.
 	\item[Task] \hfill \\
-	A task performs the actual data processing. However, within an executor thread all the tasks are executed sequentially. The main reason for having tasks is that the number of tasks stays the same throughout the lifetime of a topology but the number of executors can change (by rebalancing). Thus if some worker nodes in the cluster go down, the topology can continue executing with the same number of tasks as before.
+	A task represents the actual tuple processing function. However, within an executor thread all the tasks are executed sequentially. The main reason for having tasks is that the number of tasks stays the same throughout the lifetime of a topology but the number of executors can change (by rebalancing). Thus if some worker nodes in the cluster go down, the topology can continue executing with the same number of tasks as before.
 \end{description}
 
 \subsection{Zookeeper Nodes}
 
 The Storm cluster contains a number of Zookeeper nodes which coordinate the communication between the master and the workers. Storm does this by storing the state of the cluster on the Zookeper nodes where both Nimbus and worker nodes can access it.
 
-The cluster state contains worker assignments, information about topologies, and heartbeats sent by the worker nodes back to Nimbus. Apart from the cluster state, Storm is completely stateless.
+The cluster state contains worker assignments, information about topologies, and heartbeats sent by the worker nodes back to Nimbus. Apart from the cluster state, Storm is completely stateless. Hence, if the master node or a worker node fail the cluster continues executing. The only time the cluster stops executing is if all the Zookeper nodes die.
+
+\section{Tuple Processing}
+\label{sec:tuple_processing}
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.7]{pdf/worker_inside.pdf}
+	\caption{Tuple processing in Apache Storm.}
+	\label{fig:worker_inside}
+\end{figure}
+
+Figure \ref{fig:worker_inside} shows how tuple processing is implemented inside a Storm worker process. The tuple is read from a message buffer by the receiver thread of the worker and put on a corresponding executor's receiver queue. The tuple is then picked up by the component thread of an executor.
+
+After the component thread has executed the task it puts the tuple on the sender queue. There, it is picked up by the executor's sender thread which puts the tuple on the global sender queue of the worker. Lastly, the global sender thread of the worker serialises the tuple and sends it downstream.
+
+Alternatively, if the tuple is forwarded to an executor in the same worker process it is put on the receiver queue of the corresponding executor directly after processing.
+
+Storm uses the term queue freely but in fact the queues are implemented as ring buffers using LMAX Disruptor \cite{LMAX_Disruptor}. Detailed background of how Disruptor works and its performance benchmarks can be found in \cite{Thompson_Farley_Barker_Gee_Stewart_2011}.
 
 \section{Serialisation}
 \label{sec:serialisation}
 
 Since Storm topologies execute on a cluster all the components need to be serialisable. This is achieved with Apache Thrift. Components are defined as Thrift objects and Thrift generates all the Java serialisation code automatically.
 
-Furthermore, since Nimbus is a Thrift service Thrift generates all the code required for RPC support. This allows for easy cross-language communication with Nimbus and defining topologies in any of the languages supported by Thrift.
+\todo{Why is Thrift good?}
+
+Furthermore, since Nimbus is a Thrift service Thrift generates all the code required for remote procedure call (RPC) support. This allows defining topologies in any of the languages supported by Thrift and easy cross-language communication with the Nimbus service.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -349,74 +376,49 @@ Furthermore, since Nimbus is a Thrift service Thrift generates all the code requ
 % - Explain how executors interact within a worker - messages
 
 
-The design of Storm-MC was ported over from Apache Storm. This enabled rapid progress while guaranteeing compatibility with Apache Storm API. Clearly, however, some differences had to be made to take advantage of a multi-core machine performance. This chapter explains the design of Storm-MC.
+The design of Storm-MC was ported over from Apache Storm. This enabled rapid progress while guaranteeing compatibility with Apache Storm API. Clearly, however, some differences had to be made to take advantage of multi-core machine performance implications. This chapter explains the design of Storm-MC.
 
 \section{Apache Storm on Multi-core}
 
 To begin, we discuss why Apache Storm does not perform optimally on a single multi-core machine. Storm can be ran in local mode where it emulates execution on a cluster. This mode exists so that it is possible to debug and develop topologies without needing access to a cluster. However, there are several reasons why the local mode is not as performant as it could be.
 
-\begin{figure}[!htb]
-	\centering
-	\includegraphics[scale=0.7]{pdf/worker_inside.pdf}
-	\caption{Inside the Worker process.}
-	\label{fig:worker_inside}
-\end{figure}
-
-\todo{add arrows to other executors and show queues.}
-
-Figure \ref{fig:worker_inside} shows how tuple processing is implemented inside a Storm worker process. The tuple is read by the receiver thread of the worker and put on worker's receiver queue. The tuple is then picked up by the component thread of one, or possibly more, executors. After the executor has executed its task it puts the tuple on its sender queue. There, it is picked up by its sender thread which puts the tuple on the global sender queue of the worker. Lastly, the sender thread of the worker serialises it and sends it down-stream.
-
-Clearly, there is a lot of overhead involved and there is not much use for the processing to be so complex on a single machine.
+We described tuple processing in Storm in section \ref{sec:tuple_processing}. Clearly, there is a lot of overhead necessary to simulate sending tuples to executors in other worker nodes. This overhead comes not only from the tuple passing through several queues but also includes running a Netty \cite{Netty} server used for message passing.
 
 Storm runs many threads which are only useful in distributed context. Indeed, during our experiments we found that a topology with 8 executors was being executed with 64 threads.
 
-\todo{Storm runs Zookeeper on localhost and sends executor heartbeats to it.}
+\todo{Plot threads vs components}
+\todo{Maybe include Thread Dump and a graph of thread counts}
 
-Additionally, every worker has a heartbeat thread that simulates sending heartbeat messages to the Nimbus process. It does this by writing to a local cache which is persisted to a file by a blocking write on every heartbeat. This is done by running a local Zookeper server which replaces the Zookeeper nodes of a cluster.
+Additionally, every worker has a heartbeat thread that simulates sending heartbeat messages to the Nimbus process. It does this by writing to a local cache which is persisted to a file by a blocking write on every heartbeat. While heartbeats are essential in cluster mode, there is no need for them in local mode.
 
-\todo{the only overhead in Storm is that the threads exist, they don't have to be used}
+Another overhead is running a local Zookeper server which emulates the Zookeeper nodes of a cluster. State is maintained in this server even though there is always only one topology executing at a time.
 
-%In Apache Storm, a worker has a receiver thread which listens to its assigned port and puts received messages on a queue where they are picked up by its executors. Moreover, each executor has its own sending thread which picks up tuples produced by the executor and puts them on the global sending queue of the worker which has yet another thread assigned to it. This is unnecessary in a multi-core setting where no messages need to be exchanged.
-
-
-
-%\begin{description}
-%	\item[Multi-process Nature of Storm] \hfill \\
-%	In general, multi-process applications suffer overhead from inter-process communication and are generally slower than their multi-threaded counterparts \cite{Kumar:2013:HSD:2536274.2536314}.
 %	\item[Fault Tolerance] \hfill \\
 %	Storm is made to be fault-tolerant. This means that it can guarantee a tuple being processed from its spout all the way to its final bolt. To do this it adds an additional acker bolt to every topology. This bolt acts as a root of a tree with the nodes being all the components the tuple "goes" through. If the tuple gets successfully processed by a component its node is marked as "acked". Hence once all nodes of the tree are marked as "acked" Storm can guarantee the tuple was processed.
-%	\todo{Change "goes" and "acked" to something else.}
 %	\item[Redundant threads] \hfill \\
 %	Storm runs many threads which are only useful in distributed context. Indeed, during our experiments we found that a topology with 8 executors was being executed with 64 threads. This included threads which were used as timeout timers or to send heartbeats and were unnecessary in a multi-core setting. Obviously, not all of them were executing in parallel but there is clearly room for reduction.
-%	\todo{Maybe include Thread Dump and a graph of thread counts}
-%\end{description}
 
 \section{Storm-MC Architecture}
 
-\begin{figure}[!htb]
-	\centering
-	\includegraphics[scale=0.7]{pdf/storm_mc_arch.pdf}
-	\caption{Storm-MC Architecture.}
-	\label{fig:architecture}
-\end{figure}
+\todo{Probably don't call this Architecture}
 
-The overall architecture of Storm-MC can be seen in figure \ref{fig:architecture}. The design we adopted for porting worker nodes is to only have one worker process running all the executor threads of a topology. Additionally, the code for the Nimbus daemon was merged with the worker.
+The design we adopted for porting worker nodes is to only have one worker process running all the executor threads of a topology.
+
+Additionally, the code for the Nimbus daemon was merged with the worker. This was done because there is no need to run the Nimbus and worker specific code at the same time. Once Nimbus sets up the topology, all the work is done by the worker. Hence they can be executed serially.
 
 \subsection{Nimbus}
 
-\todo{Rewrite paragraph below, too informal.}
-In Apache Storm, Nimbus runs as a server. While appropriate for a system running on a cluster this is unnecessary on a single machine. Thus to run a topology on Storm-MC one only has to import the library into their project and use it as a standard Java library. To kill the topology, one only needs to send the kill signal as with a standard Java program. Furthermore, there is no need for activating and deactivating as the user can just kill and resubmit the topology. Lastly, rebalancing does not really transfer to a multi-core system and was thusly omitted.
+Unlike Nimbus executing on a Storm cluster, Nimbus in Storm-MC does not support running multiple topologies at the same time. However, to do that one only needs to run the topology in a separate process. This is because unlike when executing on the cluster different topologies do not need to share any state and it is more natural to execute them as separate processes.
 
-As can be understood from the previous paragraph, Storm-MC does not support running multiple topologies at the same time. However, to do that one only needs to run a separate process. This is because unlike on the cluster different topologies do not need to share any memory and it is more natural to execute them as separate processes.
-\todo{Mention things like cache lines in support of above argument.}
+This has the added benefit of each process having its own part of main memory thus reducing cache conflicts as shown in \cite{Chandra:2005:PIC:1042442.1043432} and providing higher security by not having different topologies share memory space. Additionally, if a single thread of one topology is blocking it does not block other topologies.
 
-Additionally, Storm-MC does not support any scheduling. Since within one process there is only one topology running at a time and the hardware configuration of the machine does not change, the parallelism is clearly defined by the number of executors per component specified in the topology configuration.
+Nimbus on Storm-MC does not support scheduling topologies. Since within one process there is only one topology running at a time and the hardware configuration of the machine does not change, the parallelism is clearly defined by the number of executors per component specified in the topology configuration.
 
-One way to implement scheduling could be to pin threads to specific cores. Unfortunately, Java does not provide support for CPU affinity, the assignments are handled automatically by the JVM. Potentially, this could be achieved by using a C or C++ library but this was not implemented in Storm-MC.
+One way to implement scheduling could be to pin threads to specific cores. Unfortunately, Java does not provide support for CPU affinity, the assignments are handled automatically by the JVM. Potentially, this could be achieved by using C or C++, both of which support CPPU affinity, but this was not implemented in Storm-MC.
 
-\todo{next paragraph doesn't connect to anything.}
+\todo{Mention porting over from Thrift.}
 
-In light of this Storm-MC is completely stateless. The cluster state that was managed by Zookeeper in Apache Storm was completely stripped away.
+The role of Nimbus in Storm-MC has effectively been reduced to validating the topology and passing it along to the worker part of the process which handles the topology execution.
 
 \subsection{Worker}
 
@@ -428,12 +430,12 @@ This design has several benefits:
 	\item All the inter-thread communication is occurring within one Worker.
 	\item Supervisor can be removed as there is no need to synchronise workers.
 	\item There is no need to simulate over-the-network message passing.
-	\item Message passing between executor threads within a worker stays the same.
+	\item Message passing between executor threads within a worker stays the same as in Apache Storm.
 \end{itemize}
 
 A comparison of an Apache Storm worker node and its Storm-MC equivalent can be seen in figure \ref{fig:comparison}.
 
-\begin{figure}
+\begin{figure}[!htb]
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
@@ -451,24 +453,27 @@ A comparison of an Apache Storm worker node and its Storm-MC equivalent can be s
 \label{fig:comparison}
 \end{figure}
 
-\subsection{Message Exchange}
+\subsection{State}
 
-LMAX Disruptor is used for tuple passing between components of a stream. Detailed background of how Disruptor works and its performance benchmarks can be found in \cite{Thompson_Farley_Barker_Gee_Stewart_2011}.
+In light of previous subsections Storm-MC is completely stateless. The cluster state that was managed by Zookeeper in Apache Storm was completely stripped away. This state was only relevant when multiple topologies were sharing the cluster.
 
-There were two types of tuple transfers in Apache Storm:
+\section{Tuple Processing}
 
-\begin{description}
-	\item[Inter-worker (remote) transfers] \hfill \\
-	When the tuple is sent to a different worker, it is put on a disruptor buffer by an executor thread and picked up by a separate sender thread which sends it across the network to the executors subscribed to the stream. The worker of these executors runs a receiver thread which listens to messages on its port and puts the tuples on disruptor buffers of the corresponding executors.
-	\item[Intra-worker (local) transfers] \hfill \\
-	When the tuple is sent within the same worker, it is put directly on the disruptor buffer of the executor thus avoiding sending a network message to the same machine.
-\end{description}
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.7]{pdf/worker_inside_mc.pdf}
+	\caption{Tuple processing in Storm-MC.}
+	\label{fig:worker_inside_mc}
+\end{figure}
 
-Since Storm-MC only has one worker process, all tuple transfers are local. Thus, a map of executor identifier to disruptor buffers is maintained. Hence, an executor thread picks up a tuple from the ring buffer corresponding to its identifier and after processing the tuple inserts it into a buffer of executors subscribed to its output stream.
+The implementation of tuple processing in Storm-MC can be seen in figure \ref{fig:worker_inside_mc}. As can be seen from the figure, the queues used for remote message sending were stripped away and there is only one Disruptor queue for every executor. Once an executor is done processing a tuple it simply puts it on the Disruptor queue of the bolts downstream.
 
-\section{Things Not Included in Storm-MC}
+There were several other options we considered when implementing tuple processing. However, the Disruptor shows superior throughput and latency compared to alternative solutions in \cite{something}.
 
-\todo{This section name should be rephrased.}
+\todo{find the citation for above claim.}
+
+\section{Differences between Apache Storm and Storm-MC}
+
 \todo{Maybe present this as a table of features.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -483,6 +488,12 @@ Since Storm-MC only has one worker process, all tuple transfers are local. Thus,
 In this chapter we evaluate Storm-MC. We do this by comparing its performance against the local mode of Apache Storm.
 
 \section{Performance}
+
+
+
+\section{Challenges}
+
+In this section we are going to discuss challenges we encountered while porting Apache Storm to multi-core machines.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
