@@ -145,14 +145,12 @@ The solution proposed in this paper is to take the existing Apache Storm project
 In chapter 1, blah blah.
 \clearpage{}
 
-\clearpage{}
-\clearpage{}
 
 \clearpage{}\chapter{Background}
 
 \todo{Probably move tuple processing elsewhere.}
 
-In this chapter we give background information necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm \ref{sec:storm_overview}, explain the concepts (\ref{sec:concepts}) used in Storm, show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), describe processing \ref{sec:tuple_processing}, and finally  describe the serialisation used by Storm.
+In this chapter we give background information necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm \ref{sec:storm_overview}, explain the concepts (\ref{sec:concepts}) used in Storm, show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), and finally  describe the serialisation used by Storm.
 
 \section{Storm Overview}
 \label{sec:storm_overview}
@@ -295,24 +293,6 @@ The Storm cluster contains a number of Zookeeper nodes which coordinate the comm
 
 The cluster state contains worker assignments, information about topologies, and heartbeats sent by the worker nodes back to Nimbus. Apart from the cluster state, Storm is completely stateless. Hence, if the master node or a worker node fail the cluster continues executing. The only time the cluster stops executing is if all the Zookeper nodes die.
 
-\section{Tuple Processing}
-\label{sec:tuple_processing}
-
-\begin{figure}[!htb]
-	\centering
-	\includegraphics[scale=0.7]{pdf/worker_inside.pdf}
-	\caption{Tuple processing in Apache Storm.}
-	\label{fig:worker_inside}
-\end{figure}
-
-Figure \ref{fig:worker_inside} shows how tuple processing is implemented inside a Storm worker process. The tuple is read from a message buffer by the receiver thread of the worker and put on a receive queue of the corresponding executor. The tuple is then picked up by the component thread of an executor for task execution.
-
-After the component thread has executed the task it puts the tuple on the sender queue. There, it is picked up by the executor's sender thread which puts the tuple on the global sender queue of the worker. Lastly, the global sender thread of the worker serialises the tuple and sends it downstream.
-
-Alternatively, if the tuple is forwarded to an executor in the same worker process it is put on the receiver queue of the corresponding executor directly after processing.
-
-Storm uses the term queue freely but in fact the queues are implemented as ring buffers using LMAX Disruptor \cite{LMAX_Disruptor}. Detailed background of how Disruptor works and its performance benchmarks can be found in \cite{Thompson_Farley_Barker_Gee_Stewart_2011}.
-
 \section{Serialisation}
 \label{sec:serialisation}
 
@@ -325,7 +305,7 @@ Furthermore, since Nimbus is a Thrift service Thrift generates all the code requ
 
 \clearpage{}\chapter{Bringing Storm to Multi-core}
 
-The following chapter explains the design of Storm-MC. We describe how Apach Storm behaves on multi-core machines (\ref{sec:storm_on_mc}), how the Storm architecture was ported to multi-core (\ref{sec:storm_mc_arch}), how tuple processing was ported to multi-core (\ref{sec:mc_tuple_processing}), and finally, we list feature differences between Apache Storm and Storm-MC (\ref{sec:differences}).
+The following chapter explains the design of Storm-MC. We describe how Apache Storm behaves on multi-core machines (\ref{sec:storm_on_mc}), how the Storm architecture was ported over to multi-core (\ref{sec:storm_mc_arch}), how tuple processing was ported to multi-core (\ref{sec:tuple_processing}), and finally, we list feature differences between Apache Storm and Storm-MC (\ref{sec:differences}).
 
 The design of Storm-MC was ported over from Apache Storm. This enabled rapid progress while guaranteeing compatibility with the Apache Storm API. Clearly, however, some differences had to be made to take advantage of multi-core machine performance implications. 
 
@@ -406,7 +386,22 @@ A comparison of an Apache Storm worker node and its Storm-MC equivalent can be s
 In light of previous subsections Storm-MC is completely stateless. The cluster state that was managed by Zookeeper in Apache Storm was completely stripped away. This state was only relevant when multiple topologies were sharing the cluster.
 
 \section{Tuple Processing}
-\label{sec:mc_tuple_processing}
+\label{sec:tuple_processing}
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.7]{pdf/worker_inside.pdf}
+	\caption{Tuple processing in Apache Storm.}
+	\label{fig:worker_inside}
+\end{figure}
+
+Figure \ref{fig:worker_inside} shows how tuple processing is implemented inside a Storm worker process. The tuple is read from a message buffer by the receiver thread of the worker and put on a receive queue of the corresponding executor. The tuple is then picked up by the component thread of an executor for task execution.
+
+After the component thread has executed the task it puts the tuple on the sender queue. There, it is picked up by the executor's sender thread which puts the tuple on the global sender queue of the worker. Lastly, the global sender thread of the worker serialises the tuple and sends it downstream.
+
+Alternatively, if the tuple is forwarded to an executor in the same worker process it is put on the receiver queue of the corresponding executor directly after processing.
+
+Storm uses the term queue freely but in fact the queues are implemented as ring buffers using LMAX Disruptor \cite{LMAX_Disruptor}. Detailed background of how Disruptor works and its performance benchmarks can be found in \cite{Thompson_Farley_Barker_Gee_Stewart_2011}.
 
 \todo{Mention overhead by running SystemBolt vs just timer in Storm-MC}
 
@@ -424,10 +419,16 @@ There were several other options we considered when implementing tuple processin
 \todo{find the citation for above claim.}
 
 \section{Differences between Apache Storm and Storm-MC}
-\label{differences}
+\label{sec:differences}
 
 \todo{Maybe present this as a table of features.}
 \clearpage{}
+
+\clearpage{}\chapter{Storm-MC Implementation}
+
+The following chapter describes the implementation
+
+\section{}\clearpage{}
 
 \clearpage{}\chapter{Evaluation}
 

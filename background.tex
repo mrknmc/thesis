@@ -2,7 +2,7 @@
 
 \todo{Probably move tuple processing elsewhere.}
 
-In this chapter we give background information necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm \ref{sec:storm_overview}, explain the concepts (\ref{sec:concepts}) used in Storm, show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), describe processing \ref{sec:tuple_processing}, and finally  describe the serialisation used by Storm.
+In this chapter we give background information necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm \ref{sec:storm_overview}, explain the concepts (\ref{sec:concepts}) used in Storm, show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), and finally  describe the serialisation used by Storm.
 
 \section{Storm Overview}
 \label{sec:storm_overview}
@@ -145,24 +145,6 @@ The worker nodes run a daemon called Supervisor. There are 4 layers of abstracti
 The Storm cluster contains a number of Zookeeper nodes which coordinate the communication between the master and the workers. Storm does this by storing the state of the cluster on the Zookeper nodes where both Nimbus and worker nodes can access it.
 
 The cluster state contains worker assignments, information about topologies, and heartbeats sent by the worker nodes back to Nimbus. Apart from the cluster state, Storm is completely stateless. Hence, if the master node or a worker node fail the cluster continues executing. The only time the cluster stops executing is if all the Zookeper nodes die.
-
-\section{Tuple Processing}
-\label{sec:tuple_processing}
-
-\begin{figure}[!htb]
-	\centering
-	\includegraphics[scale=0.7]{pdf/worker_inside.pdf}
-	\caption{Tuple processing in Apache Storm.}
-	\label{fig:worker_inside}
-\end{figure}
-
-Figure \ref{fig:worker_inside} shows how tuple processing is implemented inside a Storm worker process. The tuple is read from a message buffer by the receiver thread of the worker and put on a receive queue of the corresponding executor. The tuple is then picked up by the component thread of an executor for task execution.
-
-After the component thread has executed the task it puts the tuple on the sender queue. There, it is picked up by the executor's sender thread which puts the tuple on the global sender queue of the worker. Lastly, the global sender thread of the worker serialises the tuple and sends it downstream.
-
-Alternatively, if the tuple is forwarded to an executor in the same worker process it is put on the receiver queue of the corresponding executor directly after processing.
-
-Storm uses the term queue freely but in fact the queues are implemented as ring buffers using LMAX Disruptor \cite{LMAX_Disruptor}. Detailed background of how Disruptor works and its performance benchmarks can be found in \cite{Thompson_Farley_Barker_Gee_Stewart_2011}.
 
 \section{Serialisation}
 \label{sec:serialisation}

@@ -73,6 +73,8 @@ Acknowledgements go here.
 
 \include{design}
 
+\include{implementation}
+
 \include{evaluation}
 
 \include{conclusion}
