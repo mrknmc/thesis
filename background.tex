@@ -1,10 +1,20 @@
 \chapter{Background}
 
-In this chapter we give background information necessary to understand the design of Storm-MC. Apache Storm is developed in a mix of Java and Clojure. As mentioned by the author of Storm in \cite{Marz_2014}, writing the Storm interfaces in Java ensured large potential user-base while writing the implementation in Clojure increased productivity.
+\todo{Probably move tuple processing elsewhere.}
 
-To ensure API compatibility with Storm, Storm-MC was developed using the same languages. This allowed for great code reuse and not getting slowed down by re-implementing functionality already present in Storm in a different language.
+In this chapter we give background information necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm \ref{sec:storm_overview}, explain the concepts (\ref{sec:concepts}) used in Storm, show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), describe processing \ref{sec:tuple_processing}, and finally  describe the serialisation used by Storm.
 
-\section{Core Concepts}
+\section{Storm Overview}
+\label{sec:storm_overview}
+
+Apache Storm is a distributed real-time computation system developed in a mix of Java and Clojure. As mentioned by the author of Storm in \cite{Marz_2014}, writing the Storm interfaces in Java ensured large potential user-base while writing the implementation in Clojure increased productivity.
+
+To ensure API compatibility with Storm, Storm-MC was developed using the same set of languages. This allowed for code reuse and not having to re-implement functionality already present in Storm. Hence, in the following sections we describe Storm in greater detail in hope that this will later clarify design choices made for Storm-MC.
+
+\section{Storm Concepts}
+\label{sec:concepts}
+
+\subsection{Core Concepts}
 
 There are several core concepts used by Storm and hence by extension Storm-MC as well. These concepts are put together to form a simple API that allows the user to break down a computation into separate components and define how these components interact with each other. The three core concepts of Storm are:
 
@@ -17,28 +27,7 @@ There are several core concepts used by Storm and hence by extension Storm-MC as
   The programmer connects spouts and bolts in a directed graph called topology which describes how the components interact with each other. The topology is then submitted to Storm for execution.
 \end{description}
 
-\section{Example Topology}
-
-\begin{figure}[!htb]
-	\centering
-	\includegraphics[scale=0.7]{pdf/wordcount_topology.pdf}
-	\caption{WordCount topology.}
-	\label{fig:wordcount_topology}
-\end{figure}
-
-A classic example used to explain Storm topologies is the WordCount topology. In this topology, there is a spout generating random sentences, a bolt splitting the sentences on white space, and a bolt counting occurrences of every word. Figure \ref{fig:wordcount_topology} shows how we could represent this topology graphically.
-
-This may seem as a simplistic example but it is useful when demonstrating how easy it is to implement a working topology using the Storm API.
-
-\begin{listing}[!htb]
-\inputminted{java}{code/WordCountTopology.java}
-\caption{WordCountTopology.java}
-\label{listing:wordcount_topology}
-\end{listing}
-
-Listing \ref{listing:wordcount_topology} shows how the topology is put together to form a graph of components. Storm uses the Builder design pattern to build up the topology which is then submitted to Storm for execution. The last argument to the setBolt/setSpout method is the number of parallel tasks we want Storm to execute for the respective component. For implementation of the spout and bolts, refer to appendix \ref{ch:listings}.
-
-\section{Additional Concepts}
+\subsection{Additional Concepts}
 
 \begin{description}
   \item[Stream] \hfill \\
@@ -65,7 +54,30 @@ All the components of a Storm topology execute in parallel. The user can specify
 
 \todo{talk more about config}
 
+\section{Example Topology}
+\label{sec:example_topology}
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.7]{pdf/wordcount_topology.pdf}
+	\caption{WordCount topology.}
+	\label{fig:wordcount_topology}
+\end{figure}
+
+A classic example used to explain Storm topologies is the WordCount topology. In this topology, there is a spout generating random sentences, a bolt splitting the sentences on white space, and a bolt counting occurrences of every word. Figure \ref{fig:wordcount_topology} shows how we could represent this topology graphically.
+
+This may seem as a simplistic example but it is useful when demonstrating how easy it is to implement a working topology using the Storm API.
+
+\begin{listing}[!htb]
+\inputminted{java}{code/WordCountTopology.java}
+\caption{WordCountTopology.java}
+\label{listing:wordcount_topology}
+\end{listing}
+
+Listing \ref{listing:wordcount_topology} shows how the topology is put together to form a graph of components. Storm uses the Builder design pattern to build up the topology which is then submitted to Storm for execution. The last argument to the setBolt/setSpout method is the number of parallel tasks we want Storm to execute for the respective component. For implementation of the spout and bolts used in this topology, refer to appendix \ref{ch:listings}.
+
 \section{Storm Architecture}
+\label{sec:storm_arch}
 
 \begin{figure}[!htb]
 	\centering
@@ -144,7 +156,7 @@ The cluster state contains worker assignments, information about topologies, and
 	\label{fig:worker_inside}
 \end{figure}
 
-Figure \ref{fig:worker_inside} shows how tuple processing is implemented inside a Storm worker process. The tuple is read from a message buffer by the receiver thread of the worker and put on a corresponding executor's receiver queue. The tuple is then picked up by the component thread of an executor.
+Figure \ref{fig:worker_inside} shows how tuple processing is implemented inside a Storm worker process. The tuple is read from a message buffer by the receiver thread of the worker and put on a receive queue of the corresponding executor. The tuple is then picked up by the component thread of an executor for task execution.
 
 After the component thread has executed the task it puts the tuple on the sender queue. There, it is picked up by the executor's sender thread which puts the tuple on the global sender queue of the worker. Lastly, the global sender thread of the worker serialises the tuple and sends it downstream.
 

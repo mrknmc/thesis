@@ -1,53 +1,4 @@
-\documentclass[bsc,logo,frontabs,twoside,singlespacing,normalheadings,parskip]{infthesis}\usepackage[]{graphicx}\usepackage[]{color}
-%% maxwidth is the original width if it is less than linewidth
-%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
-\makeatletter
-\def\maxwidth{ %
-  \ifdim\Gin@nat@width>\linewidth
-    \linewidth
-  \else
-    \Gin@nat@width
-  \fi
-}
-\makeatother
-
-\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
-\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
-\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
-\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
-\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
-\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
-\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
-\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
-\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
-\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
-
-\usepackage{framed}
-\makeatletter
-\newenvironment{kframe}{%
- \def\at@end@of@kframe{}%
- \ifinner\ifhmode%
-  \def\at@end@of@kframe{\end{minipage}}%
-  \begin{minipage}{\columnwidth}%
- \fi\fi%
- \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
- \colorbox{shadecolor}{##1}\hskip-\fboxsep
-     % There is no \\@totalrightmargin, so:
-     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
- \MakeFramed {\advance\hsize-\width
-   \@totalleftmargin\z@ \linewidth\hsize
-   \@setminipage}}%
- {\par\unskip\endMakeFramed%
- \at@end@of@kframe}
-\makeatother
-
-\definecolor{shadecolor}{rgb}{.97, .97, .97}
-\definecolor{messagecolor}{rgb}{0, 0, 0}
-\definecolor{warningcolor}{rgb}{1, 0, 1}
-\definecolor{errorcolor}{rgb}{1, 0, 0}
-\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
-
-\usepackage{alltt}     
+\documentclass[bsc,logo,frontabs,twoside,singlespacing,normalheadings,parskip]{infthesis}     
 \usepackage[page]{appendix}
 
 \usepackage{fontspec}
@@ -77,7 +28,7 @@
     pdfpagemode=UseOutlines,
     pdfpagelayout=TwoPageRight
 }
-\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+
 \begin{document}
 
 \title{Storm on Multi-core}
@@ -112,15 +63,12 @@ This project is about taking the ideas from the distributed system Apache Storm 
 While the cost of a commodity hardware cluster might be lower than the price of a single computer with equal power there are certain limitations:
 
 \begin{itemize}
-
-\item The nodes of a cluster communicate through network. This limits the speed of communication between processes that live on different nodes.
-
-\item Distributed systems waste resources by replicating data to ensure reliability.
+\item The nodes of a cluster communicate through network. This limits the speed of communication between processes that live on different nodes.
+\item Distributed systems waste resources by replicating data to ensure reliability.
 
 
 \end{itemize}
-
-On the other hand, even though Moore’s law still holds true, processor makers now favour increasing the number of cores in CPU chips to increasing their frequency. This trend implies that the “free lunch” of getting better software performance by upgrading the processor is over and programmers now have to design systems with parallel architectures in mind. However, there are some limitations to this as well:
+On the other hand, even though Moore’s law still holds true, processor makers now favour increasing the number of cores in CPU chips to increasing their frequency. This trend implies that the “free lunch” of getting better software performance by upgrading the processor is over and programmers now have to design systems with parallel architectures in mind. However, there are some limitations to this as well:
 
 \begin{itemize}
 
@@ -494,20 +442,12 @@ The first topology we tested for performance is a variant of the aforementioned 
 
 This topology is considered to be CPU-intensive.
 
+<<external-code, echo=FALSE, cache=FALSE>>=
+read_chunk('wordcount.R')
+@
 
-
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
-
-{\centering \includegraphics[width=\maxwidth]{figure/wordcount-plot-1} 
-
-}
-
-\caption[Improvement of Storm-MC over Apache Storm in number of tuples processed]{Improvement of Storm-MC over Apache Storm in number of tuples processed}\label{fig:wordcount-plot}
-\end{figure}
-
-
-\end{knitrout}
+<<wordcount-plot, echo=FALSE, cache=TRUE, fig.cap="Improvement of Storm-MC over Apache Storm in number of tuples processed", fig.align="center", fig.height=3>>=
+@
 
 
 \subsection{Enron Topology}

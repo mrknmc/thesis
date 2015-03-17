@@ -67,80 +67,13 @@ Acknowledgements go here.
 
 \include{introduction}
 
-\include{prior_work}
+%\include{prior_work}
 
 \include{background}
 
 \include{design}
 
-\chapter{Evaluation}
-
-In this chapter we evaluate Storm-MC. We do this by comparing its performance against the local mode of Apache Storm.
-
-\section{Performance}
-
-\subsection{Software Setup}
-
-\todo{Change versions below as applicable. Link to GitHub for source?}
-
-All performance benchmarks were ran using the following software packages:
-
-\begin{itemize}
-	\item Apache Storm version 0.9.2
-	\item Storm-MC version 0.1.5
-	\item A fork of IBM Storm Email Benchmarks version 0.1.4
-	\item Storm-benchmark version 0.1.0
-\end{itemize}
-
-The Apache Storm source code had to be adapted to include a workaround for a deadlock bug present in version 0.9.2. This bug caused a topology to exit with threads left in Zombie state under certain conditions. This prevented Storm from logging the benchmark metrics after execution.
-
-Version 0.1.5 is the latest version of Storm-MC as of this moment. The first release was version 0.1.0 which was production-ready but since then there were 5 minor versions fixing bugs as they were discovered during testing.
-
-IBM open sourced a suite of benchmarks which they used to compare Apache Storm to their real-time stream system IBM Infosphere Streams. These benchmarks were adapted and used to benchmark Apache Storm and Storm-MC.
-
-Lastly, a number of spout and bolt components were used from the storm-benchmark project which Apache Storm developers use to benchmark Storm.
-
-Since Storm-MC reuses package names from Apache Storm, the same benchmark is directly executable by both libraries. This saved a lot of time and furthermore there is no need to maintain two benchmarks suites.
-
-\todo{Go into more detail which components were re-used and where?}
-
-\subsection{Hardware Setup}
-
-The benchmarks were executed on the following hardware:
-
-\todo{This is currently student.compute, find out what it is.}
-
-\subsection{WordCount Topology}
-
-The first topology we tested for performance is a variant of the aforementioned WordCount topology. Recall, that this topology is shown graphically on figure \ref{fig:wordcount_topology}. The topology was ran with 3 executors running for every component.
-
-This topology is considered to be CPU-intensive.
-
-<<external-code, echo=FALSE, cache=FALSE>>=
-read_chunk('wordcount.R')
-@
-
-<<wordcount-plot, echo=FALSE, cache=TRUE, fig.cap="Improvement of Storm-MC over Apache Storm in number of tuples processed", fig.align="center", fig.height=3>>=
-@
-
-
-\subsection{Enron Topology}
-
-Next, we tested the Enron topology from the IBM benchmarks. In this topology, serialised emails from the Enron email database are read from a file by a spout. They are further deserialised by one bolt, filtered by another bolt, modified by yet another bolt and then finally metrics are recorded by another bolt.
-
-Similarly, to the WordCount topology this topology is serial in nature. However, whereas the WordCount topology keeps the random sentences in memory, the Enron topology reads from a file. Thus, this benchmark is mostly I/O intensive.
-
-\subsection{RollingSort Topology}
-
-The RollingSort topology is ported over from the aforementioned storm-benchmark project. This topology includes one spout and one bolt. The spout produces hundred character-long strings of random digits from zero to eight. The bolt stores a rolling window of hundred of these messages and sorts them every \textbf{x} seconds.
-
-This benchmark is included because it is considered memory-intensive.
-
-\todo{change x depending on the actual benchmark.}
-
-\section{Challenges}
-
-In this section we are going to discuss challenges we encountered while porting Apache Storm to multi-core machines.
+\include{evaluation}
 
 \include{conclusion}
 

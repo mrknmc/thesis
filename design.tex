@@ -1,18 +1,15 @@
 \chapter{Bringing Storm to Multi-core}
 
-% - Explain why original Storm is bad
-% - Explain high-level
-% - Explain Nimbus - assignments are useless though
-% - Explain how executors interact within a worker - messages
+The following chapter explains the design of Storm-MC. We describe how Apach Storm behaves on multi-core machines (\ref{sec:storm_on_mc}), how the Storm architecture was ported to multi-core (\ref{sec:storm_mc_arch}), how tuple processing was ported to multi-core (\ref{sec:mc_tuple_processing}), and finally, we list feature differences between Apache Storm and Storm-MC (\ref{sec:differences}).
 
-
-The design of Storm-MC was ported over from Apache Storm. This enabled rapid progress while guaranteeing compatibility with Apache Storm API. Clearly, however, some differences had to be made to take advantage of multi-core machine performance implications. This chapter explains the design of Storm-MC.
+The design of Storm-MC was ported over from Apache Storm. This enabled rapid progress while guaranteeing compatibility with the Apache Storm API. Clearly, however, some differences had to be made to take advantage of multi-core machine performance implications. 
 
 \section{Apache Storm on Multi-core}
+\label{sec:storm_on_mc}
 
 To begin, we discuss why Apache Storm does not perform optimally on a single multi-core machine. Storm can be ran in local mode where it emulates execution on a cluster. This mode exists so that it is possible to debug and develop topologies without needing access to a cluster. However, there are several reasons why the local mode is not as performant as it could be.
 
-We described tuple processing in Storm in section \ref{sec:tuple_processing}. Clearly, there is a lot of overhead necessary to simulate sending tuples to executors in other worker nodes. This overhead comes not only from the tuple passing through several queues but also includes running a Netty \cite{Netty} server used for message passing.
+We described tuple processing in Storm in section \ref{sec:tuple_processing}. There is a lot of overhead necessary to simulate sending tuples to executors in other worker nodes. This overhead comes not only from the tuple passing through several queues but also includes running a Netty \cite{Netty} server used for message passing in Storm.
 
 Storm runs many threads which are only useful in distributed context. Indeed, during our experiments we found that a topology with 8 executors was being executed with 64 threads.
 
@@ -29,6 +26,7 @@ Another overhead is running a local Zookeper server which emulates the Zookeeper
 %	Storm runs many threads which are only useful in distributed context. Indeed, during our experiments we found that a topology with 8 executors was being executed with 64 threads. This included threads which were used as timeout timers or to send heartbeats and were unnecessary in a multi-core setting. Obviously, not all of them were executing in parallel but there is clearly room for reduction.
 
 \section{Storm-MC Architecture}
+\label{sec:storm_mc_arch}
 
 \todo{Probably don't call this Architecture}
 
@@ -88,6 +86,7 @@ A comparison of an Apache Storm worker node and its Storm-MC equivalent can be s
 In light of previous subsections Storm-MC is completely stateless. The cluster state that was managed by Zookeeper in Apache Storm was completely stripped away. This state was only relevant when multiple topologies were sharing the cluster.
 
 \section{Tuple Processing}
+\label{sec:mc_tuple_processing}
 
 \todo{Mention overhead by running SystemBolt vs just timer in Storm-MC}
 
@@ -105,5 +104,6 @@ There were several other options we considered when implementing tuple processin
 \todo{find the citation for above claim.}
 
 \section{Differences between Apache Storm and Storm-MC}
+\label{differences}
 
 \todo{Maybe present this as a table of features.}

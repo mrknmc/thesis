@@ -1,8 +1,23 @@
 \chapter{Evaluation}
 
-In this chapter we evaluate Storm-MC. We do this by comparing its performance against the local mode of Apache Storm.
+In this chapter we evaluate Storm-MC. We describe the metrics used to evaluate performance of Storm-MC (\ref{sec:metrics}), list the configuration used for benchmarking (\ref{sec:system_conf}), compare Storm-MC to Apache Storm executing in local mode on a set of different topologies (\ref{sec:performance}), and finally talk about challenges encountered while designing Storm-MC (\ref{sec:challenges}).
 
-\section{Performance}
+\section{Evaluation Metrics}
+\label{sec:metrics}
+
+The system was evaluated on the following metrics:
+
+\begin{description}
+	\item[Throughput] \hfill \\
+	The number of tuples processed by every component in the given time of the topology is recorded.
+	\item[CPU utilisation] \hfill \\
+	Usage of CPU is recorded every \textbf{x} seconds throughout execution and is then averaged.
+	\item[Memory utilisation] \hfill \\
+	Main memory usage is recorded every \textbf{x} seconds throught execution and is then averaged.
+\end{description}
+
+\section{System Configuration}
+\label{sec:system_conf}
 
 \subsection{Software Setup}
 
@@ -35,16 +50,24 @@ The benchmarks were executed on the following hardware:
 
 \todo{This is currently student.compute, find out what it is.}
 
+\section{Performance}
+\label{sec:performance}
+
+\todo{Say how long they were executed for.}
+
+To assess performance of Storm-MC, 4 different benchmarks were executed, each with a different focus. The benchmarks were executed for a constant period of time after which the system was killed and metrics collected.
+
 \subsection{WordCount Topology}
 
 The first topology we tested for performance is a variant of the aforementioned WordCount topology. Recall, that this topology is shown graphically on figure \ref{fig:wordcount_topology}. The topology was ran with 3 executors running for every component.
 
-This topology is considered to be CPU-intensive. 
+This topology is considered to be CPU-intensive.
 
-\todo{stack bar chart showing improvement of Storm-MC over Storm.}
+<<external-code, echo=FALSE, cache=FALSE>>=
+read_chunk('wordcount.R')
+@
 
-<<foo, echo=FALSE, cache=TRUE, fig.height=4>>=
-plot(rnorm(100))
+<<wordcount-plot, echo=FALSE, cache=TRUE, fig.cap="Improvement of Storm-MC over Apache Storm in number of tuples processed", fig.align="center", fig.height=3>>=
 @
 
 
@@ -56,15 +79,13 @@ Similarly, to the WordCount topology this topology is serial in nature. However,
 
 \subsection{RollingSort Topology}
 
-The RollingSort topology is ported over from the aforementioned storm-benchmark project. This topology includes one spout and one bolt. The spout produces hundred character-long strings of random digits from zero to eight. The bolt stores a rolling window of hundred of these messages and sorts them every x seconds.
+The RollingSort topology is ported over from the aforementioned storm-benchmark project. This topology includes one spout and one bolt. The spout produces hundred character-long strings of random digits from zero to eight. The bolt stores a rolling window of hundred of these messages and sorts them every \textbf{x} seconds.
 
-This benchmark is included because it is considered memory-intensive. 
+This benchmark is included because it is considered memory-intensive.
 
 \todo{change x depending on the actual benchmark.}
 
 \section{Challenges}
+\label{sec:challenges}
 
 In this section we are going to discuss challenges we encountered while porting Apache Storm to multi-core machines.
-\bibliographystyle{apalike}
-\bibliography{mybibfile}
-\end{document}
