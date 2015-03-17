@@ -110,3 +110,6 @@ sympy-plots-for-*.tex/
 
 # Texpad temp
 *.texpadtmp
+
+# knitr cache
+cache

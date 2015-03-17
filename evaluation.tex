@@ -1,78 +1,3 @@
-% to choose your degree
-% please un-comment just one of the following
-\documentclass[bsc,logo,frontabs,twoside,singlespacing,normalheadings,parskip]{infthesis}     % for BSc, BEng etc.
-% \documentclass[minf,frontabs,twoside,singlespacing,parskip]{infthesis}  % for MInf
-
-% APPENDIX
-\usepackage[page]{appendix}
-
-% FONT COMMANDS
-\usepackage{fontspec}
-\setmainfont[Mapping=tex-text,Numbers=OldStyle]{fbb}
-\setsansfont[Mapping=tex-text,Numbers=OldStyle,Scale=MatchLowercase]{Gill Sans}
-\setmonofont[Mapping=tex-text,Scale=MatchLowercase]{Inconsolata}
-
-
-% DISPLAY TODOS
-%\usepackage[disable]{todonotes}
-\usepackage[draft,bordercolor=white,backgroundcolor=yellow!60,linecolor=black,colorinlistoftodos]{todonotes}
-
-% MAKE SURE TODOS ARE INLINE
-\let\Oldtodo\todo
-\renewcommand{\todo}[1]{\Oldtodo[inline]{#1}}
-
-% INCLUDE CODE FILES
-\usepackage{minted}
-
-% ALLOW TWO FIGURES NEXT TO EACH OTHER
-\usepackage{subcaption}
-
-
-% ENSURE CHAPTERS WORK IN PDF VIEWERS
-\usepackage[]{hyperref}
-\hypersetup{
-    pdftitle={Storm on Multi-core},
-    pdfauthor={Mark Nemec},
-    %pdfsubject={Your subject here},
-    %pdfkeywords={keyword1, keyword2},
-    bookmarksnumbered=true,
-    bookmarksopen=true,
-    bookmarksopenlevel=1,
-    %colorlinks=true,
-    pdfstartview=Fit,
-    pdfpagemode=UseOutlines,
-    pdfpagelayout=TwoPageRight
-}
-
-\begin{document}
-
-\title{Storm on Multi-core}
-\author{Mark Nemec}
-\course{Computer Science}
-\project{4th Year Project Report}
-
-\date{\today}
-
-\abstract{This is the abstract.}
-
-\maketitle
-
-\section*{Acknowledgements}
-Acknowledgements go here.
-
-\tableofcontents
-\listoflistings
-
-\pagenumbering{arabic}
-
-\include{introduction}
-
-\include{prior_work}
-
-\include{background}
-
-\include{design}
-
 \chapter{Evaluation}
 
 In this chapter we evaluate Storm-MC. We do this by comparing its performance against the local mode of Apache Storm.
@@ -114,13 +39,12 @@ The benchmarks were executed on the following hardware:
 
 The first topology we tested for performance is a variant of the aforementioned WordCount topology. Recall, that this topology is shown graphically on figure \ref{fig:wordcount_topology}. The topology was ran with 3 executors running for every component.
 
-This topology is considered to be CPU-intensive.
+This topology is considered to be CPU-intensive. 
 
-<<external-code, echo=FALSE, cache=FALSE>>=
-read_chunk('wordcount.R')
-@
+\todo{stack bar chart showing improvement of Storm-MC over Storm.}
 
-<<wordcount-plot, echo=FALSE, cache=TRUE, fig.cap="Improvement of Storm-MC over Apache Storm in number of tuples processed", fig.align="center", fig.height=3>>=
+<<foo, echo=FALSE, cache=TRUE, fig.height=4>>=
+plot(rnorm(100))
 @
 
 
@@ -132,25 +56,15 @@ Similarly, to the WordCount topology this topology is serial in nature. However,
 
 \subsection{RollingSort Topology}
 
-The RollingSort topology is ported over from the aforementioned storm-benchmark project. This topology includes one spout and one bolt. The spout produces hundred character-long strings of random digits from zero to eight. The bolt stores a rolling window of hundred of these messages and sorts them every \textbf{x} seconds.
+The RollingSort topology is ported over from the aforementioned storm-benchmark project. This topology includes one spout and one bolt. The spout produces hundred character-long strings of random digits from zero to eight. The bolt stores a rolling window of hundred of these messages and sorts them every x seconds.
 
-This benchmark is included because it is considered memory-intensive.
+This benchmark is included because it is considered memory-intensive. 
 
 \todo{change x depending on the actual benchmark.}
 
 \section{Challenges}
 
 In this section we are going to discuss challenges we encountered while porting Apache Storm to multi-core machines.
-
-\include{conclusion}
-
-\begin{appendices}
-\include{appendix}
-\end{appendices}
-
-% use the following and \cite{} as above if you use BibTeX
-% otherwise generate bibtem entries
 \bibliographystyle{apalike}
 \bibliography{mybibfile}
-
 \end{document}
