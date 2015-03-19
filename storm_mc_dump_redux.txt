@@ -1,0 +1,124 @@
+2015-03-18 10:19:40
+Full thread dump Java HotSpot(TM) 64-Bit Server VM (24.51-b03 mixed mode):
+
+"Thread-3-wordcount.countbolt" prio=5 tid=0x00007f9408847000 nid=0x4f03 runnable [0x0000000197481000]
+   java.lang.Thread.State: RUNNABLE
+	at clojure.lang.LazySeq.sval(LazySeq.java:42)
+	- locked <0x000000016917ca58> (a clojure.lang.LazySeq)
+	at clojure.lang.LazySeq.seq(LazySeq.java:60)
+	- locked <0x000000016917ca58> (a clojure.lang.LazySeq)
+	at clojure.lang.RT.seq(RT.java:484)
+	at clojure.core$seq.invoke(core.clj:133)
+	at clojure.core$dorun.invoke(core.clj:2780)
+	at clojure.core$doall.invoke(core.clj:2796)
+	at backtype.storm.stats$update_rolling_window_set.doInvoke(stats.clj:74)
+	at clojure.lang.RestFn.invoke(RestFn.java:439)
+	at clojure.lang.Atom.swap(Atom.java:65)
+	at clojure.core$swap_BANG_.invoke(core.clj:2162)
+	at backtype.storm.stats$emitted_tuple_BANG_.invoke(stats.clj:213)
+	at backtype.storm.daemon.task$mk_tasks_fn$fn__1677.invoke(task.clj:168)
+	at backtype.storm.daemon.executor$fn__1876$fn__1883$bolt_emit__1896.invoke(executor.clj:519)
+	at backtype.storm.daemon.executor$fn__1876$fn$reify__1900.emit(executor.clj:554)
+	at backtype.storm.task.OutputCollector.emit(OutputCollector.java:204)
+	at backtype.storm.task.OutputCollector.emit(OutputCollector.java:50)
+	at backtype.storm.topology.BasicOutputCollector.emit(BasicOutputCollector.java:37)
+	at backtype.storm.topology.BasicOutputCollector.emit(BasicOutputCollector.java:41)
+	at com.ibm.streamsx.storm.email.benchmark.bolts.CountBolt.execute(CountBolt.java:50)
+	at backtype.storm.topology.BasicBoltExecutor.execute(BasicBoltExecutor.java:51)
+	at backtype.storm.daemon.executor$fn__1876$tuple_action_fn__1878.invoke(executor.clj:489)
+	at backtype.storm.daemon.executor$mk_task_receiver$fn__1808.invoke(executor.clj:220)
+	at backtype.storm.disruptor$clojure_handler$reify__1150.onEvent(disruptor.clj:58)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchToCursor(DisruptorQueue.java:119)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchWhenAvailable(DisruptorQueue.java:93)
+	at backtype.storm.disruptor$consume_batch_when_available.invoke(disruptor.clj:80)
+	at backtype.storm.daemon.executor$fn__1876$fn__1883$fn__1902.invoke(executor.clj:606)
+	at backtype.storm.util$async_loop$fn__452.invoke(util.clj:437)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-2-wordcount.splitbolt" prio=5 tid=0x00007f9408d9e800 nid=0x4d03 runnable [0x000000019737e000]
+   java.lang.Thread.State: RUNNABLE
+	at clojure.lang.Cons.next(Cons.java:39)
+	at clojure.lang.RT.boundedLength(RT.java:1654)
+	at clojure.lang.AFn.applyToHelper(AFn.java:155)
+	at clojure.lang.AFn.applyTo(AFn.java:151)
+	at clojure.core$apply.invoke(core.clj:619)
+	at backtype.storm.stats$update_rolling_window_set.doInvoke(stats.clj:78)
+	at clojure.lang.RestFn.invoke(RestFn.java:439)
+	at clojure.lang.Atom.swap(Atom.java:65)
+	at clojure.core$swap_BANG_.invoke(core.clj:2162)
+	at backtype.storm.stats$emitted_tuple_BANG_.invoke(stats.clj:213)
+	at backtype.storm.daemon.task$mk_tasks_fn$fn__1677.invoke(task.clj:168)
+	at backtype.storm.daemon.executor$fn__1876$fn__1883$bolt_emit__1896.invoke(executor.clj:519)
+	at backtype.storm.daemon.executor$fn__1876$fn$reify__1900.emit(executor.clj:554)
+	at backtype.storm.task.OutputCollector.emit(OutputCollector.java:204)
+	at backtype.storm.task.OutputCollector.emit(OutputCollector.java:50)
+	at backtype.storm.topology.BasicOutputCollector.emit(BasicOutputCollector.java:37)
+	at backtype.storm.topology.BasicOutputCollector.emit(BasicOutputCollector.java:41)
+	at com.ibm.streamsx.storm.email.benchmark.bolts.SplitSentenceBolt.execute(SplitSentenceBolt.java:41)
+	at backtype.storm.topology.BasicBoltExecutor.execute(BasicBoltExecutor.java:51)
+	at backtype.storm.daemon.executor$fn__1876$tuple_action_fn__1878.invoke(executor.clj:489)
+	at backtype.storm.daemon.executor$mk_task_receiver$fn__1808.invoke(executor.clj:220)
+	at backtype.storm.disruptor$clojure_handler$reify__1150.onEvent(disruptor.clj:58)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchToCursor(DisruptorQueue.java:119)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchWhenAvailable(DisruptorQueue.java:93)
+	at backtype.storm.disruptor$consume_batch_when_available.invoke(disruptor.clj:80)
+	at backtype.storm.daemon.executor$fn__1876$fn__1883$fn__1902.invoke(executor.clj:606)
+	at backtype.storm.util$async_loop$fn__452.invoke(util.clj:437)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-1-wordcount.spout" prio=5 tid=0x00007f9408e36800 nid=0x4c07 runnable [0x000000019727b000]
+   java.lang.Thread.State: TIMED_WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	at java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:349)
+	at backtype.storm.utils.DisruptorQueue.publishDirect(DisruptorQueue.java:180)
+	at backtype.storm.utils.DisruptorQueue.publish(DisruptorQueue.java:161)
+	at backtype.storm.disruptor$publish.invoke(disruptor.clj:66)
+	at backtype.storm.disruptor$publish.invoke(disruptor.clj:68)
+	at backtype.storm.daemon.worker$mk_transfer_fn$fn__1990.invoke(worker.clj:59)
+	at backtype.storm.daemon.executor$mk_executor_transfer_fn$this__1814.invoke(executor.clj:237)
+	at backtype.storm.daemon.executor$mk_executor_transfer_fn$this__1814.invoke(executor.clj:245)
+	at backtype.storm.daemon.executor$fn__1824$fn__1836$send_spout_msg__1849.invoke(executor.clj:379)
+	at backtype.storm.daemon.executor$fn__1824$fn$reify__1853.emit(executor.clj:396)
+	at backtype.storm.spout.SpoutOutputCollector.emit(SpoutOutputCollector.java:49)
+	at backtype.storm.spout.SpoutOutputCollector.emit(SpoutOutputCollector.java:63)
+	at backtype.storm.spout.SpoutOutputCollector.emit(SpoutOutputCollector.java:72)
+	at com.ibm.streamsx.storm.email.benchmark.spouts.FileReadSpout.nextTuple(FileReadSpout.java:96)
+	at backtype.storm.daemon.executor$fn__1824$fn__1836$fn__1855.invoke(executor.clj:435)
+	at backtype.storm.util$async_loop$fn__452.invoke(util.clj:437)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"user-timer" daemon prio=5 tid=0x00007f94090fb000 nid=0x2d07 waiting on condition [0x0000000197178000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(Native Method)
+	at backtype.storm.utils.Time.sleepUntil(Time.java:77)
+	at backtype.storm.utils.Time.sleep(Time.java:82)
+	at backtype.storm.timer$mk_timer$fn__953$fn__954.invoke(timer.clj:63)
+	at backtype.storm.timer$mk_timer$fn__953.invoke(timer.clj:42)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"main" prio=5 tid=0x00007f9408804000 nid=0x30f waiting on condition [0x000000010615f000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(Native Method)
+	at com.ibm.streamsx.storm.email.benchmark.utils.ConfigProps.configureTopologyLocal(ConfigProps.java:73)
+	at com.ibm.streamsx.storm.email.benchmark.utils.ConfigProps.configureTopologyLocal(ConfigProps.java:60)
+	at com.ibm.streamsx.storm.email.benchmark.FileReadWordCount.main(FileReadWordCount.java:45)
+
+   Locked ownable synchronizers:
+	- None
+

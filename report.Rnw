@@ -9,9 +9,18 @@
 % FONT COMMANDS
 \usepackage{fontspec}
 \setmainfont[Mapping=tex-text,Numbers=OldStyle]{fbb}
-\setsansfont[Mapping=tex-text,Numbers=OldStyle,Scale=MatchLowercase]{Gill Sans}
+\setsansfont[BoldFont="GillSans-SemiBold",Mapping=tex-text,Numbers=OldStyle,Scale=MatchLowercase]{Gill Sans}
 \setmonofont[Mapping=tex-text,Scale=MatchLowercase]{Inconsolata}
 
+%% TABLE PACKAGE
+\usepackage{booktabs}
+
+% CHANGE TABULAR FONT TO SANS-SERIF
+\let\oldtabular\tabular
+\renewcommand{\tabular}{\sffamily\oldtabular}
+
+% USE MORE ROW SPACE
+\renewcommand{\arraystretch}{1.3}
 
 % DISPLAY TODOS
 %\usepackage[disable]{todonotes}
@@ -61,13 +70,19 @@
 Acknowledgements go here.
 
 \tableofcontents
+\listoffigures
+\listoftables
 \listoflistings
 
 \pagenumbering{arabic}
 
-\include{introduction}
+<<external-code, echo=FALSE, cache=FALSE>>=
+read_chunk('wordcount.R')
+read_chunk('threads.R')
+read_chunk('dump.R')
+@
 
-%\include{prior_work}
+\include{introduction}
 
 \include{background}
 
@@ -85,7 +100,7 @@ Acknowledgements go here.
 
 % use the following and \cite{} as above if you use BibTeX
 % otherwise generate bibtem entries
-\bibliographystyle{apalike}
-\bibliography{mybibfile}
+\bibliographystyle{plain}
+\bibliography{report}
 
 \end{document}

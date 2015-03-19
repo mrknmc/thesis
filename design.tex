@@ -9,16 +9,78 @@ The design of Storm-MC was ported over from Apache Storm. This enabled rapid pro
 
 To begin, we discuss why Apache Storm does not perform optimally on a single multi-core machine. Storm can be ran in local mode where it emulates execution on a cluster. This mode exists so that it is possible to debug and develop topologies without needing access to a cluster. However, there are several reasons why the local mode is not as performant as it could be.
 
-We described tuple processing in Storm in section \ref{sec:tuple_processing}. There is a lot of overhead necessary to simulate sending tuples to executors in other worker nodes. This overhead comes not only from the tuple passing through several queues but also includes running a Netty \cite{Netty} server used for message passing in Storm.
+\subsection{Tuple processing}
 
-Storm runs many threads which are only useful in distributed context. Indeed, during our experiments we found that a topology with 8 executors was being executed with 64 threads.
+Figure \ref{fig:worker_inside} shows how tuple processing is implemented inside a Storm worker process. The tuple is read from a message buffer by the receiver thread of the worker and put on a receive queue of the corresponding executor. The tuple is then picked up by the component thread of the executor for task execution.
 
-\todo{Plot threads vs components}
-\todo{Maybe include Thread Dump and a graph of thread counts}
+After the component thread has executed the task it puts the tuple on the executor sender queue. There, it is picked up by the executor sender thread which puts the tuple on the global sender queue of the worker. Lastly, the global sender thread of the worker serialises the tuple and sends it downstream.
+
+Alternatively, if the tuple is forwarded to an executor in the same worker process it is put on the receiver queue of the corresponding executor directly after processing.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.7]{pdf/worker_inside.pdf}
+	\caption{Tuple processing in Apache Storm.}
+	\label{fig:worker_inside}
+\end{figure}
+
+Storm uses the term "queue" freely but in fact the queues are implemented as ring buffers using the LMAX Disruptor library \cite{LMAXDisruptor}. Detailed background on how Disruptor works and its performance benchmarks can be found in \cite{Thompson_Farley_Barker_Gee_Stewart_2011}.
+
+There is a lot of overhead necessary to simulate sending tuples to executors in other worker nodes. For one, there is significant overhead from the tuple passing through the three queues of a worker. In \cite{DisruptorWiki}, the authors of LMAX Disruptor show that a three step pipeline has half the throughput of a single consumer-producer pipeline.
+
+Furthermore, Storm simulates the cluster network by running a local Netty \cite{Netty} server.
+
+\subsection{Heartbeats \& Timers}
 
 Additionally, every worker has a heartbeat thread that simulates sending heartbeat messages to the Nimbus process. It does this by writing to a local cache which is persisted to a file by a blocking write on every heartbeat. While heartbeats are essential in cluster mode, there is no need for them in local mode.
 
-Another overhead is running a local Zookeper server which emulates the Zookeeper nodes of a cluster. State is maintained in this server even though there is always only one topology executing at a time.
+\subsection{Acker \& System Bolts}
+
+The acker and system bolts are ran for every topology. The acker bolt can be disabled via the configuration file. In such a case it executes idly.
+
+\subsection{Zookeeper}
+
+Another overhead is running a local Zookeper server which emulates the Zookeeper nodes of a cluster. Running the Zookeeper server is a massive addition to the list of overheads. Indeed, during profiling we found that a topology with one worker and three executors was being executed with 55 threads (not including system JVM threads and threads created by the profiler). 28 of these threads were started by Zookeeper. Table \ref{table:breakdown} shows what the individual threads were used for.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{@{}lc@{}}
+    \textbf{Spout Parallelism} & \textbf{\# of Threads} \\ \toprule
+    Main Thread & 1  \\
+	Worker Sender \& Receiver Threads & 2  \\
+    Acker \& System Component Threads & 2  \\
+    Executor Component Threads & 3  \\
+    Executor Sender Threads & 5  \\
+    Various Timers \& Event Loops & 13  \\
+    Zookeper Server & 28  \\
+\end{tabular}
+\caption{Break-down of threads used by Apache Storm to execute a topology with 3 components.}
+\label{table:breakdown}
+\end{table}
+
+To find out what state the threads were actually in at any given time we run the topology and recorded a thread dump every second for five minutes. The results can be observed in table \ref{table:dump}.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{@{}lc@{}}
+    \textbf{Spout Parallelism} & \textbf{\# of Threads} \\ \toprule
+    RUNNABLE & 8  \\
+	TIMED WAITING & 22  \\
+    WAITING & 25  \\
+\end{tabular}
+\caption{Recorded thread states over five minute period.}
+\label{table:dump}
+\end{table}
+
+<<dump-plot, echo=FALSE, cache=TRUE, fig.cap="Threads over time.", fig.align="center", fig.height=3>>=
+@
+
+As can be seen from the table, most of the threads were either in state \texttt{WAITING} or \texttt{TIMED WAITING}. According to the Java documentation on thread states \cite{JavaThreads} these two states are used for threads that are waiting for an action from a different thread and cannot be scheduled by the scheduler until that action is executed.
+
+In the subsequent sections we will discuss how the number of running threads was significantly reduced. In fact, to execute the same topology on Storm-MC would only require 5 threads.
+
+\todo{Plot threads vs components}
+\todo{Maybe include Thread Dump and a graph of thread counts}
 
 %	\item[Fault Tolerance] \hfill \\
 %	Storm is made to be fault-tolerant. This means that it can guarantee a tuple being processed from its spout all the way to its final bolt. To do this it adds an additional acker bolt to every topology. This bolt acts as a root of a tree with the nodes being all the components the tuple "goes" through. If the tuple gets successfully processed by a component its node is marked as "acked". Hence once all nodes of the tree are marked as "acked" Storm can guarantee the tuple was processed.
@@ -87,21 +149,6 @@ In light of previous subsections Storm-MC is completely stateless. The cluster s
 
 \section{Tuple Processing}
 \label{sec:tuple_processing}
-
-\begin{figure}[!htb]
-	\centering
-	\includegraphics[scale=0.7]{pdf/worker_inside.pdf}
-	\caption{Tuple processing in Apache Storm.}
-	\label{fig:worker_inside}
-\end{figure}
-
-Figure \ref{fig:worker_inside} shows how tuple processing is implemented inside a Storm worker process. The tuple is read from a message buffer by the receiver thread of the worker and put on a receive queue of the corresponding executor. The tuple is then picked up by the component thread of an executor for task execution.
-
-After the component thread has executed the task it puts the tuple on the sender queue. There, it is picked up by the executor's sender thread which puts the tuple on the global sender queue of the worker. Lastly, the global sender thread of the worker serialises the tuple and sends it downstream.
-
-Alternatively, if the tuple is forwarded to an executor in the same worker process it is put on the receiver queue of the corresponding executor directly after processing.
-
-Storm uses the term queue freely but in fact the queues are implemented as ring buffers using LMAX Disruptor \cite{LMAX_Disruptor}. Detailed background of how Disruptor works and its performance benchmarks can be found in \cite{Thompson_Farley_Barker_Gee_Stewart_2011}.
 
 \todo{Mention overhead by running SystemBolt vs just timer in Storm-MC}
 

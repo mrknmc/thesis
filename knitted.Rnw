@@ -3,9 +3,15 @@
 
 \usepackage{fontspec}
 \setmainfont[Mapping=tex-text,Numbers=OldStyle]{fbb}
-\setsansfont[Mapping=tex-text,Numbers=OldStyle,Scale=MatchLowercase]{Gill Sans}
+\setsansfont[BoldFont="GillSans-SemiBold",Mapping=tex-text,Numbers=OldStyle,Scale=MatchLowercase]{Gill Sans}
 \setmonofont[Mapping=tex-text,Scale=MatchLowercase]{Inconsolata}
 
+\usepackage{booktabs}
+
+\let\oldtabular\tabular
+\renewcommand{\tabular}{\sffamily\oldtabular}
+
+\renewcommand{\arraystretch}{1.3}
 
 \usepackage[draft,bordercolor=white,backgroundcolor=yellow!60,linecolor=black,colorinlistoftodos]{todonotes}
 
@@ -46,9 +52,17 @@
 Acknowledgements go here.
 
 \tableofcontents
+\listoffigures
+\listoftables
 \listoflistings
 
 \pagenumbering{arabic}
+
+<<external-code, echo=FALSE, cache=FALSE>>=
+read_chunk('wordcount.R')
+read_chunk('threads.R')
+read_chunk('dump.R')
+@
 
 \clearpage{}\chapter{Introduction}
 
@@ -93,10 +107,7 @@ The solution proposed in this paper is to take the existing Apache Storm project
 In chapter 1, blah blah.
 \clearpage{}
 
-
 \clearpage{}\chapter{Background}
-
-\todo{Probably move tuple processing elsewhere.}
 
 In this chapter we give background information necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm \ref{sec:storm_overview}, explain the concepts (\ref{sec:concepts}) used in Storm, show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), and finally  describe the serialisation used by Storm.
 
@@ -148,7 +159,18 @@ Users are also able to specify their own custom grouping by implementing the \te
 
 All the components of a Storm topology execute in parallel. The user can specify how much parallelism he wants associated with every component and Storm spawns the necessary number of threads. This is done through a configuration file, defined in YAML, which is submitted along with the topology.
 
-\todo{talk more about config}
+There are two additional bolts running for every topology:
+
+\begin{description}
+	\item[Acker] \hfill \\
+	The Acker bolt guarantees fault tolerance for the topology. It tracks every tuple that was produced and ensures that the tuple has been acknowledged by every bolt of the stream.
+	\item[System Bolt] \hfill \\
+	The System bolt is useful in two ways:
+	\begin{description}
+		\item[Metrics] System bolt collects metrics on the local Java Virtual Machine (JVM). Other components can subscribe to these metrics and receive their values at  regular intervals.
+		\item[Ticks] Components of a topology can subscribe to receive tick tuples in regular intervals. These tuples can be used to trigger some event of a component.
+	\end{description}
+\end{description}
 
 \section{Example Topology}
 \label{sec:example_topology}
@@ -262,16 +284,78 @@ The design of Storm-MC was ported over from Apache Storm. This enabled rapid pro
 
 To begin, we discuss why Apache Storm does not perform optimally on a single multi-core machine. Storm can be ran in local mode where it emulates execution on a cluster. This mode exists so that it is possible to debug and develop topologies without needing access to a cluster. However, there are several reasons why the local mode is not as performant as it could be.
 
-We described tuple processing in Storm in section \ref{sec:tuple_processing}. There is a lot of overhead necessary to simulate sending tuples to executors in other worker nodes. This overhead comes not only from the tuple passing through several queues but also includes running a Netty \cite{Netty} server used for message passing in Storm.
+\subsection{Tuple processing}
 
-Storm runs many threads which are only useful in distributed context. Indeed, during our experiments we found that a topology with 8 executors was being executed with 64 threads.
+Figure \ref{fig:worker_inside} shows how tuple processing is implemented inside a Storm worker process. The tuple is read from a message buffer by the receiver thread of the worker and put on a receive queue of the corresponding executor. The tuple is then picked up by the component thread of the executor for task execution.
 
-\todo{Plot threads vs components}
-\todo{Maybe include Thread Dump and a graph of thread counts}
+After the component thread has executed the task it puts the tuple on the executor sender queue. There, it is picked up by the executor sender thread which puts the tuple on the global sender queue of the worker. Lastly, the global sender thread of the worker serialises the tuple and sends it downstream.
+
+Alternatively, if the tuple is forwarded to an executor in the same worker process it is put on the receiver queue of the corresponding executor directly after processing.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.7]{pdf/worker_inside.pdf}
+	\caption{Tuple processing in Apache Storm.}
+	\label{fig:worker_inside}
+\end{figure}
+
+Storm uses the term "queue" freely but in fact the queues are implemented as ring buffers using the LMAX Disruptor library \cite{LMAXDisruptor}. Detailed background on how Disruptor works and its performance benchmarks can be found in \cite{Thompson_Farley_Barker_Gee_Stewart_2011}.
+
+There is a lot of overhead necessary to simulate sending tuples to executors in other worker nodes. For one, there is significant overhead from the tuple passing through the three queues of a worker. In \cite{DisruptorWiki}, the authors of LMAX Disruptor show that a three step pipeline has half the throughput of a single consumer-producer pipeline.
+
+Furthermore, Storm simulates the cluster network by running a local Netty \cite{Netty} server.
+
+\subsection{Heartbeats \& Timers}
 
 Additionally, every worker has a heartbeat thread that simulates sending heartbeat messages to the Nimbus process. It does this by writing to a local cache which is persisted to a file by a blocking write on every heartbeat. While heartbeats are essential in cluster mode, there is no need for them in local mode.
 
-Another overhead is running a local Zookeper server which emulates the Zookeeper nodes of a cluster. State is maintained in this server even though there is always only one topology executing at a time.
+\subsection{Acker \& System Bolts}
+
+The acker and system bolts are ran for every topology. The acker bolt can be disabled via the configuration file. In such a case it executes idly.
+
+\subsection{Zookeeper}
+
+Another overhead is running a local Zookeper server which emulates the Zookeeper nodes of a cluster. Running the Zookeeper server is a massive addition to the list of overheads. Indeed, during profiling we found that a topology with one worker and three executors was being executed with 55 threads (not including system JVM threads and threads created by the profiler). 28 of these threads were started by Zookeeper. Table \ref{table:breakdown} shows what the individual threads were used for.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{@{}lc@{}}
+    \textbf{Spout Parallelism} & \textbf{\# of Threads} \\ \toprule
+    Main Thread & 1  \\
+	Worker Sender \& Receiver Threads & 2  \\
+    Acker \& System Component Threads & 2  \\
+    Executor Component Threads & 3  \\
+    Executor Sender Threads & 5  \\
+    Various Timers \& Event Loops & 13  \\
+    Zookeper Server & 28  \\
+\end{tabular}
+\caption{Break-down of threads used by Apache Storm to execute a topology with 3 components.}
+\label{table:breakdown}
+\end{table}
+
+To find out what state the threads were actually in at any given time we run the topology and recorded a thread dump every second for five minutes. The results can be observed in table \ref{table:dump}.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{@{}lc@{}}
+    \textbf{Spout Parallelism} & \textbf{\# of Threads} \\ \toprule
+    RUNNABLE & 8  \\
+	TIMED WAITING & 22  \\
+    WAITING & 25  \\
+\end{tabular}
+\caption{Recorded thread states over five minute period.}
+\label{table:dump}
+\end{table}
+
+<<dump-plot, echo=FALSE, cache=TRUE, fig.cap="Threads over time.", fig.align="center", fig.height=3>>=
+@
+
+As can be seen from the table, most of the threads were either in state \texttt{WAITING} or \texttt{TIMED WAITING}. According to the Java documentation on thread states \cite{JavaThreads} these two states are used for threads that are waiting for an action from a different thread and cannot be scheduled by the scheduler until that action is executed.
+
+In the subsequent sections we will discuss how the number of running threads was significantly reduced. In fact, to execute the same topology on Storm-MC would only require 5 threads.
+
+\todo{Plot threads vs components}
+\todo{Maybe include Thread Dump and a graph of thread counts}
 
 
 \section{Storm-MC Architecture}
@@ -336,21 +420,6 @@ In light of previous subsections Storm-MC is completely stateless. The cluster s
 \section{Tuple Processing}
 \label{sec:tuple_processing}
 
-\begin{figure}[!htb]
-	\centering
-	\includegraphics[scale=0.7]{pdf/worker_inside.pdf}
-	\caption{Tuple processing in Apache Storm.}
-	\label{fig:worker_inside}
-\end{figure}
-
-Figure \ref{fig:worker_inside} shows how tuple processing is implemented inside a Storm worker process. The tuple is read from a message buffer by the receiver thread of the worker and put on a receive queue of the corresponding executor. The tuple is then picked up by the component thread of an executor for task execution.
-
-After the component thread has executed the task it puts the tuple on the sender queue. There, it is picked up by the executor's sender thread which puts the tuple on the global sender queue of the worker. Lastly, the global sender thread of the worker serialises the tuple and sends it downstream.
-
-Alternatively, if the tuple is forwarded to an executor in the same worker process it is put on the receiver queue of the corresponding executor directly after processing.
-
-Storm uses the term queue freely but in fact the queues are implemented as ring buffers using LMAX Disruptor \cite{LMAX_Disruptor}. Detailed background of how Disruptor works and its performance benchmarks can be found in \cite{Thompson_Farley_Barker_Gee_Stewart_2011}.
-
 \todo{Mention overhead by running SystemBolt vs just timer in Storm-MC}
 
 \begin{figure}[!htb]
@@ -374,7 +443,7 @@ There were several other options we considered when implementing tuple processin
 
 \clearpage{}\chapter{Storm-MC Implementation}
 
-The following chapter describes the implementation
+The following chapter describes the implementation of Storm-MC.
 
 \section{}\clearpage{}
 
@@ -443,13 +512,21 @@ The first topology we tested for performance is a variant of the aforementioned 
 
 This topology is considered to be CPU-intensive.
 
-<<external-code, echo=FALSE, cache=FALSE>>=
-read_chunk('wordcount.R')
-@
-
 <<wordcount-plot, echo=FALSE, cache=TRUE, fig.cap="Improvement of Storm-MC over Apache Storm in number of tuples processed", fig.align="center", fig.height=3>>=
 @
 
+\begin{tabular}{c c c c c} \toprule
+    {Spout Parallelism} & {Split Bolt Parallelism} & {Count Bolt Parallelism} & {\# of Threads} \\ \midrule
+    1 & 1 & 1 & 55  \\ \midrule
+    2 & 2 & 2 & 61  \\ \midrule
+    3 & 3 & 3 & 67  \\ \bottomrule
+\end{tabular}
+
+<<threads-plot, echo=FALSE, cache=TRUE, fig.cap="Number of threads used by Storm and Storm-MC", fig.align="center", fig.height=3>>=
+@
+
+
+When the topology was run on Apache Storm in local mode, the process executed with 55 threads. Compared to that, running it on Storm-MC required only 5 threads: the main thread (1), one thread for each component (3), and a user timer used for topology metrics and ticks (1).
 
 \subsection{Enron Topology}
 
@@ -469,6 +546,14 @@ This benchmark is included because it is considered memory-intensive.
 \label{sec:challenges}
 
 In this section we are going to discuss challenges we encountered while porting Apache Storm to multi-core machines.
+
+\begin{description}
+	\item[Unfamiliarity with Clojure] \hfill \\
+	
+	\item[Lack of Documentation] \hfill \\
+	
+\end{description}
+
 \clearpage{}
 
 \clearpage{}\chapter{Conclusion}
@@ -515,7 +600,7 @@ Finally, listing \ref{listing:wordcount_count} shows how a bolt that counts the 
 \clearpage{}
 \end{appendices}
 
-\bibliographystyle{apalike}
-\bibliography{mybibfile}
+\bibliographystyle{plain}
+\bibliography{report}
 
 \end{document}

@@ -63,13 +63,21 @@ The first topology we tested for performance is a variant of the aforementioned 
 
 This topology is considered to be CPU-intensive.
 
-<<external-code, echo=FALSE, cache=FALSE>>=
-read_chunk('wordcount.R')
-@
-
 <<wordcount-plot, echo=FALSE, cache=TRUE, fig.cap="Improvement of Storm-MC over Apache Storm in number of tuples processed", fig.align="center", fig.height=3>>=
 @
 
+\begin{tabular}{c c c c c} \toprule
+    {Spout Parallelism} & {Split Bolt Parallelism} & {Count Bolt Parallelism} & {\# of Threads} \\ \midrule
+    1 & 1 & 1 & 55  \\ \midrule
+    2 & 2 & 2 & 61  \\ \midrule
+    3 & 3 & 3 & 67  \\ \bottomrule
+\end{tabular}
+
+<<threads-plot, echo=FALSE, cache=TRUE, fig.cap="Number of threads used by Storm and Storm-MC", fig.align="center", fig.height=3>>=
+@
+
+
+When the topology was run on Apache Storm in local mode, the process executed with 55 threads. Compared to that, running it on Storm-MC required only 5 threads: the main thread (1), one thread for each component (3), and a user timer used for topology metrics and ticks (1).
 
 \subsection{Enron Topology}
 
@@ -89,3 +97,11 @@ This benchmark is included because it is considered memory-intensive.
 \label{sec:challenges}
 
 In this section we are going to discuss challenges we encountered while porting Apache Storm to multi-core machines.
+
+\begin{description}
+	\item[Unfamiliarity with Clojure] \hfill \\
+	
+	\item[Lack of Documentation] \hfill \\
+	
+\end{description}
+

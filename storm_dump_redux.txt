@@ -1,0 +1,875 @@
+cd2015-03-18 10:13:15
+Full thread dump Java HotSpot(TM) 64-Bit Server VM (24.51-b03 mixed mode):
+
+"Thread-20-disruptor-worker-transfer-queue" prio=5 tid=0x00007f884aae4000 nid=0xbf03 runnable [0x00000001154bb000]
+   java.lang.Thread.State: TIMED_WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x000000078100ddb0> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:226)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2176)
+	at com.lmax.disruptor.BlockingWaitStrategy.waitFor(BlockingWaitStrategy.java:87)
+	at com.lmax.disruptor.ProcessingSequenceBarrier.waitFor(ProcessingSequenceBarrier.java:54)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchWhenAvailable(DisruptorQueue.java:97)
+	at backtype.storm.disruptor$consume_batch_when_available.invoke(disruptor.clj:80)
+	at backtype.storm.disruptor$consume_loop_STAR_$fn__847.invoke(disruptor.clj:94)
+	at backtype.storm.util$async_loop$fn__456.invoke(util.clj:431)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-19-worker-receiver-thread-0" daemon prio=5 tid=0x00007f884b6eb000 nid=0xbd03 waiting on condition [0x00000001153b7000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007810f7c90> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:606)
+	at clojure.lang.Reflector.invokeMatchingMethod(Reflector.java:93)
+	at clojure.lang.Reflector.invokeNoArgInstanceMember(Reflector.java:298)
+	at backtype.storm.messaging.local.LocalConnection.recv(local.clj:38)
+	at backtype.storm.messaging.loader$mk_receive_thread$fn__855$fn__856.invoke(loader.clj:33)
+	at backtype.storm.util$async_loop$fn__456.invoke(util.clj:431)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-18-__acker" prio=5 tid=0x00007f884b389000 nid=0xbb03 runnable [0x00000001152b5000]
+   java.lang.Thread.State: TIMED_WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x0000000780ffa1d8> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:226)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2176)
+	at com.lmax.disruptor.BlockingWaitStrategy.waitFor(BlockingWaitStrategy.java:87)
+	at com.lmax.disruptor.ProcessingSequenceBarrier.waitFor(ProcessingSequenceBarrier.java:54)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchWhenAvailable(DisruptorQueue.java:97)
+	at backtype.storm.disruptor$consume_batch_when_available.invoke(disruptor.clj:80)
+	at backtype.storm.daemon.executor$fn__4300$fn__4312$fn__4359.invoke(executor.clj:751)
+	at backtype.storm.util$async_loop$fn__456.invoke(util.clj:431)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-17-disruptor-executor[1 1]-send-queue" prio=5 tid=0x00007f884af1d000 nid=0xb903 runnable [0x00000001151b2000]
+   java.lang.Thread.State: TIMED_WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x0000000780ffcf50> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:226)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2176)
+	at com.lmax.disruptor.BlockingWaitStrategy.waitFor(BlockingWaitStrategy.java:87)
+	at com.lmax.disruptor.ProcessingSequenceBarrier.waitFor(ProcessingSequenceBarrier.java:54)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchWhenAvailable(DisruptorQueue.java:97)
+	at backtype.storm.disruptor$consume_batch_when_available.invoke(disruptor.clj:80)
+	at backtype.storm.disruptor$consume_loop_STAR_$fn__847.invoke(disruptor.clj:94)
+	at backtype.storm.util$async_loop$fn__456.invoke(util.clj:431)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-16-__system" prio=5 tid=0x00007f884af0c000 nid=0xb703 runnable [0x00000001150af000]
+   java.lang.Thread.State: TIMED_WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x0000000781006e60> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:226)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2176)
+	at com.lmax.disruptor.BlockingWaitStrategy.waitFor(BlockingWaitStrategy.java:87)
+	at com.lmax.disruptor.ProcessingSequenceBarrier.waitFor(ProcessingSequenceBarrier.java:54)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchWhenAvailable(DisruptorQueue.java:97)
+	at backtype.storm.disruptor$consume_batch_when_available.invoke(disruptor.clj:80)
+	at backtype.storm.daemon.executor$fn__4300$fn__4312$fn__4359.invoke(executor.clj:751)
+	at backtype.storm.util$async_loop$fn__456.invoke(util.clj:431)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-15-disruptor-executor[-1 -1]-send-queue" prio=5 tid=0x00007f884b717800 nid=0xb503 runnable [0x0000000114fac000]
+   java.lang.Thread.State: TIMED_WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x0000000781009be8> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:226)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2176)
+	at com.lmax.disruptor.BlockingWaitStrategy.waitFor(BlockingWaitStrategy.java:87)
+	at com.lmax.disruptor.ProcessingSequenceBarrier.waitFor(ProcessingSequenceBarrier.java:54)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchWhenAvailable(DisruptorQueue.java:97)
+	at backtype.storm.disruptor$consume_batch_when_available.invoke(disruptor.clj:80)
+	at backtype.storm.disruptor$consume_loop_STAR_$fn__847.invoke(disruptor.clj:94)
+	at backtype.storm.util$async_loop$fn__456.invoke(util.clj:431)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-14-wordcount.spout" prio=5 tid=0x00007f884aae3800 nid=0xb303 sleeping[0x0000000114ea9000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(Native Method)
+	at backtype.storm.spout.SleepSpoutWaitStrategy.emptyEmit(SleepSpoutWaitStrategy.java:36)
+	at backtype.storm.daemon.executor$fn__4232$fn__4247$fn__4276.invoke(executor.clj:578)
+	at backtype.storm.util$async_loop$fn__456.invoke(util.clj:431)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-13-disruptor-executor[4 4]-send-queue" prio=5 tid=0x00007f884adde000 nid=0xb103 runnable [0x0000000114da6000]
+   java.lang.Thread.State: TIMED_WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	at java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:349)
+	at com.lmax.disruptor.AbstractMultithreadedClaimStrategy.waitForFreeSlotAt(AbstractMultithreadedClaimStrategy.java:99)
+	at com.lmax.disruptor.AbstractMultithreadedClaimStrategy.incrementAndGet(AbstractMultithreadedClaimStrategy.java:49)
+	at com.lmax.disruptor.Sequencer.next(Sequencer.java:127)
+	at backtype.storm.utils.DisruptorQueue.publishDirect(DisruptorQueue.java:174)
+	at backtype.storm.utils.DisruptorQueue.publish(DisruptorQueue.java:167)
+	at backtype.storm.disruptor$publish.invoke(disruptor.clj:66)
+	at backtype.storm.disruptor$publish.invoke(disruptor.clj:68)
+	at backtype.storm.daemon.worker$mk_transfer_local_fn$fn__4400.invoke(worker.clj:107)
+	at backtype.storm.daemon.worker$mk_transfer_fn$fn__4407.invoke(worker.clj:131)
+	at backtype.storm.daemon.executor$start_batch_transfer__GT_worker_handler_BANG_$fn__4142.invoke(executor.clj:257)
+	at backtype.storm.disruptor$clojure_handler$reify__834.onEvent(disruptor.clj:58)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchToCursor(DisruptorQueue.java:125)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchWhenAvailable(DisruptorQueue.java:99)
+	at backtype.storm.disruptor$consume_batch_when_available.invoke(disruptor.clj:80)
+	at backtype.storm.disruptor$consume_loop_STAR_$fn__847.invoke(disruptor.clj:94)
+	at backtype.storm.util$async_loop$fn__456.invoke(util.clj:431)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-12-wordcount.splitbolt" prio=5 tid=0x00007f884b6f8800 nid=0xaf03 runnable [0x0000000114ca3000]
+   java.lang.Thread.State: RUNNABLE
+	at java.util.regex.Pattern$Start.match(Pattern.java:3408)
+	at java.util.regex.Matcher.search(Matcher.java:1199)
+	at java.util.regex.Matcher.find(Matcher.java:592)
+	at java.util.regex.Pattern.split(Pattern.java:1200)
+	at java.lang.String.split(String.java:2313)
+	at java.lang.String.split(String.java:2355)
+	at com.ibm.streamsx.storm.email.benchmark.bolts.SplitSentenceBolt.splitSentence(SplitSentenceBolt.java:48)
+	at com.ibm.streamsx.storm.email.benchmark.bolts.SplitSentenceBolt.execute(SplitSentenceBolt.java:40)
+	at backtype.storm.topology.BasicBoltExecutor.execute(BasicBoltExecutor.java:50)
+	at backtype.storm.daemon.executor$fn__4300$tuple_action_fn__4302.invoke(executor.clj:636)
+	at backtype.storm.daemon.executor$mk_task_receiver$fn__4223.invoke(executor.clj:404)
+	at backtype.storm.disruptor$clojure_handler$reify__834.onEvent(disruptor.clj:58)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchToCursor(DisruptorQueue.java:125)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchWhenAvailable(DisruptorQueue.java:99)
+	at backtype.storm.disruptor$consume_batch_when_available.invoke(disruptor.clj:80)
+	at backtype.storm.daemon.executor$fn__4300$fn__4312$fn__4359.invoke(executor.clj:751)
+	at backtype.storm.util$async_loop$fn__456.invoke(util.clj:431)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-11-disruptor-executor[3 3]-send-queue" prio=5 tid=0x00007f884b721800 nid=0xad03 runnable [0x0000000114ba0000]
+   java.lang.Thread.State: TIMED_WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x0000000780a5d0a8> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:226)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2176)
+	at com.lmax.disruptor.BlockingWaitStrategy.waitFor(BlockingWaitStrategy.java:87)
+	at com.lmax.disruptor.ProcessingSequenceBarrier.waitFor(ProcessingSequenceBarrier.java:54)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchWhenAvailable(DisruptorQueue.java:97)
+	at backtype.storm.disruptor$consume_batch_when_available.invoke(disruptor.clj:80)
+	at backtype.storm.disruptor$consume_loop_STAR_$fn__847.invoke(disruptor.clj:94)
+	at backtype.storm.util$async_loop$fn__456.invoke(util.clj:431)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-10-wordcount.countbolt" prio=5 tid=0x00007f884b5e0800 nid=0xab03 runnable [0x0000000114a9d000]
+   java.lang.Thread.State: RUNNABLE
+	at java.util.HashMap.hash(HashMap.java:366)
+	at java.util.HashMap.getEntry(HashMap.java:466)
+	at java.util.HashMap.get(HashMap.java:421)
+	at clojure.lang.RT.getFrom(RT.java:654)
+	at clojure.lang.RT.get(RT.java:646)
+	at backtype.storm.daemon.task$mk_tasks_fn$fn__3947.invoke(task.clj:154)
+	at backtype.storm.daemon.executor$fn__4300$fn__4312$bolt_emit__4339.invoke(executor.clj:666)
+	at backtype.storm.daemon.executor$fn__4300$fn$reify__4345.emit(executor.clj:701)
+	at backtype.storm.task.OutputCollector.emit(OutputCollector.java:203)
+	at backtype.storm.task.OutputCollector.emit(OutputCollector.java:49)
+	at backtype.storm.topology.BasicOutputCollector.emit(BasicOutputCollector.java:36)
+	at backtype.storm.topology.BasicOutputCollector.emit(BasicOutputCollector.java:40)
+	at com.ibm.streamsx.storm.email.benchmark.bolts.CountBolt.execute(CountBolt.java:50)
+	at backtype.storm.topology.BasicBoltExecutor.execute(BasicBoltExecutor.java:50)
+	at backtype.storm.daemon.executor$fn__4300$tuple_action_fn__4302.invoke(executor.clj:636)
+	at backtype.storm.daemon.executor$mk_task_receiver$fn__4223.invoke(executor.clj:404)
+	at backtype.storm.disruptor$clojure_handler$reify__834.onEvent(disruptor.clj:58)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchToCursor(DisruptorQueue.java:125)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchWhenAvailable(DisruptorQueue.java:99)
+	at backtype.storm.disruptor$consume_batch_when_available.invoke(disruptor.clj:80)
+	at backtype.storm.daemon.executor$fn__4300$fn__4312$fn__4359.invoke(executor.clj:751)
+	at backtype.storm.util$async_loop$fn__456.invoke(util.clj:431)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-9-disruptor-executor[2 2]-send-queue" prio=5 tid=0x00007f884addd800 nid=0x310b runnable [0x00000001140bb000]
+   java.lang.Thread.State: TIMED_WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x0000000780a6b850> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:226)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2176)
+	at com.lmax.disruptor.BlockingWaitStrategy.waitFor(BlockingWaitStrategy.java:87)
+	at com.lmax.disruptor.ProcessingSequenceBarrier.waitFor(ProcessingSequenceBarrier.java:54)
+	at backtype.storm.utils.DisruptorQueue.consumeBatchWhenAvailable(DisruptorQueue.java:97)
+	at backtype.storm.disruptor$consume_batch_when_available.invoke(disruptor.clj:80)
+	at backtype.storm.disruptor$consume_loop_STAR_$fn__847.invoke(disruptor.clj:94)
+	at backtype.storm.util$async_loop$fn__456.invoke(util.clj:431)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"user-timer" daemon prio=5 tid=0x00007f884b2be000 nid=0xa903 waiting on condition [0x000000011499a000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(Native Method)
+	at backtype.storm.utils.Time.sleepUntil(Time.java:76)
+	at backtype.storm.utils.Time.sleep(Time.java:81)
+	at backtype.storm.timer$mk_timer$fn__1118$fn__1119.invoke(timer.clj:57)
+	at backtype.storm.timer$mk_timer$fn__1118.invoke(timer.clj:42)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"executor-heartbeat-timer" daemon prio=5 tid=0x00007f884adfb800 nid=0xa703 sleeping[0x0000000114897000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(Native Method)
+	at backtype.storm.utils.Time.sleepUntil(Time.java:76)
+	at backtype.storm.utils.Time.sleep(Time.java:81)
+	at backtype.storm.timer$mk_timer$fn__1118$fn__1119.invoke(timer.clj:57)
+	at backtype.storm.timer$mk_timer$fn__1118.invoke(timer.clj:42)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"refresh-active-timer" daemon prio=5 tid=0x00007f884b2bd800 nid=0xa503 waiting on condition [0x0000000114794000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(Native Method)
+	at backtype.storm.utils.Time.sleepUntil(Time.java:76)
+	at backtype.storm.utils.Time.sleep(Time.java:81)
+	at backtype.storm.timer$mk_timer$fn__1118$fn__1119.invoke(timer.clj:57)
+	at backtype.storm.timer$mk_timer$fn__1118.invoke(timer.clj:42)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"refresh-connections-timer" daemon prio=5 tid=0x00007f884adfa800 nid=0xa303 waiting on condition [0x0000000114691000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(Native Method)
+	at backtype.storm.utils.Time.sleepUntil(Time.java:76)
+	at backtype.storm.utils.Time.sleep(Time.java:81)
+	at backtype.storm.timer$mk_timer$fn__1118$fn__1119.invoke(timer.clj:57)
+	at backtype.storm.timer$mk_timer$fn__1118.invoke(timer.clj:42)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"heartbeat-timer" daemon prio=5 tid=0x00007f884b01d000 nid=0xa103 sleeping[0x000000011458e000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(Native Method)
+	at backtype.storm.utils.Time.sleepUntil(Time.java:76)
+	at backtype.storm.utils.Time.sleep(Time.java:81)
+	at backtype.storm.timer$mk_timer$fn__1118$fn__1119.invoke(timer.clj:57)
+	at backtype.storm.timer$mk_timer$fn__1118.invoke(timer.clj:42)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"CuratorFramework-0" daemon prio=5 tid=0x00007f884ae65000 nid=0x9f03 waiting on condition [0x00000001143c4000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x0000000780cc34f8> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.DelayQueue.take(DelayQueue.java:209)
+	at java.util.concurrent.DelayQueue.take(DelayQueue.java:68)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl.backgroundOperationsLoop(CuratorFrameworkImpl.java:737)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl.access$300(CuratorFrameworkImpl.java:56)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl$3.call(CuratorFrameworkImpl.java:244)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:262)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- <0x0000000780cc35d0> (a java.util.concurrent.ThreadPoolExecutor$Worker)
+
+"Thread-4-EventThread" daemon prio=5 tid=0x00007f884ae64800 nid=0x2d0b waiting on condition [0x00000001142c1000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x0000000780cc2b98> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+	at org.apache.zookeeper.ClientCnxn$EventThread.run(ClientCnxn.java:491)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-4-SendThread(fe80:0:0:0:0:0:0:1%1:2000)" daemon prio=5 tid=0x00007f884b5e1800 nid=0x9b07 runnable [0x00000001141be000]
+   java.lang.Thread.State: RUNNABLE
+	at sun.nio.ch.KQueueArrayWrapper.kevent0(Native Method)
+	at sun.nio.ch.KQueueArrayWrapper.poll(KQueueArrayWrapper.java:200)
+	at sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:103)
+	at sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:87)
+	- locked <0x0000000780cc26e0> (a sun.nio.ch.Util$2)
+	- locked <0x0000000780cc26d0> (a java.util.Collections$UnmodifiableSet)
+	- locked <0x0000000780cc21c8> (a sun.nio.ch.KQueueSelectorImpl)
+	at sun.nio.ch.SelectorImpl.select(SelectorImpl.java:98)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:338)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1068)
+
+   Locked ownable synchronizers:
+	- None
+
+"ConnectionStateManager-0" daemon prio=5 tid=0x00007f884ab16800 nid=0x9d07 waiting on condition [0x00000001118f9000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x0000000780cc3a50> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.ArrayBlockingQueue.take(ArrayBlockingQueue.java:374)
+	at org.apache.curator.framework.state.ConnectionStateManager.processEvents(ConnectionStateManager.java:208)
+	at org.apache.curator.framework.state.ConnectionStateManager.access$000(ConnectionStateManager.java:42)
+	at org.apache.curator.framework.state.ConnectionStateManager$1.call(ConnectionStateManager.java:110)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:262)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- <0x0000000780cc3b30> (a java.util.concurrent.ThreadPoolExecutor$Worker)
+
+"Thread-6" prio=5 tid=0x00007f884abb1800 nid=0x9103 waiting on condition [0x0000000113bac000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x0000000780c49b18> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+	at backtype.storm.event$event_manager$fn__2379.invoke(event.clj:38)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-5" prio=5 tid=0x00007f884b3bb000 nid=0x8f03 waiting on condition [0x0000000113aa9000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x0000000780c49f10> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+	at backtype.storm.event$event_manager$fn__2379.invoke(event.clj:38)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"CuratorFramework-0" daemon prio=5 tid=0x00007f884aa32000 nid=0x8703 waiting on condition [0x000000011369d000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809cca98> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.DelayQueue.take(DelayQueue.java:209)
+	at java.util.concurrent.DelayQueue.take(DelayQueue.java:68)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl.backgroundOperationsLoop(CuratorFrameworkImpl.java:737)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl.access$300(CuratorFrameworkImpl.java:56)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl$3.call(CuratorFrameworkImpl.java:244)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:262)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- <0x00000007809cc8f8> (a java.util.concurrent.ThreadPoolExecutor$Worker)
+
+"main-EventThread" daemon prio=5 tid=0x00007f884aa31000 nid=0x7f07 waiting on condition [0x000000011359a000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x0000000780c54a68> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+	at org.apache.zookeeper.ClientCnxn$EventThread.run(ClientCnxn.java:491)
+
+   Locked ownable synchronizers:
+	- None
+
+"main-SendThread(localhost:2000)" daemon prio=5 tid=0x00007f884aa2f800 nid=0x8307 runnable [0x0000000113497000]
+   java.lang.Thread.State: RUNNABLE
+	at sun.nio.ch.KQueueArrayWrapper.kevent0(Native Method)
+	at sun.nio.ch.KQueueArrayWrapper.poll(KQueueArrayWrapper.java:200)
+	at sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:103)
+	at sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:87)
+	- locked <0x0000000780c545b8> (a sun.nio.ch.Util$2)
+	- locked <0x0000000780c545a8> (a java.util.Collections$UnmodifiableSet)
+	- locked <0x0000000780c54140> (a sun.nio.ch.KQueueSelectorImpl)
+	at sun.nio.ch.SelectorImpl.select(SelectorImpl.java:98)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:338)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1068)
+
+   Locked ownable synchronizers:
+	- None
+
+"ConnectionStateManager-0" daemon prio=5 tid=0x00007f884aa30800 nid=0x8507 waiting on condition [0x0000000113291000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809cd148> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.ArrayBlockingQueue.take(ArrayBlockingQueue.java:374)
+	at org.apache.curator.framework.state.ConnectionStateManager.processEvents(ConnectionStateManager.java:208)
+	at org.apache.curator.framework.state.ConnectionStateManager.access$000(ConnectionStateManager.java:42)
+	at org.apache.curator.framework.state.ConnectionStateManager$1.call(ConnectionStateManager.java:110)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:262)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- <0x00000007809cce48> (a java.util.concurrent.ThreadPoolExecutor$Worker)
+
+"timer" daemon prio=5 tid=0x00007f884b4cd000 nid=0x7307 sleeping[0x0000000112c7f000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(Native Method)
+	at backtype.storm.utils.Time.sleepUntil(Time.java:76)
+	at backtype.storm.utils.Time.sleep(Time.java:81)
+	at backtype.storm.timer$mk_timer$fn__1118$fn__1119.invoke(timer.clj:57)
+	at backtype.storm.timer$mk_timer$fn__1118.invoke(timer.clj:42)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-4" prio=5 tid=0x00007f884ad45800 nid=0x7d03 waiting on condition [0x000000011318e000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809b6268> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+	at backtype.storm.event$event_manager$fn__2379.invoke(event.clj:38)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-3" prio=5 tid=0x00007f884b622000 nid=0x7b03 waiting on condition [0x000000011308b000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809b66a0> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+	at backtype.storm.event$event_manager$fn__2379.invoke(event.clj:38)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"CuratorFramework-0" daemon prio=5 tid=0x00007f884b624800 nid=0x7903 waiting on condition [0x0000000112f88000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809ba0a8> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.DelayQueue.take(DelayQueue.java:209)
+	at java.util.concurrent.DelayQueue.take(DelayQueue.java:68)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl.backgroundOperationsLoop(CuratorFrameworkImpl.java:737)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl.access$300(CuratorFrameworkImpl.java:56)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl$3.call(CuratorFrameworkImpl.java:244)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:262)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- <0x00000007809ba180> (a java.util.concurrent.ThreadPoolExecutor$Worker)
+
+"main-EventThread" daemon prio=5 tid=0x00007f884b620000 nid=0x630b waiting on condition [0x0000000112e85000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809b9780> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+	at org.apache.zookeeper.ClientCnxn$EventThread.run(ClientCnxn.java:491)
+
+   Locked ownable synchronizers:
+	- None
+
+"main-SendThread(localhost:2000)" daemon prio=5 tid=0x00007f884b6aa800 nid=0x7507 runnable [0x0000000112d82000]
+   java.lang.Thread.State: RUNNABLE
+	at sun.nio.ch.KQueueArrayWrapper.kevent0(Native Method)
+	at sun.nio.ch.KQueueArrayWrapper.poll(KQueueArrayWrapper.java:200)
+	at sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:103)
+	at sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:87)
+	- locked <0x00000007809b92d0> (a sun.nio.ch.Util$2)
+	- locked <0x00000007809b92c0> (a java.util.Collections$UnmodifiableSet)
+	- locked <0x00000007809b7db8> (a sun.nio.ch.KQueueSelectorImpl)
+	at sun.nio.ch.SelectorImpl.select(SelectorImpl.java:98)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:338)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1068)
+
+   Locked ownable synchronizers:
+	- None
+
+"ConnectionStateManager-0" daemon prio=5 tid=0x00007f884aa80000 nid=0x7707 waiting on condition [0x0000000112873000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809ba600> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.ArrayBlockingQueue.take(ArrayBlockingQueue.java:374)
+	at org.apache.curator.framework.state.ConnectionStateManager.processEvents(ConnectionStateManager.java:208)
+	at org.apache.curator.framework.state.ConnectionStateManager.access$000(ConnectionStateManager.java:42)
+	at org.apache.curator.framework.state.ConnectionStateManager$1.call(ConnectionStateManager.java:110)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:262)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- <0x00000007809ba6e0> (a java.util.concurrent.ThreadPoolExecutor$Worker)
+
+"timer" daemon prio=5 tid=0x00007f884ad44000 nid=0x6b07 sleeping[0x0000000112467000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(Native Method)
+	at backtype.storm.utils.Time.sleepUntil(Time.java:76)
+	at backtype.storm.utils.Time.sleep(Time.java:81)
+	at backtype.storm.timer$mk_timer$fn__1118$fn__1119.invoke(timer.clj:57)
+	at backtype.storm.timer$mk_timer$fn__1118.invoke(timer.clj:42)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"CuratorFramework-0" daemon prio=5 tid=0x00007f884b629800 nid=0x7103 waiting on condition [0x0000000112b7c000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809cbe78> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.DelayQueue.take(DelayQueue.java:209)
+	at java.util.concurrent.DelayQueue.take(DelayQueue.java:68)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl.backgroundOperationsLoop(CuratorFrameworkImpl.java:737)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl.access$300(CuratorFrameworkImpl.java:56)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl$3.call(CuratorFrameworkImpl.java:244)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:262)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- <0x00000007809cbcd8> (a java.util.concurrent.ThreadPoolExecutor$Worker)
+
+"main-EventThread" daemon prio=5 tid=0x00007f884ad43800 nid=0x6907 waiting on condition [0x0000000112a79000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x0000000780c59410> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+	at org.apache.zookeeper.ClientCnxn$EventThread.run(ClientCnxn.java:491)
+
+   Locked ownable synchronizers:
+	- None
+
+"main-SendThread(localhost:2000)" daemon prio=5 tid=0x00007f884acec800 nid=0x6d07 runnable [0x0000000112976000]
+   java.lang.Thread.State: RUNNABLE
+	at sun.nio.ch.KQueueArrayWrapper.kevent0(Native Method)
+	at sun.nio.ch.KQueueArrayWrapper.poll(KQueueArrayWrapper.java:200)
+	at sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:103)
+	at sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:87)
+	- locked <0x0000000780c57f50> (a sun.nio.ch.Util$2)
+	- locked <0x0000000780c57f40> (a java.util.Collections$UnmodifiableSet)
+	- locked <0x0000000780c57a48> (a sun.nio.ch.KQueueSelectorImpl)
+	at sun.nio.ch.SelectorImpl.select(SelectorImpl.java:98)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:338)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1068)
+
+   Locked ownable synchronizers:
+	- None
+
+"ConnectionStateManager-0" daemon prio=5 tid=0x00007f884b620800 nid=0x6f07 waiting on condition [0x0000000112770000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809cc528> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.ArrayBlockingQueue.take(ArrayBlockingQueue.java:374)
+	at org.apache.curator.framework.state.ConnectionStateManager.processEvents(ConnectionStateManager.java:208)
+	at org.apache.curator.framework.state.ConnectionStateManager.access$000(ConnectionStateManager.java:42)
+	at org.apache.curator.framework.state.ConnectionStateManager$1.call(ConnectionStateManager.java:110)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:262)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- <0x00000007809cc228> (a java.util.concurrent.ThreadPoolExecutor$Worker)
+
+"CuratorFramework-0" daemon prio=5 tid=0x00007f884acc4000 nid=0x6107 waiting on condition [0x000000011266d000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809b46f0> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.DelayQueue.take(DelayQueue.java:209)
+	at java.util.concurrent.DelayQueue.take(DelayQueue.java:68)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl.backgroundOperationsLoop(CuratorFrameworkImpl.java:737)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl.access$300(CuratorFrameworkImpl.java:56)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl$3.call(CuratorFrameworkImpl.java:244)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:262)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- <0x00000007809b47c8> (a java.util.concurrent.ThreadPoolExecutor$Worker)
+
+"main-EventThread" daemon prio=5 tid=0x00007f884ad42800 nid=0x5907 waiting on condition [0x000000011256a000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809b2d80> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+	at org.apache.zookeeper.ClientCnxn$EventThread.run(ClientCnxn.java:491)
+
+   Locked ownable synchronizers:
+	- None
+
+"main-SendThread(fe80:0:0:0:0:0:0:1%1:2000)" daemon prio=5 tid=0x00007f884b628800 nid=0x6507 runnable [0x0000000112364000]
+   java.lang.Thread.State: RUNNABLE
+	at sun.nio.ch.KQueueArrayWrapper.kevent0(Native Method)
+	at sun.nio.ch.KQueueArrayWrapper.poll(KQueueArrayWrapper.java:200)
+	at sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:103)
+	at sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:87)
+	- locked <0x00000007809b28f0> (a sun.nio.ch.Util$2)
+	- locked <0x00000007809b28e0> (a java.util.Collections$UnmodifiableSet)
+	- locked <0x00000007809b2418> (a sun.nio.ch.KQueueSelectorImpl)
+	at sun.nio.ch.SelectorImpl.select(SelectorImpl.java:98)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:338)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1068)
+
+   Locked ownable synchronizers:
+	- None
+
+"ConnectionStateManager-0" daemon prio=5 tid=0x00007f884b647000 nid=0x6707 waiting on condition [0x0000000111f58000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809b4c48> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.ArrayBlockingQueue.take(ArrayBlockingQueue.java:374)
+	at org.apache.curator.framework.state.ConnectionStateManager.processEvents(ConnectionStateManager.java:208)
+	at org.apache.curator.framework.state.ConnectionStateManager.access$000(ConnectionStateManager.java:42)
+	at org.apache.curator.framework.state.ConnectionStateManager$1.call(ConnectionStateManager.java:110)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:262)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- <0x00000007809b4d28> (a java.util.concurrent.ThreadPoolExecutor$Worker)
+
+"CuratorFramework-0" daemon prio=5 tid=0x00007f884acc5000 nid=0x5f03 waiting on condition [0x0000000112261000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809b01f8> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.DelayQueue.take(DelayQueue.java:209)
+	at java.util.concurrent.DelayQueue.take(DelayQueue.java:68)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl.backgroundOperationsLoop(CuratorFrameworkImpl.java:737)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl.access$300(CuratorFrameworkImpl.java:56)
+	at org.apache.curator.framework.imps.CuratorFrameworkImpl$3.call(CuratorFrameworkImpl.java:244)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:262)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- <0x00000007809b02d0> (a java.util.concurrent.ThreadPoolExecutor$Worker)
+
+"main-EventThread" daemon prio=5 tid=0x00007f884b484800 nid=0x5707 waiting on condition [0x000000011215e000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809af900> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+	at org.apache.zookeeper.ClientCnxn$EventThread.run(ClientCnxn.java:491)
+
+   Locked ownable synchronizers:
+	- None
+
+"main-SendThread(fe80:0:0:0:0:0:0:1%1:2000)" daemon prio=5 tid=0x00007f884ae89800 nid=0x5b07 runnable [0x000000011205b000]
+   java.lang.Thread.State: RUNNABLE
+	at sun.nio.ch.KQueueArrayWrapper.kevent0(Native Method)
+	at sun.nio.ch.KQueueArrayWrapper.poll(KQueueArrayWrapper.java:200)
+	at sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:103)
+	at sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:87)
+	- locked <0x00000007809af450> (a sun.nio.ch.Util$2)
+	- locked <0x00000007809af440> (a java.util.Collections$UnmodifiableSet)
+	- locked <0x00000007809adf28> (a sun.nio.ch.KQueueSelectorImpl)
+	at sun.nio.ch.SelectorImpl.select(SelectorImpl.java:98)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:338)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1068)
+
+   Locked ownable synchronizers:
+	- None
+
+"ConnectionStateManager-0" daemon prio=5 tid=0x00007f884accf800 nid=0x5d07 waiting on condition [0x0000000111e55000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007809b0750> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.ArrayBlockingQueue.take(ArrayBlockingQueue.java:374)
+	at org.apache.curator.framework.state.ConnectionStateManager.processEvents(ConnectionStateManager.java:208)
+	at org.apache.curator.framework.state.ConnectionStateManager.access$000(ConnectionStateManager.java:42)
+	at org.apache.curator.framework.state.ConnectionStateManager$1.call(ConnectionStateManager.java:110)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:262)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- <0x00000007809b0830> (a java.util.concurrent.ThreadPoolExecutor$Worker)
+
+"Thread-2" daemon prio=5 tid=0x00007f884b484000 nid=0x5503 waiting on condition [0x0000000111d52000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(Native Method)
+	at backtype.storm.utils.Time.sleepUntil(Time.java:76)
+	at backtype.storm.utils.Time.sleep(Time.java:81)
+	at backtype.storm.utils.TimeCacheMap$1.run(TimeCacheMap.java:70)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"timer" daemon prio=5 tid=0x00007f884ae03800 nid=0x5303 waiting on condition [0x0000000111c4f000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(Native Method)
+	at backtype.storm.utils.Time.sleepUntil(Time.java:76)
+	at backtype.storm.utils.Time.sleep(Time.java:81)
+	at backtype.storm.timer$mk_timer$fn__1118$fn__1119.invoke(timer.clj:57)
+	at backtype.storm.timer$mk_timer$fn__1118.invoke(timer.clj:42)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"Thread-1" daemon prio=5 tid=0x00007f884ac3d800 nid=0x5103 waiting on condition [0x0000000111b4c000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(Native Method)
+	at backtype.storm.utils.Time.sleepUntil(Time.java:76)
+	at backtype.storm.utils.Time.sleep(Time.java:81)
+	at backtype.storm.utils.TimeCacheMap$1.run(TimeCacheMap.java:70)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"ProcessThread(sid:0 cport:-1):" prio=5 tid=0x00007f884b5fb800 nid=0x4f03 waiting on condition [0x0000000111a49000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007808a23b8> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+	at org.apache.zookeeper.server.PrepRequestProcessor.run(PrepRequestProcessor.java:120)
+
+   Locked ownable synchronizers:
+	- None
+
+"SyncThread:0" prio=5 tid=0x00007f884ad8c000 nid=0x4d03 waiting on condition [0x00000001117f6000]
+   java.lang.Thread.State: WAITING (parking)
+	at sun.misc.Unsafe.park(Native Method)
+	- parking to wait for  <0x00000007808a2800> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)
+	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)
+	at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+	at org.apache.zookeeper.server.SyncRequestProcessor.run(SyncRequestProcessor.java:97)
+
+   Locked ownable synchronizers:
+	- None
+
+"SessionTracker" prio=5 tid=0x00007f884ac52000 nid=0x4b03 in Object.wait() [0x00000001116f3000]
+   java.lang.Thread.State: TIMED_WAITING (on object monitor)
+	at java.lang.Object.wait(Native Method)
+	- waiting on <0x00000007808a0eb0> (a org.apache.zookeeper.server.SessionTrackerImpl)
+	at org.apache.zookeeper.server.SessionTrackerImpl.run(SessionTrackerImpl.java:146)
+	- locked <0x00000007808a0eb0> (a org.apache.zookeeper.server.SessionTrackerImpl)
+
+   Locked ownable synchronizers:
+	- None
+
+"NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2000" daemon prio=5 tid=0x00007f884b3f9800 nid=0x4907 runnable [0x00000001115f0000]
+   java.lang.Thread.State: RUNNABLE
+	at sun.nio.ch.KQueueArrayWrapper.kevent0(Native Method)
+	at sun.nio.ch.KQueueArrayWrapper.poll(KQueueArrayWrapper.java:200)
+	at sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:103)
+	at sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:87)
+	- locked <0x00000007808aae68> (a sun.nio.ch.Util$2)
+	- locked <0x00000007808aae58> (a java.util.Collections$UnmodifiableSet)
+	- locked <0x000000078089e280> (a sun.nio.ch.KQueueSelectorImpl)
+	at sun.nio.ch.SelectorImpl.select(SelectorImpl.java:98)
+	at org.apache.zookeeper.server.NIOServerCnxnFactory.run(NIOServerCnxnFactory.java:178)
+	at java.lang.Thread.run(Thread.java:744)
+
+   Locked ownable synchronizers:
+	- None
+
+"main" prio=5 tid=0x00007f884a809800 nid=0x30f waiting on condition [0x0000000105958000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(Native Method)
+	at com.ibm.streamsx.storm.email.benchmark.utils.ConfigProps.configureTopologyLocal(ConfigProps.java:73)
+	at com.ibm.streamsx.storm.email.benchmark.utils.ConfigProps.configureTopologyLocal(ConfigProps.java:60)
+	at com.ibm.streamsx.storm.email.benchmark.FileReadWordCount.main(FileReadWordCount.java:45)
+
+   Locked ownable synchronizers:
+	- None

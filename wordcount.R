@@ -19,4 +19,5 @@ t <- melt(mat, id=c("component"))
 # create plot
 k <- ggplot(t, aes(x=component, y=value, fill=variable))
 # add labels
+# TODO: add scale to Y axis
 k + geom_bar(stat="identity") + xlab("Component") + ylab("Improvement") + ylim(0,2)

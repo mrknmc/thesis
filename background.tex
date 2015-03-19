@@ -1,7 +1,5 @@
 \chapter{Background}
 
-\todo{Probably move tuple processing elsewhere.}
-
 In this chapter we give background information necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm \ref{sec:storm_overview}, explain the concepts (\ref{sec:concepts}) used in Storm, show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), and finally  describe the serialisation used by Storm.
 
 \section{Storm Overview}
@@ -52,7 +50,18 @@ Users are also able to specify their own custom grouping by implementing the \te
 
 All the components of a Storm topology execute in parallel. The user can specify how much parallelism he wants associated with every component and Storm spawns the necessary number of threads. This is done through a configuration file, defined in YAML, which is submitted along with the topology.
 
-\todo{talk more about config}
+There are two additional bolts running for every topology:
+
+\begin{description}
+	\item[Acker] \hfill \\
+	The Acker bolt guarantees fault tolerance for the topology. It tracks every tuple that was produced and ensures that the tuple has been acknowledged by every bolt of the stream.
+	\item[System Bolt] \hfill \\
+	The System bolt is useful in two ways:
+	\begin{description}
+		\item[Metrics] System bolt collects metrics on the local Java Virtual Machine (JVM). Other components can subscribe to these metrics and receive their values at  regular intervals.
+		\item[Ticks] Components of a topology can subscribe to receive tick tuples in regular intervals. These tuples can be used to trigger some event of a component.
+	\end{description}
+\end{description}
 
 \section{Example Topology}
 \label{sec:example_topology}
