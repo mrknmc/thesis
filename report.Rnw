@@ -84,6 +84,8 @@ read_chunk('dump.R')
 
 \include{introduction}
 
+\include{literature}
+
 \include{background}
 
 \include{design}
