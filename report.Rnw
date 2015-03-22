@@ -6,6 +6,10 @@
 % APPENDIX
 \usepackage[page]{appendix}
 
+% NATBIB
+\usepackage{natbib}
+%\bibliographystyle{abbrvnat}
+
 % FONT COMMANDS
 \usepackage{fontspec}
 \setmainfont[Mapping=tex-text,Numbers=OldStyle]{fbb}
@@ -102,7 +106,7 @@ read_chunk('dump.R')
 
 % use the following and \cite{} as above if you use BibTeX
 % otherwise generate bibtem entries
-\bibliographystyle{plain}
+\bibliographystyle{apalike}
 \bibliography{report}
 
 \end{document}
