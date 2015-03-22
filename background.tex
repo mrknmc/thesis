@@ -46,8 +46,6 @@ There are several core concepts used by Storm and hence by extension Storm-MC as
 
 Users are also able to specify their own custom grouping by implementing the \texttt{CustomStreamGrouping} interface.
 
-\todo{Explain why you would want to do that.}
-
 All the components of a Storm topology execute in parallel. The user can specify how much parallelism he wants associated with every component and Storm spawns the necessary number of threads. This is done through a configuration file, defined in YAML, which is submitted along with the topology.
 
 There are two additional bolts running for every topology:
@@ -95,7 +93,7 @@ Listing \ref{listing:wordcount_topology} shows how the topology is put together 
 	\label{fig:storm_arch}
 \end{figure}
 
-\todo{Maybe highlight similarities to Hadoop}
+%\todo{Maybe highlight similarities to Hadoop}
 
 A Storm cluster adopts the Master-Worker pattern. To set up a Storm topology, the user launches daemon processes on nodes of the cluster and submits the topology to the master node, also called Nimbus. The worker nodes receive task assignments from the master and execute on them. The coordination between the master node and the worker nodes is handled by nodes running Apache Zookeeper \cite{ApacheZookeeper}. Figure \ref{fig:storm_arch} shows a graphical representation of Storm Architecture.
 
@@ -159,8 +157,6 @@ The cluster state contains worker assignments, information about topologies, and
 \section{Serialisation}
 \label{sec:serialisation}
 
-Since Storm topologies execute on a cluster all the components need to be serialisable. This is achieved with Apache Thrift. Components are defined as Thrift objects and Thrift generates all the Java serialisation code automatically.
-
-\todo{Why is Thrift good?}
+Since Storm topologies execute on a cluster all components need to be serialisable. This is achieved with Apache Thrift. Components are defined as Thrift objects and Thrift generates all the Java serialisation code automatically.
 
 Furthermore, since Nimbus is a Thrift service Thrift generates all the code required for remote procedure call (RPC) support. This allows defining topologies in any of the languages supported by Thrift and easy cross-language communication with the Nimbus service.

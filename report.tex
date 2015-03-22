@@ -194,7 +194,7 @@ In research, several techniques have been developed to enable real time data str
 
 \citet{akhter2006multi} define a multi-core processor as a processor that "embed[s] two or more independent execution cores into a single processor package. By providing multiple execution cores, each sequence of instructions, or thread, has a hardware execution environment entirely to itself. This enables each thread run in a truly parallel manner".
 
-\todo{Describe how apps run on multi-core}
+Running an application on multi-core can in the best case produce a speedup equivalent to the number of cores. The best case is when an application is embarrassingly parallel i.e. there is no inter-thread communication. Even though data stream processing is not an embarrassingly parallel problem, \citet{Prat-Perez:2013:PPM:2450027.2450037} show that running a producer-consumer application on multiple cores can produce significant speedup.
 
 \subsection{Advantages Over Clusters}
 
@@ -215,7 +215,7 @@ On the other hand, there are certain disadvantages in running a computation on a
 
 \begin{description}
 	\item[Horizontal Scaling] \hfill \\
-	Commodity hardware clusters offer better horizontal scaling than a single multicore server. If one needs to add nodes to the cluster it is as easy as purchasing more commodity hardware. On a multi-core machine it is not that simple. For example, a top of the line Intel\textregistered Xeon\textregistered Processor E5-2699 has support for 36 threads. Beyond that one would need to add another socket which essentially doubles the price.
+	Commodity hardware clusters offer better horizontal scaling than a single multicore server. If one needs to add nodes to the cluster it is as easy as purchasing more commodity hardware. On a multi-core machine it is not that simple. For example, a top of the line Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} Processor E5-2699 has support for 36 threads. Beyond that one would need to add another socket which essentially doubles the price.
 	\item[Higher Short-term Cost than with a Cloud Provider] \hfill \\
 	In short-term the cost of purchasing a server may be significantly higher than renting out a cluster from a cloud computing service. Thus, it makes most sense to run an application on multi-core if it is a long-term investment.
 	\item[More Maintenance than with a Cloud Provider] \hfill \\
@@ -316,8 +316,6 @@ There are several core concepts used by Storm and hence by extension Storm-MC as
 
 Users are also able to specify their own custom grouping by implementing the \texttt{CustomStreamGrouping} interface.
 
-\todo{Explain why you would want to do that.}
-
 All the components of a Storm topology execute in parallel. The user can specify how much parallelism he wants associated with every component and Storm spawns the necessary number of threads. This is done through a configuration file, defined in YAML, which is submitted along with the topology.
 
 There are two additional bolts running for every topology:
@@ -365,7 +363,6 @@ Listing \ref{listing:wordcount_topology} shows how the topology is put together 
 	\label{fig:storm_arch}
 \end{figure}
 
-\todo{Maybe highlight similarities to Hadoop}
 
 A Storm cluster adopts the Master-Worker pattern. To set up a Storm topology, the user launches daemon processes on nodes of the cluster and submits the topology to the master node, also called Nimbus. The worker nodes receive task assignments from the master and execute on them. The coordination between the master node and the worker nodes is handled by nodes running Apache Zookeeper \cite{ApacheZookeeper}. Figure \ref{fig:storm_arch} shows a graphical representation of Storm Architecture.
 
@@ -428,9 +425,7 @@ The cluster state contains worker assignments, information about topologies, and
 \section{Serialisation}
 \label{sec:serialisation}
 
-Since Storm topologies execute on a cluster all the components need to be serialisable. This is achieved with Apache Thrift. Components are defined as Thrift objects and Thrift generates all the Java serialisation code automatically.
-
-\todo{Why is Thrift good?}
+Since Storm topologies execute on a cluster all components need to be serialisable. This is achieved with Apache Thrift. Components are defined as Thrift objects and Thrift generates all the Java serialisation code automatically.
 
 Furthermore, since Nimbus is a Thrift service Thrift generates all the code required for remote procedure call (RPC) support. This allows defining topologies in any of the languages supported by Thrift and easy cross-language communication with the Nimbus service.
 \clearpage{}
@@ -459,13 +454,11 @@ After the component thread has executed the task it puts the tuple on the execut
 
 Alternatively, if the tuple is forwarded to an executor in the same worker process it is put on the receive queue of the corresponding executor directly after task execution.
 
-The queues used in Storm are implemented as ring buffers using the LMAX Disruptor library \citep{LMAXDisruptor}. Detailed background on how Disruptor works and its performance benchmarks can be found in \cite{Thompson_Farley_Barker_Gee_Stewart_2011}.
+The queues used in Storm are implemented as ring buffers using the LMAX Disruptor library \citep{LMAXDisruptor}. Detailed background on how Disruptor works and its performance benchmarks can be found in \citep{Thompson_Farley_Barker_Gee_Stewart_2011}.
 
-There is significant overhead required to simulate sending tuples to executors in other worker nodes. For one, there is the overhead from the tuple passing through the three queues of a worker. The authors of LMAX Disruptor showed that a three step pipeline has half the throughput of a single consumer-producer pipeline \cite{DisruptorWiki}.
+There is significant overhead required to simulate sending tuples to executors in other worker nodes. For one, there is the overhead from the tuple passing through the three queues of a worker. The authors of LMAX Disruptor showed that a three step pipeline has half the throughput of a single consumer-producer pipeline \citep{DisruptorWiki}.
 
-Furthermore, to emulate over-the-network messages Storm uses \texttt{LinkedBlockingQueue} which according to \cite{Thompson_Farley_Barker_Gee_Stewart_2011} has several orders of magnitude lower performance than the Disruptor.
-
-To summarise, due to less write contention, lower concurrency overhead, and being more cache-friendly the Disruptor pattern can offer latency of inter-thread messages lower than 50 nanoseconds and a throughput of over 25 million messages per second.
+Furthermore, to emulate over-the-network messages Storm uses a \texttt{Hashmap} of \texttt{LinkedBlockingQueue}s which according to \cite{Thompson_Farley_Barker_Gee_Stewart_2011} has several orders of magnitude lower performance than the Disruptor. Due to less write contention, lower concurrency overhead, and being more cache-friendly the Disruptor pattern can offer latency of inter-thread messages lower than 50 nanoseconds and a throughput of over 25 million messages per second.
 
 \subsection{Thread Overhead}
 
@@ -475,14 +468,12 @@ To summarise, due to less write contention, lower concurrency overhead, and bein
 	\item[Acker Bolt] \hfill \\
 	The Acker is included in every topology. The Acker bolt can be disabled via the configuration file. In such a case it is mostly idle since it does not receive any messages but it can still use up resources especially if it waits for messages using a busy waiting strategy.
 	\item[Heartbeats \& Timers] \hfill \\
-	Every worker has a heartbeat thread that simulates sending heartbeat messages to the Nimbus process. It does this by writing to a local cache which is persisted to a file by a blocking write on every heartbeat. While heartbeats are essential in cluster mode to signal the node being alive, there is no need for them in local mode.
+	Every worker has a heartbeat thread that simulates sending heartbeat messages to the Nimbus process. It does this by writing to a local cache which is persisted to a file by a write on every heartbeat. Since the write is implemented using the \texttt{java.io} package the write is blocking i.e. the thread cannot continue until the write is completed. While heartbeats are essential in cluster mode to signal the node being alive, there is no need for them in local mode.
 	\item[Zookeeper Emulation] \hfill \\
-	More overhead is produced by a local Zookeper server which emulates the Zookeeper nodes of a cluster. Running the Zookeeper server is a massive addition to the list of overheads as shown in the following paragraphs.
+	More overhead is produced by a local Zookeper server which emulates the Zookeeper nodes of a cluster. Running the Zookeeper server is a massive addition to the list of overheads as shown in the following paragraphs. The purpose of Zookeeper is to maintain states of running topologies and nodes of the cluster. As we will show in the following sections maintaining this state on multi-core is not necessary.
 \end{description}
 
 During profiling we found that a topology with one worker and three executors was being executed with 55 threads (not including system JVM threads and threads created by the profiler). Table \ref{table:breakdown} shows a breakdown of what the individual threads were used for.
-
-\todo{Below doesn't add up to 55?}
 
 \begin{table}[h!]
 \centering
@@ -493,7 +484,7 @@ During profiling we found that a topology with one worker and three executors wa
     Acker \& System Component Threads & 2  \\
     Executor Component Threads & 3  \\
     Executor Sender Threads & 5  \\
-    Various Timers \& Event Loops & 13  \\
+    Various Timers \& Event Loops & 14  \\
     Zookeper Server & 28  \\
 \end{tabular}
 \caption{Breakdown of threads used by Storm to execute a 3-component topology.}
@@ -522,16 +513,14 @@ To find out what state the threads were actually in at any given time the topolo
 
 \end{knitrout}
 
-As can be seen from the table, most of the threads were either in state \texttt{WAITING} or \texttt{TIMED WAITING}. According to the Java documentation on thread states \cite{JavaThreads} these two states are used for threads that are waiting for an action from a different thread and cannot be scheduled by the scheduler until that action is executed.
+Even though three minutes may seem to be a very short amount of time the fact that there is almost no variation shows that it is sufficient. As can be seen from the table, most of the threads were either in state \texttt{WAITING} or \texttt{TIMED WAITING}. According to the Java documentation on thread states \citep{JavaThreads} these two states are used for threads that are waiting for an action from a different thread and cannot be scheduled by the scheduler until that action is executed.
 
-On average there were eight threads in state \texttt{RUNNABLE} which JVM uses to mark threads which are executing on the JVM and are possibly waiting for resources from the operating system (OS) such as processor. Hence, these are threads directly competing to be scheduled by the OS. This means that for three components running in parallel there are five threads doing potentially unnecessary work.
+On average there were eight threads in state \texttt{RUNNABLE} which JVM uses to mark threads which are executing on the JVM and are possibly waiting for resources from the operating system (OS) such as processor \citep{JavaThreads}. Hence, these are threads directly competing to be scheduled by the OS. This means that for three components running in parallel there are five threads doing potentially unnecessary work.
 
 In the subsequent sections we will show that these threads were in fact unnecessary and we will discuss how the number of threads was reduced. In fact, to execute the same topology on Storm-MC requires only 5 threads.
 
 \section{Storm-MC Design}
 \label{sec:storm_mc_arch}
-
-\todo{Probably don't call this Architecture}
 
 The design we adopted for porting worker nodes is to only have one worker process running all the executor threads of a topology.
 

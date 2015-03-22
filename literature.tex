@@ -35,7 +35,7 @@ In research, several techniques have been developed to enable real time data str
 
 \citet{akhter2006multi} define a multi-core processor as a processor that "embed[s] two or more independent execution cores into a single processor package. By providing multiple execution cores, each sequence of instructions, or thread, has a hardware execution environment entirely to itself. This enables each thread run in a truly parallel manner".
 
-\todo{Describe how apps run on multi-core}
+Running an application on multi-core can in the best case produce a speedup equivalent to the number of cores. The best case is when an application is embarrassingly parallel i.e. there is no inter-thread communication. Even though data stream processing is not an embarrassingly parallel problem, \citet{Prat-Perez:2013:PPM:2450027.2450037} show that running a producer-consumer application on multiple cores can produce significant speedup.
 
 \subsection{Advantages Over Clusters}
 
@@ -56,7 +56,7 @@ On the other hand, there are certain disadvantages in running a computation on a
 
 \begin{description}
 	\item[Horizontal Scaling] \hfill \\
-	Commodity hardware clusters offer better horizontal scaling than a single multicore server. If one needs to add nodes to the cluster it is as easy as purchasing more commodity hardware. On a multi-core machine it is not that simple. For example, a top of the line Intel\textregistered Xeon\textregistered Processor E5-2699 has support for 36 threads. Beyond that one would need to add another socket which essentially doubles the price.
+	Commodity hardware clusters offer better horizontal scaling than a single multicore server. If one needs to add nodes to the cluster it is as easy as purchasing more commodity hardware. On a multi-core machine it is not that simple. For example, a top of the line Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} Processor E5-2699 has support for 36 threads. Beyond that one would need to add another socket which essentially doubles the price.
 	\item[Higher Short-term Cost than with a Cloud Provider] \hfill \\
 	In short-term the cost of purchasing a server may be significantly higher than renting out a cluster from a cloud computing service. Thus, it makes most sense to run an application on multi-core if it is a long-term investment.
 	\item[More Maintenance than with a Cloud Provider] \hfill \\
