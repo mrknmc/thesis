@@ -27,14 +27,14 @@ All performance benchmarks were ran using the following software packages:
 
 \begin{itemize}
 	\item Apache Storm version 0.9.2
-	\item Storm-MC version 0.1.5
+	\item Storm-MC version 0.1.8
 	\item A fork of IBM Storm Email Benchmarks version 0.1.4
-	\item Storm-benchmark version 0.1.0
+	\item Storm-benchmark version 0.1.9
 \end{itemize}
 
 The Apache Storm source code had to be adapted to include a workaround for a deadlock bug present in version 0.9.2. This bug caused a topology to exit with threads left in Zombie state under certain conditions. This prevented Storm from logging the benchmark metrics after execution.
 
-Version 0.1.5 is the latest version of Storm-MC as of this moment. The first release was version 0.1.0 which was production-ready but since then there were 5 minor versions fixing bugs as they were discovered during testing.
+Version 0.1.8 is the latest version of Storm-MC as of this moment. The first release was version 0.1.0 which was production-ready but since then there were 8 minor versions fixing bugs as they were discovered during testing.
 
 IBM open sourced a suite of benchmarks which they used to compare Apache Storm to their real-time stream system IBM Infosphere Streams. These benchmarks were adapted and used to benchmark Apache Storm and Storm-MC.
 

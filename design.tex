@@ -93,11 +93,11 @@ Additionally, the code for the Nimbus daemon was merged with the worker. This wa
 
 Unlike Nimbus executing on a Storm cluster, Nimbus in Storm-MC does not support running multiple topologies at the same time. However, to do that one only needs to run the topology in a separate process. This is because unlike when executing on the cluster different topologies do not need to share any state and it is more natural to execute them as separate processes.
 
-This has the added benefit of each process having its own part of main memory thus reducing cache conflicts as shown in \cite{Chandra:2005:PIC:1042442.1043432} and providing higher security by not having different topologies share memory space. Additionally, if a single thread of one topology is blocking it does not block other topologies.
+This has the added benefit of each process having its own part of main memory thus reducing cache conflicts as shown in \citep{Chandra:2005:PIC:1042442.1043432} and providing higher security by not having different topologies share memory space. Additionally, if a single thread of one topology is blocking it does not block other topologies.
 
 Nimbus on Storm-MC does not support scheduling topologies. Since within one process there is only one topology running at a time and the hardware configuration of the machine does not change, the parallelism is clearly defined by the number of executors per component specified in the topology configuration.
 
-One way to implement scheduling could be to pin threads to specific cores. Unfortunately, Java does not provide support for CPU affinity, the assignments are handled automatically by the JVM. Potentially, this could be achieved by using C or C++, both of which support CPPU affinity, but this was not implemented in Storm-MC.
+One way to implement scheduling could be to pin threads to specific cores. Unfortunately, Java does not provide support for CPU affinity, the assignments are handled automatically by the JVM. Potentially, this could be achieved by using C or C++, both of which support CPU affinity, but this was not implemented in Storm-MC.
 
 The role of Nimbus in Storm-MC has effectively been reduced to validating the topology and passing it along to the worker part of the process which handles the topology execution.
 
@@ -108,26 +108,28 @@ In Apache Storm, a worker node runs the supervisor daemon, which in turns launch
 This design has several benefits:
 
 \begin{itemize}
-	\item All the inter-thread communication is occurring within one Worker.
-	\item Supervisor can be removed as there is no need to synchronise workers.
+	\item All the inter-thread communication is occurring within one worker process.
+	\item Supervisor can be removed as there is no need to synchronise multiple workers.
 	\item There is no need to simulate over-the-network message passing.
 	\item Message passing between executor threads within a worker stays the same as in Apache Storm.
 \end{itemize}
 
-A comparison of an Apache Storm worker node and its Storm-MC equivalent can be seen in figure \ref{fig:comparison}.
+The role of worker is to launch executors and provide them with a shared context through which they can communicate. This is done by via a map of executor identifiers to Disruptor queues which the executors use to pass tuples between each other.
+
+A comparison of an Apache Storm worker node and its Storm-MC equivalent is depicted in figure \ref{fig:comparison}.
 
 \begin{figure}[!htb]
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=0.95\linewidth]{pdf/distributed_worker.pdf}
-  \caption{Worker in Apache Storm.}
+  \caption{Worker node in Apache Storm.}
   \label{fig:comparison1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=0.95\linewidth]{pdf/local_worker.pdf}
-  \caption{Worker in Storm-MC.}
+  \caption{Worker node equivalent in Storm-MC.}
   \label{fig:comparison2}
 \end{subfigure}
 \caption{Comparison of a worker in Storm and Storm-MC}
@@ -136,15 +138,13 @@ A comparison of an Apache Storm worker node and its Storm-MC equivalent can be s
 
 \subsection{State}
 
-\todo{Maybe remove this subsection}
-
-In light of previous subsections Storm-MC is completely stateless. The cluster state that was managed by Zookeeper in Apache Storm was completely stripped away. This state was only relevant when multiple topologies were sharing the cluster.
+As mentioned before, Storm-MC is completely stateless. The cluster state that was managed by Zookeeper in Apache Storm was completely stripped away. This state was only relevant when multiple topologies were sharing resources.
 
 \subsection{Serialisation}
 
-Great amount of work was put into removing the dependency of Storm-MC on Apache Thrift. This was done not only for optimisation purposes but since there is no serialisation required for Storm-MC also to reduce code bloat and remove an unnecessary dependency.
+Great amount of work was put into removing the dependency of Storm-MC on Apache Thrift. This was done not only for optimisation purposes but also to reduce code bloat and remove an unnecessary dependency since there is no serialisation required in multi-core communication.
 
-This required refactoring all the data types generated by Thrift used all over the codebase. This also significantly reduced the size of the codebase and made the code more readable and self-documenting than the code generated by Thrift.
+%This required refactoring all the data types generated by Thrift used all over the codebase. This significantly reduced the size of the codebase and made the code more readable and self-documenting than the code generated by Thrift.
 
 
 \todo{Mention overhead by running SystemBolt vs just timer in Storm-MC}
@@ -162,15 +162,26 @@ This required refactoring all the data types generated by Thrift used all over t
 	\label{fig:worker_inside_mc}
 \end{figure}
 
-The implementation of tuple processing in Storm-MC can be seen in figure \ref{fig:worker_inside_mc}. As can be seen from the figure, the queues used for remote message sending were stripped away and there is only one Disruptor queue for every executor. Once an executor is done processing a tuple it simply puts it on the Disruptor queue of its downstream bolts.
+The implementation of tuple processing in Storm-MC is depicted in figure \ref{fig:worker_inside_mc}. As can be seen from the figure, the queues used for remote message sending were stripped away and there is only one Disruptor queue for every executor. Once an executor is done processing a tuple it simply puts it on the Disruptor queue of its downstream bolts.
 
-Thus the tuple processing in Storm-MC is a variant of multiple producer single consumer.
-
-There were several other options we considered when implementing tuple processing. However, the Disruptor shows superior throughput and latency compared to alternative solutions in \cite{something}.
-
-\todo{find the citation for above claim.}
+Thus the tuple processing in Storm-MC is a variant of multiple producer single consumer problem. We considered several other options such as \texttt{ArrayBlockingQueue} when implementing the tuple processing mechanism. However, the Disruptor shows superior throughput and latency compared to alternative solutions \citep{DisruptorWiki}.
 
 \section{Differences between Apache Storm and Storm-MC}
 \label{sec:differences}
 
-\todo{Maybe present this as a table of features.}
+\begin{table}[h!]
+\centering
+\begin{tabular}{@{}lcc@{}}
+    \textbf{Feature} & \textbf{Apache Storm} & \textbf{Storm-MC} \\ \toprule
+    Multiple Topologies & \cmark & \xmark \\
+	Trident Support & \cmark & \xmark \\
+    Built-in Metrics & \cmark & \xmark \\
+    Nimbus as a Server & \cmark & \xmark \\
+    Multi-language Topologies & \cmark & \cmark \\
+    Hooks & \cmark & \cmark \\
+    Metrics & \cmark & \cmark \\
+    Tick Tuples & \cmark & \cmark \\
+\end{tabular}
+\caption{Feature comparison of Apache Storm and Storm-MC.}
+\label{table:features}
+\end{table}

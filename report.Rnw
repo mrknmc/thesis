@@ -6,6 +6,11 @@
 % APPENDIX
 \usepackage[page]{appendix}
 
+% CHECKMARK & OTHER SYMBOLS
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
 % NATBIB
 \usepackage{natbib}
 %\bibliographystyle{abbrvnat}

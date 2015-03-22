@@ -2,7 +2,12 @@
 
 library("ggplot2")
 library("reshape2")
+#library(RcolorBrewer)
+library(grid)
+
 # read storm results
+cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
 storm <- read.csv(file="csv/storm/executions.log",sep=";",colClasses=c('NULL', NA, 'numeric'))
 # read storm-mc results
 storm_mc <- read.csv(file="csv/storm_mc/executions.log",sep=";",colClasses=c('NULL', NA, 'numeric'))
@@ -17,7 +22,7 @@ mat$executions.storm_mc <- NULL
 # melt by component name
 t <- melt(mat, id=c("component"))
 # create plot
-k <- ggplot(t, aes(x=component, y=value, fill=variable))
+k <- ggplot(t, aes(x=component, y=value, fill=variable)) + scale_fill_manual(values=cbPalette,name="Library")
 # add labels
 # TODO: add scale to Y axis
 k + geom_bar(stat="identity") + xlab("Component") + ylab("Improvement") + ylim(0,2)
