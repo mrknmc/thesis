@@ -76,13 +76,13 @@ Storm has five major dependencies:
 
 \begin{description}
 	\item[Apache Zookeeper] \hfill \\
-	Apache Zookeeper \cite{ApacheZookeeper} is an open source server that allows reliable distributed coordination. Storm uses Apache Zookeeper to maintain state which is then read and written to by nodes of a Storm cluster. More detail on how Storm uses Zookeeper is given in section \ref{subsec:zookeeper}.
+	Apache Zookeeper \citep{ApacheZookeeper} is an open source server that allows reliable distributed coordination. Storm uses Apache Zookeeper to maintain state which is then read and written to by nodes of a Storm cluster. More detail on how Storm uses Zookeeper is given in section \ref{subsec:zookeeper}.
 	\item[Apache Thrift] \hfill \\
-	Apache Thrift \cite{ApacheThrift} is a cross-language framework for developing services. It allows you to write a definition file for services and data types required by your application and automatically generates interface code which supports remote procedure calls and serialisation of the data types.
-	\item[Apache Kryo] \hfill \\
-	Apache Kryo \cite{ApacheKryo} is a serialisation library. It is used by Storm to serialise objects when sent over the network between nodes of a cluster.
+	Apache Thrift \citep{ApacheThrift} is a cross-language framework for developing services. It allows you to write a definition file for services and data types required by your application and automatically generates interface code which supports remote procedure calls and serialisation of the data types.
+	\item[Kryo] \hfill \\
+	Kryo \citep{EsotericKryo} is a serialisation library. It is used by Storm to serialise objects when sent over the network between nodes of a cluster.
 	\item[Netty] \hfill \\
-	Netty \cite{Netty} is an asynchronous event-driven network application framework. Storm utilises Netty to send intra-cluster messages. Thus when a node produces a result to be consumed by another node of the cluster it sends a message over the network using the TCP protocol implemented in Netty.
+	Netty \citep{Netty} is an asynchronous event-driven network application framework. Storm utilises Netty to send intra-cluster messages. Thus when a node produces a result to be consumed by another node of the cluster it sends a message over the network using the TCP protocol implemented in Netty.
 	\item[LMAX Disruptor] \hfill \\
 	LMAX Disruptor \cite{LMAXDisruptor} is a high-performance data structure used to exchange data between concurrent threads. It uses a lock-free implementation of a ring buffer which components of a Storm program running on the same node a cluster use to exchange messages.
 \end{description}

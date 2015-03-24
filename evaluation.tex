@@ -27,16 +27,16 @@ All performance benchmarks were ran using the following software packages:
 
 \begin{itemize}
 	\item Apache Storm version 0.9.2
-	\item Storm-MC version 0.1.9
-	\item A fork of IBM Storm Email Benchmarks version 0.1.4
-	\item Storm-benchmark version 0.1.9
+	\item Storm-MC version 0.1.6
+	\item A fork of IBM Storm Email Benchmarks version 0.1.10
+	\item Storm-benchmark version 0.1.0
 \end{itemize}
 
-The Apache Storm source code had to be adapted to include a workaround for a deadlock bug present in version 0.9.2. This bug caused a topology to exit with threads left in Zombie state under certain conditions. This prevented Storm from logging the benchmark metrics after execution.
+The Apache Storm source code had to be adapted to include a workaround for a deadlock bug present in version 0.9.2. This bug caused a topology to exit with threads left in Zombie state under certain conditions. This prevented Storm from logging the benchmark metrics after execution. Hence a workaround was added so the results were logged.
 
-Version 0.1.9 is the latest version of Storm-MC as of this moment. The first release was version 0.1.0 which was production-ready but since then there were 9 minor versions fixing bugs as they were discovered during testing.
+Version 0.1.6 is the latest version of Storm-MC as of this moment. The first release was version 0.1.0 which was production-ready but since then there were 6 minor versions fixing bugs as they were discovered during testing.
 
-IBM open sourced a suite of benchmarks which they used to compare Apache Storm to their real-time stream system IBM Infosphere Streams. These benchmarks were adapted and used to benchmark Apache Storm and Storm-MC.
+IBM open sourced a suite of benchmarks which they used to compare Apache Storm to their real-time stream system IBM Infosphere Streams \citep{InfoSphereStreams}. These benchmarks were adapted and used to benchmark Storm-MC against Apache Storm.
 
 Lastly, a number of spout and bolt components were used from the storm-benchmark project which Apache Storm developers use to benchmark Storm.
 
@@ -82,7 +82,7 @@ This topology is considered to be CPU-intensive.
 \end{tabular}
 \caption{Storm-MC: Tuples processed per component in WordCount Topology.}
 \end{adjustwidth}
-\label{table:wordcount}
+\label{table:storm_mcwordcount}
 \end{table}
 \medskip
 
@@ -100,9 +100,9 @@ This topology is considered to be CPU-intensive.
 	5 & {17,177,688} & {17,164,209} & {150,412,037} & {1,129.32\%} & {0.2\%} \\
 	6 & {17,402,418} & {17,388,691} & {152,374,303} & {1,342.1\%} & {0.2\%} \\
 \end{tabular}
-\caption{Storm-MC: Tuples processed per component in WordCount Topology.}
+\caption{Apache Storm: Tuples processed per component in WordCount Topology.}
 \end{adjustwidth}
-\label{table:wordcount}
+\label{table:storm_wordcount}
 \end{table}
 \medskip
 
@@ -123,6 +123,38 @@ Similarly, to the WordCount topology this topology is serial in nature. However,
 The RollingSort topology is ported over from the aforementioned storm-benchmark project. This topology includes one spout and one bolt. The spout produces hundred character-long strings of random digits from zero to eight. The bolt stores a rolling window of hundred of these messages and sorts them every \textbf{x} seconds.
 
 This benchmark is included because it is considered memory-intensive.
+
+
+\medskip
+\begin{table}
+\begin{adjustwidth}{-0.5in}{-0.5in}
+\centering
+\small
+\begin{tabular}{@{}llllll@{}}
+    {Parallelism} & {FileReadSpout} & {SplitSentenceBolt} & {CountBolt} & {CPU Utilisation} & {Memory Utilisation} \\ \toprule
+    1 & {25,767,502} & {25,767,502} & {225,815,174} & {217.9\%} & {0.2\%} \\
+\end{tabular}
+\caption{Storm-MC: Tuples processed per component in RollingSort Topology.}
+\end{adjustwidth}
+\label{table:storm_mc_rolling}
+\end{table}
+\medskip
+
+\medskip
+\begin{table}
+\begin{adjustwidth}{-0.5in}{-0.5in}
+\centering
+\small
+\begin{tabular}{@{}llllll@{}}
+    {Parallelism} & {FileReadSpout} & {SplitSentenceBolt} & {CountBolt} & {CPU Utilisation} & {Memory Utilisation} \\ \toprule
+    1 & {12,583,377} & {12,579,132} & {110,233,966} & {294.5\%} & {0.1\%} \\
+\end{tabular}
+\caption{Apache Storm: Tuples processed per component in RollingSort Topology.}
+\end{adjustwidth}
+\label{table:storm_rolling}
+\end{table}
+\medskip
+
 
 \todo{change x depending on the actual benchmark.}
 

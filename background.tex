@@ -95,7 +95,7 @@ Listing \ref{listing:wordcount_topology} shows how the topology is put together 
 
 %\todo{Maybe highlight similarities to Hadoop}
 
-A Storm cluster adopts the Master-Worker pattern. To set up a Storm topology, the user launches daemon processes on nodes of the cluster and submits the topology to the master node, also called Nimbus. The worker nodes receive task assignments from the master and execute on them. The coordination between the master node and the worker nodes is handled by nodes running Apache Zookeeper \cite{ApacheZookeeper}. Figure \ref{fig:storm_arch} shows a graphical representation of Storm Architecture.
+A Storm cluster adopts the Master-Worker pattern. To set up a Storm topology, the user launches daemon processes on nodes of the cluster and submits the topology to the master node, also called Nimbus. The worker nodes receive task assignments from the master and execute the tasks assigned to them. The coordination between the master node and the worker nodes is handled by nodes running Apache Zookeeper. Figure \ref{fig:storm_arch} shows a graphical representation of Storm Architecture.
 
 \subsection{Nimbus Node}
 
@@ -103,11 +103,11 @@ The master node runs a server daemon called Nimbus. The main role of Nimbus is t
 
 \begin{description}
 	\item[Validate the topology] \hfill \\
-	The topology is validated using a validator to ensure that the submitted topology is valid before trying to execute it. The user can implement his own validator or use the default validator provided by Storm.
+	The topology is validated using a validator to ensure that the submitted topology is valid before trying to execute it. The user can use his own validator by implementing the \texttt{ITopologyValidator} interface or use the default validator provided by Storm.
 	\item[Distribute the topology source code] \hfill \\
-	Nimbus ensures that the workers involved in the topology computation have the source code by sending it over the network.
+	Nimbus ensures that the workers involved in the topology computation have the source code by sending it to all nodes of the cluster.
 	\item[Schedule the topology] \hfill \\
-	Nimbus runs a scheduler that distributes the work among workers of the cluster. Similarly to validation, the user can implement his own scheduler or use the default scheduler provided by Storm. The default scheduler uses a simple Round-robin strategy.
+	Nimbus runs a scheduler that distributes the work among workers of the cluster. Similarly to validation, the user can use his own scheduler by implementing the \texttt{IScheduler} interface or use the default scheduler provided by Storm. The default scheduler uses a simple Round-robin strategy. \citep{Aniello_Baldoni_Querzoni_2013}
 	\item[Activate the topology] \hfill \\
 	Nimbus transitions the topology to active state which tells the worker nodes to start executing it.
 	\item[Monitor the topology] \hfill \\
@@ -119,16 +119,14 @@ Nimbus is an Apache Thrift \cite{ApacheThrift} service (more on Thrift in sectio
 
 \begin{description}
 	\item[Submit a topology] \hfill \\
-	Clients can submit a topology defined in a Java Archive (JAR) file. The Nimbus service then ensures that the topology configuration and resources are distributed across the cluster and starts executing the topology.
+	Clients can submit a topology defined in a Java Archive (JAR) file. The Nimbus service then ensures that the topology configuration and resources are distributed across the cluster and starts executing the topology as previously described.
 	\item[Kill a topology] \hfill \\
 	Nimbus can stop running a topology and remove it from the cluster. The cluster can still continue executing other topologies.
 	\item[Activate/deactivate a topology] \hfill \\
 	Topologies can be deactivated and reactivated by Nimbus. This could be useful if the spout temporarily cannot produce a stream and the user does not want the cluster to execute idly.
 	\item[Rebalance a topology] \hfill \\
-	Nimbus can rebalance a topology across more nodes. Thus if the number of nodes in the cluster changes the user can increase or decrease the number of nodes involved in the topology.
+	Nimbus can rebalance a topology across more nodes. Thus if the number of nodes in the cluster ever changes the user can increase or decrease the number of nodes involved in the topology computation.
 \end{description}
-
-%\todo{Is listing this really necessary?}
 
 \subsection{Worker Nodes}
 
@@ -138,11 +136,11 @@ The worker nodes run a daemon called Supervisor. There are 4 layers of abstracti
 	\item[Supervisor] \hfill \\
 	A supervisor is a daemon process the user runs on a worker node to make it part of the cluster. It launches worker processes and assigns them a port they can receive messages on. Furthermore, it monitors the worker processes and restarts them if they fail. A worker node runs only one supervisor process.
 	\item[Worker] \hfill \\
-	A worker process is assigned a port and listens to tuple messages on a socket associated with the port. A worker launches executor threads as required by the topology. Whenever it receives a tuple, it puts it on a queue where it is picked up by one or more executors of the worker process.
+	A worker process is assigned a port and listens to tuple messages on a socket associated with the port. A worker launches executor threads as required by the topology. Whenever it receives a tuple, it puts it on a receive queue of the target executor.
 	
-	Furthermore, the worker has a transfer queue where its executors enqueue tuples ready to be sent downstream. There can be multiple workers processes running inside one supervisor.
+	Furthermore, the worker has a transfer queue where its executors enqueue tuples ready to be sent downstream. There can be multiple worker processes running inside one supervisor.
 	\item[Executor] \hfill \\
-	An executor controls the parallelism within a worker process. Every executor runs in a separate thread. An executor's job is to pick up tuples from the receiver queue of the worker, perform the task of a component it represents, and put the transformed tuples on the transfer queue of the worker. There can be many executors running inside one worker and an executor performs one (the usual case) or more tasks.
+	An executor controls the parallelism within a worker process. Every executor runs in a separate thread. An executor's job is to pick up tuples from its receive queue, perform the task of a component it represents, and put the transformed tuples on the transfer queue of the worker. There can be many executors running inside one worker and an executor performs one (the usual case) or more tasks.
 	\item[Task] \hfill \\
 	A task represents the actual tuple processing function. However, within an executor thread all the tasks are executed sequentially. The main reason for having tasks is that the number of tasks stays the same throughout the lifetime of a topology but the number of executors can change (by rebalancing). Thus if some worker nodes in the cluster go down, the topology can continue executing with the same number of tasks as before.
 \end{description}
@@ -150,9 +148,9 @@ The worker nodes run a daemon called Supervisor. There are 4 layers of abstracti
 \subsection{Zookeeper Nodes}
 \label{subsec:zookeeper}
 
-The Storm cluster contains a number of Zookeeper nodes which coordinate the communication between the master and the workers. Storm does this by storing the state of the cluster on the Zookeper nodes where both Nimbus and worker nodes can access it.
+The Storm cluster contains a number of Zookeeper nodes which coordinate the communication between Nimbus and the worker nodes. Storm does this by storing the state of the cluster on the Zookeper nodes where both Nimbus and worker nodes can access it.
 
-The cluster state contains worker assignments, information about topologies, and heartbeats sent by the worker nodes back to Nimbus. Apart from the cluster state, Storm is completely stateless. Hence, if the master node or a worker node fail the cluster continues executing. The only time the cluster stops executing is if all the Zookeper nodes die.
+The cluster state contains worker assignments, information about topologies, and heartbeats sent by the worker nodes to be read by Nimbus. Apart from the cluster state, Storm is completely stateless. Hence, if the master node or a worker node fail the cluster continues executing and the node will get restarted if possible. The only time the cluster stops executing  completely is if all the Zookeper nodes die.
 
 \section{Serialisation}
 \label{sec:serialisation}
