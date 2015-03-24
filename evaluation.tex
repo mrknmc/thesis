@@ -52,7 +52,7 @@ Since Storm-MC reuses package names from Apache Storm, the same benchmark is dir
 	\item[Main Memory] \hfill \\
 	The machine has 378 GB of main memory.
 	\item[I/O] \hfill \\
-	The machine uses the distributed Andrew File System
+	The machine uses Andrew File System (AFS).
 \end{description}
 
 
@@ -61,9 +61,9 @@ Since Storm-MC reuses package names from Apache Storm, the same benchmark is dir
 \section{Performance}
 \label{sec:performance}
 
-\todo{Say how long they were executed for.}
+To assess performance of Storm-MC, 4 different benchmarks were executed, each with a different focus. The benchmarks were executed for a constant period of time (five minutes) after which the system was killed and metrics were collected. To avoid any performance differences caused by varying amounts of heap memory required by the tested systems, the programs were run with the following flag: \texttt{-Xmx10240M}. This flag sets the maximum amount of heap memory used by the JVM to 10G which was more than enough for all benchmarks.
 
-To assess performance of Storm-MC, 4 different benchmarks were executed, each with a different focus. The benchmarks were executed for a constant period of time after which the system was killed and metrics collected.
+The parallelism of components was varied from one to six and average CPU utilisation and resident memory size were recorded by the Unix \texttt{top} program \citep{UnixTop}. CPU Utilisation  Maximum utilisation with 40 threads available is 4,000\%. Resident memory size is the amount of non-swapped physical memory a task has used. This metric can be deceiving as it depends on how OS manages memory but it is the only fairly reliable memory metric reported by \texttt{top} that can be used for Java programs. This is because the amount of virtual memory used by a Java program can be skewed by the JVM.
 
 \subsection{WordCount Topology}
 
@@ -125,6 +125,48 @@ When the topology was run on Apache Storm in local mode, the process executed wi
 Next, we tested the Enron topology from the IBM benchmarks. In this topology, serialised emails from the Enron email database are read from a file by a spout. They are further deserialised by one bolt, filtered by another bolt, modified by yet another bolt and then finally metrics are recorded by another bolt.
 
 Similarly, to the WordCount topology this topology is serial in nature. However, whereas the WordCount topology keeps the random sentences in memory, the Enron topology reads from a file. Thus, this benchmark is mostly I/O intensive.
+
+
+\medskip
+\begin{table}[!htb]
+\begin{adjustwidth}{-0.5in}{-0.5in}
+\centering
+\small
+\begin{tabular}{@{}llllll@{}}
+    {Parallelism} & {Email Throughput} & {CPU Utilisation} & {Memory Usage} \\ \toprule
+    1 & {10,868.89} & {297.7\%} & {806.8M} \\
+    2 & {22,150.44} & {482.1\%} & {756.1M} \\
+    3 & {28,079.70} & {729.5\%} & {341.4M} \\
+    4 & {36,717.50} & {1036.9\%} & {326.0M} \\
+    5 & {41,788.59} & {1311.0\%} & {260.8M} \\
+    6 & {46,595.78} & {1590.3\%} & {334.0M} \\
+\end{tabular}
+\caption{Storm-MC: Email Throughput in Enron Topology.}
+\end{adjustwidth}
+\label{table:storm_mc_enron}
+\end{table}
+\medskip	
+
+
+\medskip
+\begin{table}[!htb]
+\begin{adjustwidth}{-0.5in}{-0.5in}
+\centering
+\small
+\begin{tabular}{@{}llllll@{}}
+    {Parallelism} & {Email Throughput} & {CPU Utilisation} & {Memory Usage} \\ \toprule
+    1 & {9,624.53} & {406.6\%} & {1.94G} \\
+    2 & {15,897.62} & {945.1\%} & {2.93G} \\
+    3 & {18,481.66} & {1,427.4\%} & {3.32G} \\
+    4 & {20,517.13} & {1,891.2\%} & {3.56G} \\
+    5 & {20,091.93} & {2167.4\%} & {3.65G} \\
+    6 & {23,769.80} & {2388.6\%} & {4.09G} \\
+\end{tabular}
+\caption{Apache Storm: Email Throughput in Enron Topology.}
+\end{adjustwidth}
+\label{table:storm_enron}
+\end{table}
+\medskip
 
 \subsection{RollingSort Topology}
 
