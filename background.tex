@@ -14,11 +14,11 @@ To ensure API compatibility with Storm, Storm-MC was developed using the same se
 
 \subsection{Core Concepts}
 
-There are several core concepts used by Storm and hence by extension Storm-MC as well. These concepts are put together to form a simple API that allows the user to break down a computation into separate components and define how these components interact with each other. The three core concepts of Storm are:
+There are several core concepts used by Storm and hence by extension Storm-MC as well. These concepts are put together to form a simple API that allows the programmer to break down a computation into separate components and define how these components interact with each other. The three core concepts of Storm are:
 
 \begin{description}
   \item[Spout] \hfill \\
-  A spout is a component that represents the source of a data-stream. Typically, a spout reads from a message broker such as RabbitMQ \cite{RabbitMQ} or Apache Kafka \cite{ApacheKafka} but can also generate its own stream or read from somewhere like the Twitter streaming API.
+  A spout is a component that represents the source of a data-stream. Typically, a spout reads from a message broker such as RabbitMQ \cite{RabbitMQ} or Apache Kafka but can also generate its own stream or read from somewhere like the Twitter streaming API \citep{TwitterStreaming}.
   \item[Bolt] \hfill \\
   A bolt is a component that transforms tuples from its input data stream and emits them to its output data stream. A bolt can perform a range of functions e.g. filter out tuples based on some criteria or perform a join of two different input streams.
   \item[Topology] \hfill \\
@@ -31,16 +31,16 @@ There are several core concepts used by Storm and hence by extension Storm-MC as
   \item[Stream] \hfill \\
   A stream is defined as an unbounded sequence of tuples. Streams can be thought of as edges of a topology connecting bolts and spouts (vertices).
   \item[Tuple] \hfill \\
-  A tuple wraps named fields and their values. The values of fields can be of different types. When a component emits a tuple to a stream it sends that tuple to every bolt subscribed to the stream.
+  A tuple wraps named fields and their values. The values of the fields can be of different types. When a component emits a tuple to a stream it sends that tuple to every bolt subscribed to the stream.
   \item[Stream Grouping] \hfill \\
   Every bolt needs to have a type of stream grouping associated with it. This grouping decides the means of distributing the tuples coming from the bolt's input streams amongst the instances of the bolt task. Following are the possible types of stream grouping:
   \begin{description}
-  	\item[Shuffle] Randomly partitions the tuples among all the bolt tasks.
-  	\item[Fields] Hashes on a subset of the tuple fields.
-  	\item[All] Replicates the entire stream to all the bolt tasks.
+  	\item[Shuffle] Randomly partition the tuples among all the bolt tasks.
+  	\item[Fields] Hash on a subset of the tuple fields.
+  	\item[All] Replicate the entire stream to all the bolt tasks.
   	\item[Direct] The producer of the tuple decides which task of the bolt will receive this tuple.
-  	\item[Global] Sends the entire stream to a single bolt task.
-  	\item[Local or Shuffle] Prefers sending to executors in the same worker process, if that is not possible it uses the same strategy as shuffle.
+  	\item[Global] Send the entire stream to a single bolt task.
+  	\item[Local or Shuffle] Prefer sending to executors in the same worker process, if that is not possible use same strategy as Shuffle.
   \end{description}
 \end{description}
 
@@ -66,7 +66,7 @@ There are two additional bolts running for every topology:
 
 \begin{figure}[!htb]
 	\centering
-	\includegraphics[scale=0.7]{pdf/wordcount_topology.pdf}
+	\includegraphics[scale=0.6]{pdf/wordcount_topology.pdf}
 	\caption{WordCount topology.}
 	\label{fig:wordcount_topology}
 \end{figure}
@@ -75,20 +75,20 @@ A classic example used to explain Storm topologies is the WordCount topology. In
 
 This may seem as a simplistic example but it is useful when demonstrating how easy it is to implement a working topology using the Storm API.
 
+Listing \ref{listing:wordcount_topology} shows how the topology is put together in Storm to form a graph of components. Storm uses the Builder design pattern \citep{gamma1994design} to build up the topology which is then submitted to Storm for execution. The last argument to the \texttt{setBolt}/\texttt{setSpout} method is the number of parallel tasks we want Storm to execute for the respective component. For implementation of the spout and bolts used in this topology, refer to appendix \ref{ch:listings}.
+
 \begin{listing}[!htb]
 \inputminted{java}{code/WordCountTopology.java}
 \caption{WordCountTopology.java}
 \label{listing:wordcount_topology}
 \end{listing}
 
-Listing \ref{listing:wordcount_topology} shows how the topology is put together to form a graph of components. Storm uses the Builder design pattern to build up the topology which is then submitted to Storm for execution. The last argument to the setBolt/setSpout method is the number of parallel tasks we want Storm to execute for the respective component. For implementation of the spout and bolts used in this topology, refer to appendix \ref{ch:listings}.
-
 \section{Storm Architecture}
 \label{sec:storm_arch}
 
 \begin{figure}[!htb]
 	\centering
-	\includegraphics[scale=0.5]{pdf/storm_arch.pdf}
+	\includegraphics[scale=0.4]{pdf/storm_arch.pdf}
 	\caption{Apache Storm Architecture.}
 	\label{fig:storm_arch}
 \end{figure}

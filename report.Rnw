@@ -6,6 +6,9 @@
 % APPENDIX
 \usepackage[page]{appendix}
 
+% MAKE TABLES STICK OUT
+\usepackage{chngpage}
+
 % CHECKMARK & OTHER SYMBOLS
 \usepackage{pifont}
 \newcommand{\cmark}{\ding{51}}%

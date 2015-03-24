@@ -7,7 +7,7 @@ The main idea of these frameworks is to split the work that needs to be carried 
 % TODO: Here talk about What this paper is about !
 % TODO: Maybe mention the Hadoop multi-core paper
 % TODO: Maybe a section - move main idea here?
-This project is about taking the ideas from the distributed system Apache Storm and applying them in the context of multi-core machines instead of clusters.
+This project is about taking the ideas from the distributed system Apache Storm and applying them in the context of multi-core instead of clusters.
 
 %% TODO: After that comes Motivation which explains why it's a good idea!
 \section{Motivation}
@@ -34,7 +34,7 @@ While the cost of a commodity hardware cluster might be lower than the price of 
 
 \section{Main Idea}
 
-The solution proposed in this paper is to take the existing Apache Storm project and port it for multi-core machines. This is implemented in a library Storm-MC with an API compatible with Apache Storm. This allows us to take an existing application written with Apache Storm in mind and run it in a multi-core setting. This way, we can avoid network latency and enjoy the significant performance improvements of a shared-memory environment.
+The solution proposed in this paper is to take the existing Apache Storm project and port it to multi-core. This is implemented in Storm-MC - a library with an API compatible with Apache Storm. This allows programmers to take an existing application written with Apache Storm in mind and run it on multi-core. This way, we can avoid network latency and enjoy the significant performance improvements of a shared-memory environment.
 
 \begin{itemize}
 
