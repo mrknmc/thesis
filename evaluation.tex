@@ -87,6 +87,8 @@ This topology is considered to be CPU-intensive.
     4 & {52,285,327} & {52,283,540} & {458,187,555} & {805.5\%} & {804.1M} \\
 	5 & {55,326,941} & {55,325,167} & {484,844,652} & {998.7\%} & {806.0M} \\
 	6 & {56,747,319} & {56,744,629} & {497,285,149} & {1,195.3\%} & {824.8M} \\
+	10 & {40,341,798} & {40,336,962} & {353,490,567} & {1967.4\%} & {} \\
+	20 & {60,798,276} & {60,790,475} & {532,737,413} & {3161.5\%} & {} \\
 \end{tabular}
 \caption{Storm-MC: Tuples processed per component in WordCount Topology.}
 \end{adjustwidth}
@@ -107,12 +109,16 @@ This topology is considered to be CPU-intensive.
     4 & {20,720,637} & {20,711,756} & {181,500,586} & {895.3\%} & {2.6G} \\
 	5 & {17,177,688} & {17,164,209} & {150,412,037} & {1,129.3\%} & {2.5G} \\
 	6 & {17,402,418} & {17,388,691} & {152,374,303} & {1,342.1\%} & {2.3G} \\
+	10 & {} & {} & {} & {\%} & {} \\
+	20 & {} & {} & {} & {\%} & {} \\
 \end{tabular}
 \caption{Apache Storm: Tuples processed per component in WordCount Topology.}
 \end{adjustwidth}
 \label{table:storm_wordcount}
 \end{table}
 \medskip
+
+\todo{Could be slower because not on same socket => slower inter-thread comms.}
 
 <<threads-plot, echo=FALSE, cache=TRUE, fig.cap="Number of threads used by Storm and Storm-MC", fig.align="center", fig.height=3>>=
 @

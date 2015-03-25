@@ -114,7 +114,7 @@ read_chunk('dump.R')
 
 % use the following and \cite{} as above if you use BibTeX
 % otherwise generate bibtem entries
-\bibliographystyle{apalike}
+\bibliographystyle{plain}
 \bibliography{report}
 
 \end{document}
