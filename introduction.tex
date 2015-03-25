@@ -6,42 +6,17 @@ In recent years, there has been an explosion of cloud computing software. After 
 
 The main idea of these frameworks is to split the work that needs to be carried out and distribute it across nodes of a cluster. Commercial companies and researchers have been able to utilise these frameworks and create distributed systems which can accomplish things that would not be otherwise possible. This has mostly been allowed by the low price and good horizontal scaling properties of commodity hardware.
 
-\todo{Quote that they are standard.}
+%\todo{Quote that they are standard.}
 
 At the same time, chip makers have been increasing the number of cores in processors and now we are at a point where servers with 10-core processors are standard. Moreover, most high-end servers support multiple processor sockets thus furthering the parallelisation possible with a single machine even more.
 
 The price of multi-core servers has been going down as well. In 2008, a typical Hadoop node had two dual-core processors and 4 GB of random access memory (RAM). Nowadays, a server with two eight-core processors and 256 GB of RAM can be purchased for roughly \$10,000 USD \citep{Kumar:2013:HSD:2536274.2536314}. Hence a single server today might have better processing power than a small cluster from a few years ago \citep{Kumar:2013:HSD:2536274.2536314}.
 
-% TODO: Here talk about What this paper is about !
-% TODO: Maybe mention the Hadoop multi-core paper
-% TODO: Maybe a section - move main idea here?
-This project is about taking the ideas from the distributed system Apache Storm and applying them in the context of multi-core instead of clusters.
-
-%% TODO: After that comes Motivation which explains why it's a good idea!
-
-While the cost of a commodity hardware cluster might be lower than the price of a single computer with equal power there are certain limitations:
-
-\begin{itemize}
-\item The nodes of a cluster communicate through network. This limits the speed of communication between processes that live on different nodes.
-\item Distributed systems waste resources by replicating data to ensure reliability.
-
-% TODO: Maybe mention renting vs owning here\item Running a distributed computation on commodity hardware usually requires a data centre or renting out instances on cloud computing services such as Amazon EC2 or Rackspace. This is not ideal for some use cases which require full control over the system or a heightened level of security. 
-
-\end{itemize}
-On the other hand, even though Moore’s law still holds true, processor makers now favour increasing the number of cores in CPU chips to increasing their frequency. This trend implies that the “free lunch” of getting better software performance by upgrading the processor is over and programmers now have to design systems with parallel architectures in mind. However, there are some limitations to this as well:
-
-\begin{itemize}
-
-\item It is generally believed that writing parallel software is hard. The traditional techniques of message passing and parallel threads sharing memory require the programmer to manage the concurrency at a fairly low level, either by using messages or locks.
-
-%% TODO: Rephrase "nice if they could"
-\item Apache Storm has become the de facto tool used in stream processing on a cluster and according to their "Powered By" page \cite{Anonymous:eikzOt4-} there are tens of companies already using Storm to process their real-time streams. It would be nice if they could keep that code.
-
-\end{itemize}
+Even though the cost of a commodity hardware cluster might be lower than the price of a single computer with equal power there are certain limitations. These limitations are further explored in section \ref{sec:multicore}.
 
 \section{Main Idea}
 
-The solution proposed in this report is to take the existing Apache Storm project and port it to multi-core. This is implemented in Storm-MC - a library with an API compatible with Apache Storm. This allows programmers to take an existing application written with Apache Storm in mind and run it on multi-core. This way, we can avoid network latency and enjoy the significant performance improvements of a shared-memory environment.
+The main idea of this report is to take the existing Apache Storm project and port it to multi-core. This is implemented in Storm-MC - a library with an API compatible with Apache Storm. This allows programmers to take an existing application written with Apache Storm in mind and run it on a multi-core server. This way, we can avoid network latency and enjoy the significant performance improvements of a shared-memory environment.
 
 \section{Structure of the Report}
 

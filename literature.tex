@@ -5,9 +5,9 @@ The following chapter explains the concept of a data stream (\ref{sec:data_strea
 \section{Data Stream}
 \label{sec:data_stream}
 
-\citet{golab2003issues} define data stream as "a real-time, continuous, ordered (implicitly by arrival time or explicitly by timestamp) sequence of items. It is impossible to control the order in which items arrive, nor is it feasible to locally store a stream in its entirety".
+Data stream can be defined as ``a real-time, continuous, ordered (implicitly by arrival time or explicitly by timestamp) sequence of items. It is impossible to control the order in which items arrive, nor is it feasible to locally store a stream in its entirety" \citep{golab2003issues}.
 
-\subsection{Comparison to a Database Management System (DBMS)}
+\subsection{Comparison to a Database Management System}
 
 Historically, data has been stored into database management systems (DBMS) where it was later analysed the assumption being that there would be enough disk space to contain the data. This approach fits many purposes but recently applications started "feeling the need" to analyse rapidly changing data on-the-fly.
 
@@ -28,16 +28,17 @@ The assumption behind using a time window is that users of the real-time system 
 
 Even though the answer might only be approximate it can have great value because the query is answered at the right time. Furthermore, even though the query may run only on a subset of data it is still possible to detect trends or system failures. For example, Twitter are using Apache Storm to run real-time analysis on millions of events per second for their analytics product \citep{Solovey}.
 
-In research, several techniques have been developed to enable real time data stream mining. For example, the MOA environment created by \citet{Bifet:2010:MMO:1756006.1859903} which enables real time machine learning using the WEKA machine learning workbench \citep{Holmes1994}.
+In research, several techniques have been developed to enable real-time data stream mining. For example, the MOA environment created by \citet{Bifet:2010:MMO:1756006.1859903} which enables real-time machine learning using the WEKA machine learning workbench \citep{Holmes1994}.
 
 \section{Multi-core}
 \label{sec:multicore}
 
-\citet{akhter2006multi} define a multi-core processor as a processor that "embed[s] two or more independent execution cores into a single processor package. By providing multiple execution cores, each sequence of instructions, or thread, has a hardware execution environment entirely to itself. This enables each thread run in a truly parallel manner".
+A multi-core processor is a processor that has two or more independent execution cores. ``By providing multiple execution cores, each sequence of instructions, or thread, has a hardware execution environment entirely to itself. This enables each thread [to] run in a truly parallel manner" \citep{akhter2006multi}.
 
-Running an application on multi-core can in the best case produce a speedup equivalent to the number of cores. The best case is when an application is embarrassingly parallel i.e. there is no inter-thread communication. Even though data stream processing is not an embarrassingly parallel problem, \citet{Prat-Perez:2013:PPM:2450027.2450037} show that running a producer-consumer application on multiple cores can produce significant speedup.
+Running an application on multi-core can in the best case produce a speedup equivalent to the number of cores. The best case is when an application is embarrassingly parallel i.e. there is no inter-thread communication. Even though data stream processing is not an embarrassingly parallel problem, running a producer-consumer application on multiple cores can produce significant speedup \citep{Prat-Perez:2013:PPM:2450027.2450037} .
 
 \subsection{Advantages Over Clusters}
+\label{subsec:advantages}
 
 There are several reasons why someone might prefer to deploy their data stream application to a single multi-core machine over a cluster:
 
@@ -51,17 +52,22 @@ There are several reasons why someone might prefer to deploy their data stream a
 \end{description}
 
 \subsection{Disadvantages Over Clusters}
+\label{subsec:disadvantages}
 
 On the other hand, there are certain disadvantages in running a computation on a single multi-core machine rather than a cluster:
 
 \begin{description}
 	\item[Horizontal Scaling] \hfill \\
-	Commodity hardware clusters offer better horizontal scaling than a single multicore server. If one needs to add nodes to the cluster it is as easy as purchasing more commodity hardware. On a multi-core machine it is not that simple. For example, a top of the line Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} Processor E5-2699 has support for 36 threads. Beyond that one would need to add another socket which essentially doubles the price.
+	Commodity hardware clusters offer better horizontal scaling than a single multicore server. If one needs to add nodes to the cluster it is as easy as purchasing more commodity hardware. On a multi-core machine it is not that simple. For example, a top of the line Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} Processor E5-2699 has support for 36 threads. Beyond that one would need to add another socket which essentially doubles the price. Moreover, the server would need to support multiple processor sockets.
 	\item[Higher Short-term Cost than with a Cloud Provider] \hfill \\
 	In short-term the cost of purchasing a server may be significantly higher than renting out a cluster from a cloud computing service. Thus, it makes most sense to run an application on multi-core if it is a long-term investment.
 	\item[More Maintenance than with a Cloud Provider] \hfill \\
 	Owning a server requires more maintenance than simply renting it out from a cloud provider. A cloud provider usually does  all the necessary maintenance and can provision a new machine very easily. Hence it is advantageous to use multi-core only if one can afford to maintain them as well.
 \end{description}
+
+It is generally believed that writing parallel software is hard. The traditional techniques of message passing and parallel threads sharing memory require the programmer to manage the concurrency at a fairly low level, either by using messages or locks.
+
+Apache Storm has become the de facto tool used in stream processing on a cluster and according to their ``Powered By" page there are tens of companies already using Storm to process their real-time streams. It would be nice if they could keep that code.
 
 \section{Apache Storm}
 \label{sec:apache_storm}
@@ -89,7 +95,7 @@ Storm has five major dependencies:
 
 \subsection{Usage of Apache Storm}
 
-Storm works well with sister Apache projects such as Apache Kafka \cite{ApacheKafka} and Apache HBase \cite{ApacheHBase}. Apache Kafka is a messaging broker that is often used as the missing link between producers and consumers of a cluster. Apache HBase is a big data-store that allows real time random reads and writes modelled after Google's Bigtable project. \cite{Bigtable}
+Storm works well with sister Apache projects such as Apache Kafka \cite{ApacheKafka} and Apache HBase \cite{ApacheHBase}. Apache Kafka is a messaging broker that is often used as the missing link between producers and consumers of a cluster. Apache HBase is a big data-store that allows real-time random reads and writes modelled after Google's Bigtable project \cite{Chang:2008:BDS:1365815.1365816}.
 
 Storm is reportedly used by 81 companies listed on their website \cite{https://storm.apache.org/documentation/Powered-By.html} and possibly many others. Storm's popularity is one of the reasons why it was chosen for this project. Moreover, we believe that the concepts used in Storm (explained further in section \ref{sec:concepts}) apply to many different situations and many applications can be easily adapter to work on Storm.
 
@@ -100,7 +106,7 @@ There has been research into how to optimise computations running on a Storm clu
 
 Currently data stream processing is a province of distributed systems such as the ones mentioned in the previous section. Most languages support parallel execution and there are many libraries that ease the process of writing parallel programs on a single multi-core machine. However, they are not tailored to data stream processing and usually require the programmer to do the heavy lifting rather than abstract it away.
 
-There has been effort to port Hadoop to multi-core in \citep{Kumar:2013:HSD:2536274.2536314} (Hone) as well as port of Google's MapReduce in \citep{ranger2007evaluating} (Phoenix). However, to our knowledge there has not been effort to port Storm or any other real time data stream framework to multi-core.
+There has been effort to port Hadoop to multi-core in \citep{Kumar:2013:HSD:2536274.2536314} (Hone) as well as port of Google's MapReduce in \citep{ranger2007evaluating} (Phoenix). However, to our knowledge there has not been effort to port Storm or any other real-time data stream framework to multi-core.
 
 \section{Summary}
 

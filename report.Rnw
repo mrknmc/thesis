@@ -89,9 +89,9 @@ Acknowledgements go here.
 \pagenumbering{arabic}
 
 <<external-code, echo=FALSE, cache=FALSE>>=
-read_chunk('wordcount.R')
-read_chunk('threads.R')
-read_chunk('dump.R')
+	read_chunk('wordcount.R')
+	read_chunk('threads.R')
+	read_chunk('dump.R')
 @
 
 \include{introduction}
@@ -109,12 +109,12 @@ read_chunk('dump.R')
 \include{conclusion}
 
 \begin{appendices}
-\include{appendix}
+	\include{appendix}
 \end{appendices}
 
 % use the following and \cite{} as above if you use BibTeX
 % otherwise generate bibtem entries
-\bibliographystyle{plain}
+\bibliographystyle{unsrt}
 \bibliography{report}
 
 \end{document}
