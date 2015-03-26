@@ -64,9 +64,8 @@ The parallelism of components was varied from one to six and average CPU utilisa
 
 The first topology we tested for performance is a variant of the aforementioned WordCount topology. Recall, that this topology is shown graphically on figure \ref{fig:wordcount_topology}. Since the components do not store any data in memory or make any I/O calls this topology is considered to be mostly CPU-bound.
 
-The number of tuples processed by each component in Storm-MC and Apache Storm is shown in tables \ref{table:storm_mc_wordcount} and \ref{table:storm_wordcount}, respectively.
+The number of tuples processed by each component in Storm-MC and Apache Storm is shown in tables \ref{table:storm_mc_wordcount} and \ref{table:storm_wordcount}, respectively. As can be seen from the tables, not only was CPU utilisation in Storm-MC lower, Storm-MC often processed more than twice as many tuples per component than Apache Storm. Figure \ref{fig:countbolt-plot} depicts the number of tuples processed by CountBolt, the last component of the topology. Since this topology is serial, the number of tuples processed by CountBolt is a good indicator of total throughput.
 
-\medskip
 \begin{table}[!htb]
 \begin{adjustwidth}{-0.5in}{-0.5in}
 \centering
@@ -86,9 +85,7 @@ The number of tuples processed by each component in Storm-MC and Apache Storm is
 \label{table:storm_mc_wordcount}
 \end{adjustwidth}
 \end{table}
-\medskip
 
-\medskip
 \begin{table}[!htb]
 \begin{adjustwidth}{-0.5in}{-0.5in}
 \centering
@@ -108,21 +105,16 @@ The number of tuples processed by each component in Storm-MC and Apache Storm is
 \label{table:storm_wordcount}
 \end{adjustwidth}
 \end{table}
-\medskip
 
-
-<<countbolt-plot, echo=FALSE, cache=TRUE, fig.cap="Tuples processed by CountBolt in Storm-MC and Apache Storm", fig.align="center", fig.height=3>>=
+<<countbolt-plot, echo=FALSE, cache=TRUE, fig.cap="Tuples processed by CountBolt in Storm-MC and Apache Storm", fig.align="center", fig.pos="htb!", fig.height=3.5>>=
 @
 
-
-\todo{Could be slower because not on same socket => slower inter-thread comms.}
-
-<<threads-plot, echo=FALSE, cache=TRUE, fig.cap="Number of threads used by Storm and Storm-MC", fig.align="center", fig.height=3>>=
-@
-
-As can be seen from the tables, not only was CPU utilisation in Storm-MC lower 
 
 When the topology was run on Apache Storm in local mode, the process executed with 55 threads. Compared to that, running it on Storm-MC required only 5 threads: the main thread (1), one thread for each component (3), and a user timer used for topology metrics and ticks (1).
+
+
+<<threads-plot, echo=FALSE, cache=TRUE, fig.cap="Number of threads used by Storm and Storm-MC", fig.align="center", fig.height=3.5>>=
+@
 
 \subsection{Enron Topology}
 

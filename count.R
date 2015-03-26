@@ -1,10 +1,12 @@
 # ---- countbolt-plot ----
 
 library("ggplot2")
+library("ggthemes")
 library("reshape2")
 library(scales)
 #library(RcolorBrewer)
 library(grid)
+
 
 format_si <- function(...) {
   # Format a vector of numeric values according
@@ -50,10 +52,11 @@ t <- melt(mat, id.vars=c("parallelism"))
 k <- ggplot(t, aes(x=parallelism, y=value, fill=variable, color=variable)) +
     scale_fill_grey(name="Library", labels=c("Apache Storm", "Storm-MC")) +
     scale_colour_grey(name="Library", labels=c("Apache Storm", "Storm-MC")) +
-    theme_bw() + theme(legend.position="top")
+    theme_bw() +
+    theme(legend.position="top")
 
 k + geom_line(size=1.5) + geom_point(size=4, type=21) +
-    scale_y_continuous(limits=c(0, 550000000), labels=format_si(), name="Tuples Processed") +
-    scale_x_continuous(breaks=1:6, name="Parallelism")
+    scale_y_continuous(limits=c(0, 550000000), labels=format_si(), name="Tuples Processed\n") +
+    scale_x_continuous(breaks=1:6, name="\nParallelism")
     #geom_hline(yintercept=0, size=0.4, color="black")
 
