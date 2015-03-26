@@ -5,11 +5,11 @@ The following chapter explains the concept of a data stream (\ref{sec:data_strea
 \section{Data Stream}
 \label{sec:data_stream}
 
-Data stream can be defined as ``a real-time, continuous, ordered (implicitly by arrival time or explicitly by timestamp) sequence of items. It is impossible to control the order in which items arrive, nor is it feasible to locally store a stream in its entirety" \citep{golab2003issues}.
+\textcite{golab2003issues} define data stream as as ``a real-time, continuous, ordered (implicitly by arrival time or explicitly by timestamp) sequence of items. It is impossible to control the order in which items arrive, nor is it feasible to locally store a stream in its entirety."
 
 \subsection{Comparison to a Database Management System}
 
-Historically, data has been stored into database management systems (DBMS) where it was later analysed the assumption being that there would be enough disk space to contain the data. This approach fits many purposes but recently applications started "feeling the need" to analyse rapidly changing data on-the-fly.
+Historically, data has been stored into database management systems (DBMS) where it was later analysed the assumption being that there would be enough disk space to contain the data. This approach fits many purposes but real-time applications have recently started feeling the need to analyse rapidly changing data on-the-fly.
 
 This has brought on an advent of data stream processing. Several stream-processing frameworks have emerged such as Apache Storm \citep{ApacheStorm}, Apache Spark \citep{ApacheSpark}, and Yahoo S4 \citep{YahooS4}. These frameworks, usually ran on a cluster, provide the user with abstractions which greatly simplify writing a real-time data stream processing application.
 
@@ -33,9 +33,9 @@ In research, several techniques have been developed to enable real-time data str
 \section{Multi-core}
 \label{sec:multicore}
 
-A multi-core processor is a processor that has two or more independent execution cores. ``By providing multiple execution cores, each sequence of instructions, or thread, has a hardware execution environment entirely to itself. This enables each thread [to] run in a truly parallel manner" \citep{akhter2006multi}.
+\textcite{akhter2006multi} define multi-core processor as a processor that has two or more independent execution cores. This means that every thread has a hardware execution environment entirely to itself which enables threads to run in a truly parallel manner.
 
-Running an application on multi-core can in the best case produce a speedup equivalent to the number of cores. The best case is when an application is embarrassingly parallel i.e. there is no inter-thread communication. Even though data stream processing is not an embarrassingly parallel problem, running a producer-consumer application on multiple cores can produce significant speedup \citep{Prat-Perez:2013:PPM:2450027.2450037} .
+Running an application on multi-core can in the best case produce a speedup equivalent to the number of cores. The best case is when an application is embarrassingly parallel i.e. there is no inter-thread communication. Even though data stream processing is not an embarrassingly parallel problem, running a producer-consumer application on multiple cores can produce significant speedup \citep{Prat-Perez:2013:PPM:2450027.2450037}.
 
 \subsection{Advantages Over Clusters}
 \label{subsec:advantages}

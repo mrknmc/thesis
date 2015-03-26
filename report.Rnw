@@ -15,8 +15,17 @@
 \newcommand{\xmark}{\ding{55}}%
 
 % NATBIB
-\usepackage{natbib}
-%\bibliographystyle{abbrvnat}
+%\usepackage{natbib}
+\usepackage[
+ backend=bibtex,
+ natbib=true,
+ style=ieee,
+% citestyle=numeric,
+% backref=false,
+% backrefstyle=all+,
+% hyperref=true
+]{biblatex}
+\addbibresource{report.bib}
 
 % FONT COMMANDS
 \usepackage{fontspec}
@@ -89,7 +98,7 @@ Acknowledgements go here.
 \pagenumbering{arabic}
 
 <<external-code, echo=FALSE, cache=FALSE>>=
-	read_chunk('wordcount.R')
+	read_chunk('count.R')
 	read_chunk('threads.R')
 	read_chunk('dump.R')
 @
@@ -114,7 +123,9 @@ Acknowledgements go here.
 
 % use the following and \cite{} as above if you use BibTeX
 % otherwise generate bibtem entries
-\bibliographystyle{unsrt}
-\bibliography{report}
+%\bibliographystyle{unsrtnat}
+%\bibliography{report}
+
+\printbibliography
 
 \end{document}

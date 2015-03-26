@@ -13,15 +13,13 @@ The system was evaluated on the following metrics:
 	\item[CPU utilisation] \hfill \\
 	Usage of CPU is recorded every \textbf{x} seconds throughout execution and is then averaged.
 	\item[Memory utilisation] \hfill \\
-	Main memory usage is recorded every \textbf{x} seconds throught execution and is then averaged.
+	Main memory usage is recorded every \textbf{x} seconds throughout execution and is then averaged.
 \end{description}
 
 \section{System Configuration}
 \label{sec:system_conf}
 
 \subsection{Software Setup}
-
-\todo{Change versions below as applicable. Link to GitHub for source?}
 
 All performance benchmarks were ran using the following software packages:
 
@@ -46,33 +44,27 @@ Since Storm-MC reuses package names from Apache Storm, the same benchmark is dir
 
 \subsection{Hardware Setup}
 
+The machine used for benchmarking is the Informatics Student Compute server (\texttt{student.compute.inf.ed.ac.uk}). The server has the following hardware components:
+
 \begin{description}
-	\item[Processor] \hfill \\
-	Following is the processor used in the multi-core machine used in benchmarks: Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} E5-2690 v2 @ 3.00 GHz. The machine has two sockets each with the same processor. This processor has 10 physical cores with Hyper-Threading Technology (maybe link here) which means it can handle up to 20 threads in parallel. Thus with two sockets, there is potential to execute 40 threads in parallel.
+	\item[Processor: Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} E5-2690 v2 @ 3.00 GHz] \hfill \\
+	The machine has two sockets with the same processor each. The processor has 10 physical cores with Hyper-Threading Technology which means it can handle up to 20 threads in parallel. Thus with two sockets, there is potential to execute up to 40 threads in parallel.
 	\item[Main Memory] \hfill \\
-	The machine has 378 GB of main memory.
-	\item[I/O] \hfill \\
-	The machine uses Andrew File System (AFS).
+	The machine has 378 GB of main memory. Since data stream processing uses windows to store only up to a certain amount of memory this was more than enough to conduct the benchmarks.
 \end{description}
-
-
-\todo{This is currently student.compute, find out what it is.}
 
 \section{Performance}
 \label{sec:performance}
 
-To assess performance of Storm-MC, 4 different benchmarks were executed, each with a different focus. The benchmarks were executed for a constant period of time (five minutes) after which the system was killed and metrics were collected. To avoid any performance differences caused by varying amounts of heap memory required by the tested systems, the programs were run with the following flag: \texttt{-Xmx10240M}. This flag sets the maximum amount of heap memory used by the JVM to 10G which was more than enough for all benchmarks.
+To assess performance of Storm-MC, 4 different benchmarks were executed, each with a different focus. The benchmarks were executed for a constant period of time (five minutes) after which the system was killed and metrics were collected. To avoid any performance differences caused by varying amounts of heap memory required by the tested systems, the programs were run with the following flag: \texttt{-Xmx10240M}. This flag sets the maximum amount of heap memory used by the JVM to 10 GB which was more than enough for all benchmarks.
 
-The parallelism of components was varied from one to six and average CPU utilisation and resident memory size were recorded by the Unix \texttt{top} program \citep{UnixTop}. CPU Utilisation  Maximum utilisation with 40 threads available is 4,000\%. Resident memory size is the amount of non-swapped physical memory a task has used. This metric can be deceiving as it depends on how OS manages memory but it is the only fairly reliable memory metric reported by \texttt{top} that can be used for Java programs. This is because the amount of virtual memory used by a Java program can be skewed by the JVM.
+The parallelism of components was varied from one to six and average CPU utilisation and resident memory size were recorded by the Unix \texttt{top} program \citep{UnixTop}. Maximum CPU utilisation with 40 threads is 4,000\%. Resident memory size is the amount of non-swapped physical memory a task has used. This metric can be deceiving as it depends on how OS manages memory but it is the only fairly reliable memory metric reported by \texttt{top} that can be used for Java programs. This is because the amount of virtual memory used by a Java program can be skewed by the JVM reserving memory before needing it.
 
 \subsection{WordCount Topology}
 
-The first topology we tested for performance is a variant of the aforementioned WordCount topology. Recall, that this topology is shown graphically on figure \ref{fig:wordcount_topology}. The topology was ran with 3 executors running for every component.
+The first topology we tested for performance is a variant of the aforementioned WordCount topology. Recall, that this topology is shown graphically on figure \ref{fig:wordcount_topology}. Since the components do not store any data in memory or make any I/O calls this topology is considered to be mostly CPU-bound.
 
-This topology is considered to be CPU-intensive.
-
-<<wordcount-plot, echo=FALSE, cache=FALSE, fig.cap="Improvement of Storm-MC over Apache Storm in number of tuples processed", fig.align="center", fig.height=3>>=
-@
+The number of tuples processed by each component in Storm-MC and Apache Storm is shown in tables \ref{table:storm_mc_wordcount} and \ref{table:storm_wordcount}, respectively.
 
 \medskip
 \begin{table}[!htb]
@@ -91,8 +83,8 @@ This topology is considered to be CPU-intensive.
 	20 & {60,798,276} & {60,790,475} & {532,737,413} & {3161.5\%} & {} \\
 \end{tabular}
 \caption{Storm-MC: Tuples processed per component in WordCount Topology.}
+\label{table:storm_mc_wordcount}
 \end{adjustwidth}
-\label{table:storm_mcwordcount}
 \end{table}
 \medskip
 
@@ -113,16 +105,22 @@ This topology is considered to be CPU-intensive.
 	20 & {} & {} & {} & {\%} & {} \\
 \end{tabular}
 \caption{Apache Storm: Tuples processed per component in WordCount Topology.}
-\end{adjustwidth}
 \label{table:storm_wordcount}
+\end{adjustwidth}
 \end{table}
 \medskip
+
+
+<<countbolt-plot, echo=FALSE, cache=TRUE, fig.cap="Tuples processed by CountBolt in Storm-MC and Apache Storm", fig.align="center", fig.height=3>>=
+@
+
 
 \todo{Could be slower because not on same socket => slower inter-thread comms.}
 
 <<threads-plot, echo=FALSE, cache=TRUE, fig.cap="Number of threads used by Storm and Storm-MC", fig.align="center", fig.height=3>>=
 @
 
+As can be seen from the tables, not only was CPU utilisation in Storm-MC lower 
 
 When the topology was run on Apache Storm in local mode, the process executed with 55 threads. Compared to that, running it on Storm-MC required only 5 threads: the main thread (1), one thread for each component (3), and a user timer used for topology metrics and ticks (1).
 

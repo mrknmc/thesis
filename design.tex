@@ -169,18 +169,20 @@ Thus the tuple processing in Storm-MC is a variant of multiple producer single c
 \section{Differences between Apache Storm and Storm-MC}
 \label{sec:differences}
 
+The codebase of Apache Storm is fairly large - 54,985 lines of code as reported by \texttt{cloc} \citep{Cloc}. Thus we had to prioritise features that were ported over to Storm-MC. Table \ref{table:features} presents a list of Storm features and shows which were ported over to Storm-MC and which were not.
+
 \begin{table}[h!]
 \centering
 \begin{tabular}{@{}lcc@{}}
     \textbf{Feature} & \textbf{Apache Storm} & \textbf{Storm-MC} \\ \toprule
-    Multiple Topologies & \cmark & \xmark \\
-	Trident Support & \cmark & \xmark \\
-    Built-in Metrics & \cmark & \xmark \\
-    Nimbus as a Server & \cmark & \xmark \\
     Multi-language Topologies & \cmark & \cmark \\
     Hooks & \cmark & \cmark \\
     Metrics & \cmark & \cmark \\
     Tick Tuples & \cmark & \cmark \\
+    Multiple Topologies & \cmark & \xmark \\
+	Trident Support & \cmark & \xmark \\
+    Built-in Metrics & \cmark & \xmark \\
+    Nimbus as a Server & \cmark & \xmark \\
 \end{tabular}
 \caption{Feature comparison of Apache Storm and Storm-MC.}
 \label{table:features}
