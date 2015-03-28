@@ -14,6 +14,8 @@ The price of multi-core servers has been going down as well. In 2008, a typical 
 
 Moreover, tiled processors have emerged as competitors to traditional processors in throughput-based computations \cite{Tilera}. These processors use a large number of tiles connected by an on-chip network and even though the single-thread performance of each tile is lower than the performance of a conventional core, the increased parallelism yields higher per-server throughput \cite{DBLP:conf/isca/Lotfi-KamranGFVKPAJIOF12}.
 
+It is generally believed that writing parallel software is hard. The traditional techniques of message passing and shared memory require the programmer to manage the concurrency at a fairly low level. Apache Storm has become the de facto tool used in stream processing on a cluster and according to their ``Powered By" page there are tens of companies already using Storm to process their real-time data streams \cite{PoweredBy}. We believe there is a place for a real-time data stream processing system on multi-core and Storm's popularity and simple application programming interface (API) makes it the ideal candidate for porting.
+
 \section{Main Idea}
 
 The main idea of this report is to take the existing Apache Storm project and port it to multi-core. This is implemented in Storm-MC - a library with an API compatible with Apache Storm. Porting the Storm API allows programmers to take an existing application written with Apache Storm in mind and run it on a multi-core server. This way, we can avoid network latency and enjoy the significant performance improvements of a shared-memory environment.
@@ -26,7 +28,6 @@ The remainder of the report is structured as follows:
 	\item \textbf{Chapter 2} presents an overview of related literature and gives background on data stream processing and multi-core architectures.
 	\item \textbf{Chapter 3} explains the concepts used in Apache Storm as well as the architecture of a Storm cluster.
 	\item \textbf{Chapter 4} describes how Apache Storm was ported over to Storm-MC.
-	\item \textbf{Chapter 5} gives an overview of the implementation details of Storm-MC.
-	\item \textbf{Chapter 6} discusses the evaluation results of Storm-MC.
-	\item \textbf{Chapter 7} presents the conclusion of this report.
+	\item \textbf{Chapter 5} discusses the evaluation results of Storm-MC.
+	\item \textbf{Chapter 6} presents the conclusion of this report.
 \end{itemize}

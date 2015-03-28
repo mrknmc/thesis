@@ -9,6 +9,10 @@
 % MAKE TABLES STICK OUT
 \usepackage{chngpage}
 
+
+% TEXT IN MATH MODE
+\usepackage{amsmath}
+
 % CHECKMARK & OTHER SYMBOLS
 \usepackage{pifont}
 \newcommand{\cmark}{\ding{51}}%
@@ -101,6 +105,7 @@ Acknowledgements go here.
 	read_chunk('count.R')
 	read_chunk('threads.R')
 	read_chunk('dump.R')
+	read_chunk('enron.R')
 @
 
 \include{introduction}

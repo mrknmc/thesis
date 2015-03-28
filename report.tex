@@ -52,6 +52,9 @@
 
 \usepackage{chngpage}
 
+
+\usepackage{amsmath}
+
 \usepackage{pifont}
 \newcommand{\cmark}{\ding{51}}\newcommand{\xmark}{\ding{55}}
 \usepackage[
@@ -135,6 +138,8 @@ The price of multi-core servers has been going down as well. In 2008, a typical 
 
 Moreover, tiled processors have emerged as competitors to traditional processors in throughput-based computations \cite{Tilera}. These processors use a large number of tiles connected by an on-chip network and even though the single-thread performance of each tile is lower than the performance of a conventional core, the increased parallelism yields higher per-server throughput \cite{DBLP:conf/isca/Lotfi-KamranGFVKPAJIOF12}.
 
+It is generally believed that writing parallel software is hard. The traditional techniques of message passing and shared memory require the programmer to manage the concurrency at a fairly low level. Apache Storm has become the de facto tool used in stream processing on a cluster and according to their ``Powered By" page there are tens of companies already using Storm to process their real-time data streams \cite{PoweredBy}. We believe there is a place for a real-time data stream processing system on multi-core and Storm's popularity and simple application programming interface (API) makes it the ideal candidate for porting.
+
 \section{Main Idea}
 
 The main idea of this report is to take the existing Apache Storm project and port it to multi-core. This is implemented in Storm-MC - a library with an API compatible with Apache Storm. Porting the Storm API allows programmers to take an existing application written with Apache Storm in mind and run it on a multi-core server. This way, we can avoid network latency and enjoy the significant performance improvements of a shared-memory environment.
@@ -147,9 +152,8 @@ The remainder of the report is structured as follows:
 	\item \textbf{Chapter 2} presents an overview of related literature and gives background on data stream processing and multi-core architectures.
 	\item \textbf{Chapter 3} explains the concepts used in Apache Storm as well as the architecture of a Storm cluster.
 	\item \textbf{Chapter 4} describes how Apache Storm was ported over to Storm-MC.
-	\item \textbf{Chapter 5} gives an overview of the implementation details of Storm-MC.
-	\item \textbf{Chapter 6} discusses the evaluation results of Storm-MC.
-	\item \textbf{Chapter 7} presents the conclusion of this report.
+	\item \textbf{Chapter 5} discusses the evaluation results of Storm-MC.
+	\item \textbf{Chapter 6} presents the conclusion of this report.
 \end{itemize}
 \clearpage{}
 
@@ -168,7 +172,7 @@ Historically, data has been stored into database management systems (DBMS) where
 
 This has brought on an advent of data stream processing. Several stream-processing frameworks have emerged such as Apache Storm \citep{ApacheStorm}, Apache Spark \citep{ApacheSpark}, and Yahoo S4 \citep{YahooS4}. These frameworks, usually ran on a cluster, provide the user with abstractions which greatly simplify writing a real-time data stream processing application.
 
-Whereas DBMSs excel at getting an exact answer to a query, data streams usually provide an approximate answer. The answer is approximate because it is usually correct only within a certain window of time, the query is simplified because it can only be ran in one pass, or because it is used with a sampling rate which does not include all events. A typical data stream analysis using windows and sampling is depicted in figure \ref{fig:stream}.
+Whereas DBMSs excel at getting an exact answer to a query, data streams usually provide an approximate answer. The answer is approximate because it is usually correct only within a certain window of time, the query is simplified because it can only be ran in one pass, or because it is used with a sampling rate which does not include all events. A typical data stream analysis using windows and sampling is shown in Figure \ref{fig:stream}.
 
 \subsection{Querying a Data Stream}
 
@@ -181,16 +185,16 @@ The assumption behind using a time window is that users of the real-time system 
 	\label{fig:stream}
 \end{figure}
 
-Even though the answer might only be approximate it can have great value because the query is answered at the right time. Furthermore, even though the query may run only on a subset of data it is still possible to detect trends or system failures. For example, Twitter are using Apache Storm to run real-time analysis on millions of events per second for their analytics product \citep{Solovey}.
+Even though the answer might only be approximate it can have great value because the query is answered at the right time. Furthermore, even though the query may run only on a subset of data it is still possible to detect trends or system failures. For example, Twitter are using Apache Storm to run real-time analysis on millions of events per second for their analytics product Answers \citep{Solovey}.
 
-In research, several techniques have been developed to enable real-time data stream mining. For example, the MOA environment created by \citet{Bifet:2010:MMO:1756006.1859903} which enables real-time machine learning using the WEKA machine learning workbench \citep{Holmes1994}.
+In research, several techniques have been developed to enable real-time data stream mining. For example, the MOA environment created by \citet{Bifet:2010:MMO:1756006.1859903} enables running online machine learning methods using the WEKA machine learning workbench \citep{Holmes1994}.
 
 \section{Multi-core}
 \label{sec:multicore}
 
 \textcite{akhter2006multi} define multi-core processor as a processor that has two or more independent execution cores. This means that every thread has a hardware execution environment entirely to itself which enables threads to run in a truly parallel manner.
 
-Running an application on multi-core can in the best case produce a speedup equivalent to the number of cores. The best case is when an application is embarrassingly parallel i.e. there is no inter-thread communication. Even though data stream processing is not an embarrassingly parallel problem, running a producer-consumer application on multiple cores can produce significant speedup \citep{Prat-Perez:2013:PPM:2450027.2450037}.
+Running an application on multi-core can in the best case produce a speedup equivalent to the number of cores. The best case is when an application is embarrassingly parallel i.e. there is no inter-thread communication. Even though data stream processing is not an embarrassingly parallel problem, running a producer-consumer application on multiple cores can produce significant speedup as shown in  \citep{Prat-Perez:2013:PPM:2450027.2450037}.
 
 \subsection{Advantages Over Clusters}
 \label{subsec:advantages}
@@ -215,14 +219,11 @@ On the other hand, there are certain disadvantages in running a computation on a
 	\item[Horizontal Scaling] \hfill \\
 	Commodity hardware clusters offer better horizontal scaling than a single multicore server. If one needs to add nodes to the cluster it is as easy as purchasing more commodity hardware. On a multi-core machine it is not that simple. For example, a top of the line Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} Processor E5-2699 has support for 36 threads. Beyond that one would need to add another socket which essentially doubles the price. Moreover, the server would need to support multiple processor sockets.
 	\item[Higher Short-term Cost than with a Cloud Provider] \hfill \\
-	In short-term the cost of purchasing a server may be significantly higher than renting out a cluster from a cloud computing service. Thus, it makes most sense to run an application on multi-core if it is a long-term investment.
+	In short-term the cost of purchasing a server may be significantly higher than renting out a cluster from a cloud computing service. Thus, it makes most sense to run an application on multi-core as a medium- to long-term investment.
 	\item[More Maintenance than with a Cloud Provider] \hfill \\
 	Owning a server requires more maintenance than simply renting it out from a cloud provider. A cloud provider usually does  all the necessary maintenance and can provision a new machine very easily. Hence it is advantageous to use multi-core only if one can afford to maintain them as well.
 \end{description}
 
-It is generally believed that writing parallel software is hard. The traditional techniques of message passing and parallel threads sharing memory require the programmer to manage the concurrency at a fairly low level, either by using messages or locks.
-
-Apache Storm has become the de facto tool used in stream processing on a cluster and according to their ``Powered By" page there are tens of companies already using Storm to process their real-time streams. It would be nice if they could keep that code.
 
 \section{Apache Storm}
 \label{sec:apache_storm}
@@ -250,18 +251,18 @@ Storm has five major dependencies:
 
 \subsection{Usage of Apache Storm}
 
-Storm works well with sister Apache projects such as Apache Kafka \cite{ApacheKafka} and Apache HBase \cite{ApacheHBase}. Apache Kafka is a messaging broker that is often used as the missing link between producers and consumers of a cluster. Apache HBase is a big data-store that allows real-time random reads and writes modelled after Google's Bigtable project \cite{Chang:2008:BDS:1365815.1365816}.
+Storm works particularly well with sister Apache projects such as Apache Kafka \cite{ApacheKafka} and Apache HBase \cite{ApacheHBase}. Apache Kafka is a messaging broker that is often used as the missing link between producers and consumers of a cluster. Apache HBase is a big data-store that allows real-time random reads and writes modelled after Google's Bigtable project \cite{Chang:2008:BDS:1365815.1365816}.
 
-Storm is reportedly used by 81 companies listed on their website \cite{https://storm.apache.org/documentation/Powered-By.html} and possibly many others. Storm's popularity is one of the reasons why it was chosen for this project. Moreover, we believe that the concepts used in Storm (explained further in section \ref{sec:concepts}) apply to many different situations and many applications can be easily adapter to work on Storm.
+Storm is reportedly used by 81 companies listed on their website \cite{PoweredBy} and many others. Storm's popularity is one of the reasons why it was chosen for this project. Furthermore, we believe that the concepts used in Storm (explained further in section \ref{sec:concepts}) apply to many different situations and many applications can be easily adapter to work on top of Storm.
 
-There has been research into how to optimise computations running on a Storm cluster. \cite{Chatzistergiou:2014:FHN:2661829.2661882} looked at how to reconfigure the job by reallocating component tasks to minimise communication cost. 
+There has been significant research in optimising computations running on Apache Storm. For example, \cite{Chatzistergiou:2014:FHN:2661829.2661882} looked at how to reconfigure a Storm job by reallocating component tasks to minimise communication cost. A domain specific language for defining Storm jobs was proposed in \cite{DBLP:conf/fedcsis/ChandrasekaranSA14}. Finally, \cite{dimsonhailstorm} ported Storm to Haskell and looked at how to provide exactly once semantics.
 
 \section{Similar Efforts}
 \label{sec:similar_efforts}
 
 Currently data stream processing is a province of distributed systems such as the ones mentioned in the previous section. Most languages support parallel execution and there are many libraries that ease the process of writing parallel programs on a single multi-core machine. However, they are not tailored to data stream processing and usually require the programmer to do the heavy lifting rather than abstract it away.
 
-There has been effort to port Hadoop to multi-core in \citep{Kumar:2013:HSD:2536274.2536314} (Hone) as well as port of Google's MapReduce in \citep{ranger2007evaluating} (Phoenix). However, to our knowledge there has not been effort to port Storm or any other real-time data stream framework to multi-core.
+There has been effort to port Hadoop to multi-core in \citep{Kumar:2013:HSD:2536274.2536314} (Hone) as well as port of Google's MapReduce in \citep{ranger2007evaluating} (Phoenix). However, to our knowledge there has not been effort to port Storm or any other distributed real-time data stream system to multi-core.
 
 \section{Summary}
 
@@ -272,7 +273,7 @@ The following chapters provide a closer analysis of Apache Storm as well as a po
 
 \clearpage{}\chapter{Background}
 
-In this chapter we give background information necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm \ref{sec:storm_overview}, explain the concepts (\ref{sec:concepts}) used in Storm, show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), and finally  describe the serialisation used by Storm.
+In this chapter we give background information necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm (\ref{sec:storm_overview}), explain the concepts used in Storm (\ref{sec:concepts}), show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), and finally describe the serialisation used by Storm (\ref{sec:serialisation}).
 
 \section{Storm Overview}
 \label{sec:storm_overview}
@@ -378,7 +379,7 @@ The master node runs a server daemon called Nimbus. The main role of Nimbus is t
 	\item[Distribute the topology source code] \hfill \\
 	Nimbus ensures that the workers involved in the topology computation have the source code by sending it to all nodes of the cluster.
 	\item[Schedule the topology] \hfill \\
-	Nimbus runs a scheduler that distributes the work among workers of the cluster. Similarly to validation, the user can use his own scheduler by implementing the \texttt{IScheduler} interface or use the default scheduler provided by Storm. The default scheduler uses a simple Round-robin strategy. \citep{Aniello_Baldoni_Querzoni_2013}
+	Nimbus runs a scheduler that distributes the work among workers of the cluster. Similarly to validation, the user can use his own scheduler by implementing the \texttt{IScheduler} interface or use the default scheduler provided by Storm. The default scheduler uses a simple Round-robin strategy \citep{Aniello_Baldoni_Querzoni_2013}.
 	\item[Activate the topology] \hfill \\
 	Nimbus transitions the topology to active state which tells the worker nodes to start executing it.
 	\item[Monitor the topology] \hfill \\
@@ -451,7 +452,7 @@ To begin, we discuss why Apache Storm does not perform optimally on a single mul
 
 Figure \ref{fig:worker_inside} shows how tuple processing is implemented inside a Storm worker process. The tuple is read from a message buffer by the receiver thread of the worker and put on a receive queue of the target executor. The tuple is then picked up by the component thread of the executor for task execution.
 
-After the component thread has executed the task it puts the tuple on the executor send queue. There, it is picked up by the executor sender thread which puts the tuple on the global send queue of the worker. Lastly, the global sender thread of the worker serialises the tuple and sends it downstream.
+After the component thread has executed the task it puts the tuple on the executor send queue. There, it is picked up by the executor sender thread which puts the tuple on the global send queue of the worker. Finally, the global sender thread of the worker serialises the tuple and sends it downstream.
 
 Alternatively, if the tuple is forwarded to an executor in the same worker process it is put on the receive queue of the corresponding executor directly after task execution.
 
@@ -463,22 +464,21 @@ Furthermore, to emulate over-the-network messages Storm uses a \texttt{Hashmap} 
 
 \subsection{Thread Overhead}
 
-\todo{Maybe mention waiting strategies?}
-
 \begin{description}
 	\item[Acker Bolt] \hfill \\
 	The Acker is included in every topology. The Acker bolt can be disabled via the configuration file. In such a case it is mostly idle since it does not receive any messages but it can still use up resources especially if it waits for messages using a busy waiting strategy.
 	\item[Heartbeats \& Timers] \hfill \\
-	Every worker has a heartbeat thread that simulates sending heartbeat messages to the Nimbus node. It does this by writing to a local cache which is persisted to a file by a write on every heartbeat. Since the write is implemented using the \texttt{java.io} package the write is blocking i.e. the thread cannot continue until the write is completed. While heartbeats are essential in cluster mode to signal the node being alive, there is no need for them in local mode.
+	Every worker has a heartbeat thread that simulates sending heartbeat messages to the Nimbus node. It does this by writing to a local cache which is persisted to a file by a write on every heartbeat. Since the write is implemented using the \texttt{java.io} package the write is blocking - the thread cannot continue until the write is completed. While heartbeats are essential in cluster mode to signal the node being alive, there is no need for them in local mode.
 	\item[Zookeeper Emulation] \hfill \\
 	More overhead is produced by a local Zookeper server which emulates the Zookeeper nodes of a cluster. Running the Zookeeper server is a massive addition to the list of overheads as shown in the following paragraphs. The purpose of Zookeeper is to maintain states of running topologies and nodes of the cluster. As we will show in the following sections maintaining this state on multi-core is not necessary.
 \end{description}
 
 During profiling we found that a topology with one worker and three executors was being executed with 55 threads (not including system JVM threads and threads created by the profiler). Table \ref{table:breakdown} shows a breakdown of what the individual threads were used for.
 
-\begin{table}[h!]
+\begin{table}[htb!]
 \centering
-\begin{tabular}{@{}lc@{}}
+\small
+\begin{tabular}{@{}ll@{}}
     \textbf{Spout Parallelism} & \textbf{\# of Threads} \\ \toprule
     Main Thread & 1  \\
 	Worker Sender \& Receiver Threads & 2  \\
@@ -492,10 +492,11 @@ During profiling we found that a topology with one worker and three executors wa
 \label{table:breakdown}
 \end{table}
 
-To find out what state the threads were actually in at any given time the topology was executed for three minutes and a JVM thread dump was recorded every second. The average results of this experiment can be observed in table \ref{table:dump} and the state distribution over time can be seen in figure \ref{fig:dump-plot}.
+To find out what state the threads were actually in at any given time the topology was executed for three minutes and a JVM thread dump was recorded every second. The average results of this experiment can be observed in table \ref{table:dump} and the state distribution over time can be seen in Figure \ref{fig:dump-plot}.
 
-\begin{table}[h!]
+\begin{table}[htb!]
 \centering
+\small
 \begin{tabular}{@{}lc@{}}
     \textbf{Spout Parallelism} & \textbf{\# of Threads} \\ \toprule
     RUNNABLE & 8  \\
@@ -507,7 +508,7 @@ To find out what state the threads were actually in at any given time the topolo
 \end{table}
 
 \begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[!htb]
 \includegraphics[width=\maxwidth]{figure/dump-plot-1} \caption[Thread state distribution over time]{Thread state distribution over time.}\label{fig:dump-plot}
 \end{figure}
 
@@ -529,32 +530,28 @@ Additionally, the code for the Nimbus service was merged with the worker. This w
 
 \subsection{Nimbus}
 
-Unlike Nimbus executing on a Storm cluster, Nimbus in Storm-MC does not support running multiple topologies at the same time. However, to do that one only needs to run the topology in a separate process. This is because unlike when executing on the cluster different topologies do not need to share any state and it is more natural to execute them as separate processes.
+Unlike Storm executing on a cluster, Storm-MC does not support running multiple topologies at the same time. However, to do that one only needs to run the topology in a separate process. This is because unlike when executing on the cluster different topologies do not need to share any state and it is more natural to execute them as separate processes.
 
 This has the added benefit of each process having its own part of main memory thus reducing cache conflicts as shown in \citep{Chandra:2005:PIC:1042442.1043432} and providing higher security by not having different topologies share memory space. Additionally, if a single thread of one topology is blocking it does not block other topologies.
 
-Nimbus on Storm-MC does not support scheduling topologies. Since within one process there is only one topology running at a time and the hardware configuration of the machine does not change, the parallelism is clearly defined by the number of executors per component specified in the topology configuration.
+Storm-MC does not support topology scheduling. Since within one process there is always only one topology running at a time and the hardware configuration of the machine does not change, the parallelism is clearly defined by the number of executors per component specified in the topology configuration.
 
 One way to implement scheduling could be to pin threads to specific cores. Unfortunately, Java does not provide support for CPU affinity, the assignments are handled automatically by the JVM. Potentially, this could be achieved by using C or C++, both of which support CPU affinity, but this was not implemented in Storm-MC.
 
-The role of Nimbus in Storm-MC has effectively been reduced to validating the topology and passing it along to the worker part of the process which handles the topology execution.
+The role of Nimbus in Storm-MC has effectively been reduced to validating the topology and passing it along to the worker source code which handles topology execution.
 
 \subsection{Worker}
 
-In Apache Storm, a worker node runs the supervisor daemon, which in turns launches worker processes which contain executor threads which contain tasks. In Storm-MC, however, there is only one worker process which contains all the executor threads and their tasks.
-
-This design has several benefits:
+In Apache Storm, a worker node runs the supervisor daemon, which in turns launches worker processes which run executors which execute tasks. In Storm-MC, however, there is only one worker process which runs all the executors and their tasks. This design has several benefits:
 
 \begin{itemize}
-	\item All the inter-thread communication is occurring within one worker process.
-	\item Supervisor can be removed as there is no need to synchronise multiple workers.
+	\item All the inter-thread communication occurs within one worker process.
+	\item The supervisor daemon can be removed as there is no need to synchronise or monitor workers.
 	\item There is no need to simulate over-the-network message passing.
 	\item Message passing between executor threads within a worker stays the same as in Apache Storm.
 \end{itemize}
 
-The role of worker is to launch executors and provide them with a shared context through which they can communicate. This is done by via a map of executor identifiers to Disruptor queues which the executors use to pass tuples between each other.
-
-A comparison of an Apache Storm worker node and its Storm-MC equivalent is depicted in figure \ref{fig:comparison}.
+A comparison of an Apache Storm worker node and its Storm-MC equivalent is shown in Figure \ref{fig:comparison}.
 
 \begin{figure}[!htb]
 \centering
@@ -573,20 +570,29 @@ A comparison of an Apache Storm worker node and its Storm-MC equivalent is depic
 \label{fig:comparison}
 \end{figure}
 
+The role of the worker is to launch executors and provide them with a shared context through which they can communicate. This is done with a map of executor identifiers to Disruptor queues which the executors use to pass tuples between each other.
+
+\todo{Write about disruptor here.}
+
+Moreover, the worker contains a map of components to streams and fields. This map is used by components to figure out which components subscribe to streams they produce.
+
+Additionally, a worker has a user timer which components can use to get tick tuples at regular intervals.
+
+Finally, a worker contains shared resources which can be used by the executors. One such resource is a configurable-size thread-pool \texttt{ExecutorService}. Executors can use these via the topology context to execute some computation on a separate thread.
+
+\todo{Refactor below section}
+
 \subsection{State}
 
 As mentioned before, Storm-MC is completely stateless. The cluster state that was managed by Zookeeper in Apache Storm was completely stripped away. This state was only relevant when multiple topologies were sharing resources.
 
 \subsection{Serialisation}
 
-Great amount of work was put into removing the dependency of Storm-MC on Apache Thrift. This was done not only for optimisation purposes but also to reduce code bloat and remove an unnecessary dependency since there is no serialisation required in multi-core communication.
+Great amount of work was put into removing the dependency of Storm-MC on Apache Thrift. This was mostly done to reduce code bloat and remove an unnecessary dependency since there is no serialisation required in a multi-core environment.
 
+This required refactoring all the data types generated automatically by Thrift. This also significantly reduced the size of the codebase and made the code more readable and self-documenting than the code generated by Thrift.
 
-
-\todo{Mention overhead by running SystemBolt vs just timer in Storm-MC}
-
-
-\subsection{Tuple Processing}
+\section{Implementation Details}
 
 \begin{figure}[!htb]
 	\centering
@@ -595,9 +601,42 @@ Great amount of work was put into removing the dependency of Storm-MC on Apache 
 	\label{fig:worker_inside_mc}
 \end{figure}
 
-The implementation of tuple processing in Storm-MC is depicted in figure \ref{fig:worker_inside_mc}. As can be seen from the figure, the queues used for remote message sending were stripped away and there is only one Disruptor queue for every executor. Once an executor is done processing a tuple it simply puts it on the Disruptor queue of its downstream bolts.
+The implementation of tuple processing in Storm-MC is depicted in Figure \ref{fig:worker_inside_mc}. As can be seen from the figure, the queues used for remote message sending were stripped away and there is only one Disruptor queue for every executor. Once an executor is done processing a tuple it simply puts it on the Disruptor queue of its downstream bolts.
 
 Thus the tuple processing in Storm-MC is a variant of multiple producer single consumer problem. We considered several other options such as \texttt{ArrayBlockingQueue} when implementing the tuple processing mechanism. However, the Disruptor shows superior throughput and latency compared to alternative solutions \citep{DisruptorWiki}.
+
+\todo{Storm-MC requires one thread per component, user timer and main thread}
+
+\subsection{Nimbus}
+
+\subsection{Worker}
+
+As mentioned in previous chapter Storm-MC was implemented with only one worker per topology. This worker then exposes a common context to all the executors.
+
+\subsection{Executor Receive Queues}
+
+Worker stores a map of executor ids to receive queues. These are then used by executors to pass tuples between each other. As discussed in the previous chapter, the queues are implemented as Disruptor ring buffers. The way this works is as follows:
+
+The target executor waits at for the next entry of the ring buffer to become available. There are four different waiting strategies an executor can employ:
+
+\begin{description}
+	\item[BlockingWaitStrategy] \hfill \\
+	This strategy uses a lock and a condition variable. 
+	\item[YieldingWaitStrategy] \hfill \\
+	This strategy initially spins for hundred iterations and then uses \texttt{Thread.yield()}.
+	\item[SleepingWaitStrategy] \hfill \\
+	This strategy initially spins for hundred iterations, then uses \texttt{Thread.yield()}, and finally uses \texttt{LockSupport.parkNanos(1L)} to sleep.
+	\item[BusySpinWaitStrategy] \hfill \\
+	In this strategy the thread is in a so-called tight loop, where it checks whether a new entry is available, breaks out if it is. Otherwise it continues looping.
+\end{description}
+
+\subsection{Executor}
+
+An executor is implemented as a single thread of execution. This thread consumes a batch of tuples from the Disruptor queue when it becomes available, performs the tasks of a component it represents, and finally places the newly produced tuples on the Disruptor queue of other executors.
+
+In Apache Storm, an executor runs two threads in parallel. One that picks up new tuples from the receive queue
+
+\todo{Describe how executor is implemented - Thread vs Executor}
 
 \section{Differences between Apache Storm and Storm-MC}
 \label{sec:differences}
@@ -606,6 +645,7 @@ The codebase of Apache Storm is fairly large - 54,985 lines of code as reported 
 
 \begin{table}[h!]
 \centering
+\small
 \begin{tabular}{@{}lcc@{}}
     \textbf{Feature} & \textbf{Apache Storm} & \textbf{Storm-MC} \\ \toprule
     Multi-language Topologies & \cmark & \cmark \\
@@ -613,7 +653,8 @@ The codebase of Apache Storm is fairly large - 54,985 lines of code as reported 
     Metrics & \cmark & \cmark \\
     Tick Tuples & \cmark & \cmark \\
     Multiple Topologies & \cmark & \xmark \\
-	Trident Support & \cmark & \xmark \\
+	Trident API & \cmark & \xmark \\
+    System Bolt & \cmark & \xmark \\
     Built-in Metrics & \cmark & \xmark \\
     Nimbus as a Server & \cmark & \xmark \\
 \end{tabular}
@@ -622,15 +663,7 @@ The codebase of Apache Storm is fairly large - 54,985 lines of code as reported 
 \end{table}
 \clearpage{}
 
-\clearpage{}\chapter{Storm-MC Implementation}
-
-The following chapter describes the implementation of Storm-MC.
-
-\section{Nimbus}
-
-\section{Worker}
-
-As mentioned in previous chapter Storm-MC was implemented with only one worker per topology.\clearpage{}
+\clearpage{}\clearpage{}
 
 \clearpage{}\chapter{Evaluation}
 
@@ -644,10 +677,10 @@ The system was evaluated on the following metrics:
 \begin{description}
 	\item[Throughput] \hfill \\
 	The number of tuples processed by every component in the given time of the topology is recorded.
-	\item[CPU utilisation] \hfill \\
-	Usage of CPU is recorded every \textbf{x} seconds throughout execution and is then averaged.
-	\item[Memory utilisation] \hfill \\
-	Main memory usage is recorded every \textbf{x} seconds throughout execution and is then averaged.
+	\item[CPU Utilisation] \hfill \\
+	Usage of CPU is recorded every \textbf{x} seconds throughout execution and the average is computed.
+	\item[Memory Usage] \hfill \\
+	Main memory usage is recorded every \textbf{x} seconds throughout execution and the average is computed.
 \end{description}
 
 \section{System Configuration}
@@ -670,7 +703,7 @@ Version 0.1.6 is the latest version of Storm-MC as of this moment. The first rel
 
 IBM open sourced a suite of benchmarks which they used to compare Apache Storm to their real-time stream system IBM Infosphere Streams \citep{InfoSphereStreams}. These benchmarks were adapted and used to benchmark Storm-MC against Apache Storm.
 
-Lastly, a number of spout and bolt components were used from the storm-benchmark project which Apache Storm developers use to benchmark Storm.
+Finally, a number of spout and bolt components were used from the storm-benchmark project which Apache Storm developers use to benchmark Storm.
 
 Since Storm-MC reuses package names from Apache Storm, the same benchmark is directly executable by both libraries. This saved a lot of time and furthermore there is no need to maintain two benchmarks suites.
 
@@ -687,16 +720,21 @@ The machine used for benchmarking is the Informatics Student Compute server (\te
 	The machine has 378 GB of main memory. Since data stream processing uses windows to store only up to a certain amount of memory this was more than enough to conduct the benchmarks.
 \end{description}
 
+\subsection{Storm Configuration}
+
+As mentioned before, when submitting a topology the programmer needs to submit a configuration file as well. To ensure that the performance difference between Apache Storm and Storm-MC was not caused by different configuration, the default configuration file from Storm 0.9.2 was used to benchmark both projects.
+
+
 \section{Performance}
 \label{sec:performance}
 
 To assess performance of Storm-MC, 4 different benchmarks were executed, each with a different focus. The benchmarks were executed for a constant period of time (five minutes) after which the system was killed and metrics were collected. To avoid any performance differences caused by varying amounts of heap memory required by the tested systems, the programs were run with the following flag: \texttt{-Xmx10240M}. This flag sets the maximum amount of heap memory used by the JVM to 10 GB which was more than enough for all benchmarks.
 
-The parallelism of components was varied from one to six and average CPU utilisation and resident memory size were recorded by the Unix \texttt{top} program \citep{UnixTop}. Maximum CPU utilisation with 40 threads is 4,000\%. Resident memory size is the amount of non-swapped physical memory a task has used. This metric can be deceiving as it depends on how OS manages memory but it is the only fairly reliable memory metric reported by \texttt{top} that can be used for Java programs. This is because the amount of virtual memory used by a Java program can be skewed by the JVM reserving memory before needing it.
+The parallelism of components was varied from one to six and average CPU utilisation and resident memory size were recorded by the Unix \texttt{top} program \citep{UnixTop}. Maximum CPU utilisation with 40 threads is 4,000\%. Resident memory size is the amount of non-swapped physical memory a task has used. This metric can be deceiving as it depends on how OS manages memory but it is the only fairly reliable memory metric reported by \texttt{top} that can be used for Java programs.
 
 \subsection{WordCount Topology}
 
-The first topology we tested for performance is a variant of the aforementioned WordCount topology. Recall, that this topology is shown graphically on figure \ref{fig:wordcount_topology}. Since the components do not store any data in memory or make any I/O calls this topology is considered to be mostly CPU-bound.
+The first topology we tested for performance is a variant of the aforementioned WordCount topology. Recall, that this topology is shown graphically in Figure \ref{fig:wordcount_topology}. Since the components do not store any data in memory or make any I/O calls this topology is mostly CPU-bound.
 
 The number of tuples processed by each component in Storm-MC and Apache Storm is shown in tables \ref{table:storm_mc_wordcount} and \ref{table:storm_wordcount}, respectively. As can be seen from the tables, not only was CPU utilisation in Storm-MC lower, Storm-MC often processed more than twice as many tuples per component than Apache Storm. Figure \ref{fig:countbolt-plot} depicts the number of tuples processed by CountBolt, the last component of the topology. Since this topology is serial, the number of tuples processed by CountBolt is a good indicator of total throughput.
 
@@ -704,16 +742,15 @@ The number of tuples processed by each component in Storm-MC and Apache Storm is
 \begin{adjustwidth}{-0.5in}{-0.5in}
 \centering
 \small
-\begin{tabular}{@{}rrrrrr@{}}
-    {Parallelism} & {FileReadSpout} & {SplitSentenceBolt} & {CountBolt} & {CPU Utilisation} & {Memory Usage} \\ \toprule
+\begin{tabular}{@{}rccccl@{}}
+    \textbf{Parallelism} & \textbf{FileReadSpout} & \textbf{SplitSentenceBolt} & \textbf{CountBolt} & \textbf{CPU Utilisation} & \textbf{Resident Size} \\ \toprule
     1 & {25,767,502} & {25,767,502} & {225,815,174} & {217.9\%} & {690.8M} \\
     2 & {34,403,678} & {34,403,127} & {301,493,247} & {414.6\%} & {759.1M} \\
     3 & {45,731,188} & {45,732,988} & {400,767,999} & {611.5\%} & {798.4M} \\
     4 & {52,285,327} & {52,283,540} & {458,187,555} & {805.5\%} & {804.1M} \\
 	5 & {55,326,941} & {55,325,167} & {484,844,652} & {998.7\%} & {806.0M} \\
 	6 & {56,747,319} & {56,744,629} & {497,285,149} & {1,195.3\%} & {824.8M} \\
-	10 & {40,341,798} & {40,336,962} & {353,490,567} & {1967.4\%} & {} \\
-	20 & {60,798,276} & {60,790,475} & {532,737,413} & {3161.5\%} & {} \\
+	10 & {40,341,798} & {40,336,962} & {353,490,567} & {1,967.4\%} & {2.7G} \\
 \end{tabular}
 \caption{Storm-MC: Tuples processed per component in WordCount Topology.}
 \label{table:storm_mc_wordcount}
@@ -724,16 +761,15 @@ The number of tuples processed by each component in Storm-MC and Apache Storm is
 \begin{adjustwidth}{-0.5in}{-0.5in}
 \centering
 \small
-\begin{tabular}{@{}rrrrrr@{}}
-    {Parallelism} & {FileReadSpout} & {SplitSentenceBolt} & {CountBolt} & {CPU Utilisation} & {Memory Usage} \\ \toprule
+\begin{tabular}{@{}rccccl@{}}
+    \textbf{Parallelism} & \textbf{FileReadSpout} & \textbf{SplitSentenceBolt} & \textbf{CountBolt} & \textbf{CPU Utilisation} & \textbf{Resident Size} \\ \toprule
     1 & {12,583,377} & {12,579,132} & {110,233,966} & {294.5\%} & {2.2G} \\
     2 & {16,800,475} & {16,796,695} & {147,194,709} & {481.7\%} & {2.8G} \\
     3 & {22,120,695} & {22,107,696} & {193,735,106} & {687.1\%} & {2.6G} \\
     4 & {20,720,637} & {20,711,756} & {181,500,586} & {895.3\%} & {2.6G} \\
 	5 & {17,177,688} & {17,164,209} & {150,412,037} & {1,129.3\%} & {2.5G} \\
 	6 & {17,402,418} & {17,388,691} & {152,374,303} & {1,342.1\%} & {2.3G} \\
-	10 & {} & {} & {} & {\%} & {} \\
-	20 & {} & {} & {} & {\%} & {} \\
+	10 & {12,229,523} & {12,211,100} & {107,002,632} & {2,136.7\%} & {2.8G} \\
 \end{tabular}
 \caption{Apache Storm: Tuples processed per component in WordCount Topology.}
 \label{table:storm_wordcount}
@@ -741,7 +777,10 @@ The number of tuples processed by each component in Storm-MC and Apache Storm is
 \end{table}
 
 \begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[htb!]
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: methods}}\end{kframe}\begin{figure}[!htb]
 
 {\centering \includegraphics[width=\maxwidth]{figure/countbolt-plot-1} 
 
@@ -753,12 +792,10 @@ The number of tuples processed by each component in Storm-MC and Apache Storm is
 
 \end{knitrout}
 
-
-When the topology was run on Apache Storm in local mode, the process executed with 55 threads. Compared to that, running it on Storm-MC required only 5 threads: the main thread (1), one thread for each component (3), and a user timer used for topology metrics and ticks (1).
-
+Furthermore, it can be seen that after the parallelism is increased beyond three the throughput of Apache Storm tails off and starts going down. This can be attributed to the number of threads ran by Apache Storm. For Storm-MC this tailing off occurs with parallelism of six where the overhead of multiple producers possibly trying to publish to the same queue becomes apparent. Moreover, with parallelism set to 6, Storm-MC executes with 20 threads which is close to the number of physical cores of the machine. However, it should be noted that with parallelism equal to 10, Storm-MC still processes more than three times as many tuples.
 
 \begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[!htb]
 
 {\centering \includegraphics[width=\maxwidth]{figure/threads-plot-1} 
 
@@ -770,66 +807,86 @@ When the topology was run on Apache Storm in local mode, the process executed wi
 
 \end{knitrout}
 
+The number of threads required is a linear function of the parallelism for both Storm and Storm-MC. However, as shown in Figure \ref{fig:threads-plot}, the number of threads required by Storm increases more rapidly than Storm-MC. For example, with parallelism set to 10, Storm creates 109 threads whereas Storm-MC creates only 32. More formally, the number of threads required by both systems can be expressed as:
+
+\begin{figure}[!htb]
+\begin{eqnarray*}
+	49 \ + \ 2 \times \sum\limits_{c}^{components} parallelism(c) && \text{ for Apache Storm.} \\
+	2 \ + \ \sum\limits_{c}^{components} parallelism(c) && \text{ for Storm-MC.}
+\end{eqnarray*}
+\caption{Number of threads used by Storm and Storm-MC.}
+\end{figure}
+
+\textbf{N.B.}\@\xspace: This is a general formula that applies to all topologies, not just WordCount.
+
+Of note, the resident size used by Storm-MC is also about half of resident size used by Apache Storm. This could be explained by all the additional memory Storm has to allocate for inter-node communication.
+
 \subsection{Enron Topology}
 
-Next, we tested the Enron topology from the IBM benchmarks. In this topology, serialised emails from the Enron email database are read from a file by a spout. They are further deserialised by one bolt, filtered by another bolt, modified by yet another bolt and then finally metrics are recorded by another bolt.
+Next, we tested the Enron topology from the IBM benchmarks. In this topology, serialised emails from the Enron email dataset are read from a file by a \texttt{ReadEmailsDecompressSpout} spout. They are then deserialised by \texttt{AvroDeserializeBolt}, filtered by \texttt{NewFilterBolt}, modified by \texttt{ModifyBolt}, and finally metrics are recorded by the \texttt{NewMetricsBolt}. Additionally, executors running this bolt send their average email throughput every four seconds to one global \texttt{GlobalMetricsBolt} (excluded from the parallelism setting) which records the global average email throughput.
 
-Similarly, to the WordCount topology this topology is serial in nature. However, whereas the WordCount topology keeps the random sentences in memory, the Enron topology reads from a file. Thus, this benchmark is mostly I/O intensive.
+Similarly to the WordCount topology, this topology is serial in nature. However, whereas the WordCount topology keeps a small number of sentences in memory, the Enron topology has a spout that produces tuples by reading from a file. Thus, this benchmark is mostly I/O-bound. The average email throughput in Storm-MC and Apache Storm is shown in tables \ref{table:storm_mc_enron} and \ref{table:storm_enron}, respectively. 
 
-
-\medskip
 \begin{table}[!htb]
 \begin{adjustwidth}{-0.5in}{-0.5in}
 \centering
 \small
-\begin{tabular}{@{}llllll@{}}
-    {Parallelism} & {Email Throughput} & {CPU Utilisation} & {Memory Usage} \\ \toprule
-    1 & {10,868.89} & {297.7\%} & {806.8M} \\
-    2 & {22,150.44} & {482.1\%} & {756.1M} \\
-    3 & {28,079.70} & {729.5\%} & {341.4M} \\
-    4 & {36,717.50} & {1036.9\%} & {326.0M} \\
-    5 & {41,788.59} & {1311.0\%} & {260.8M} \\
-    6 & {46,595.78} & {1590.3\%} & {334.0M} \\
+\begin{tabular}{@{}rccl@{}}
+    \textbf{Parallelism} & \textbf{Emails Processed} & \textbf{CPU Utilisation} & \textbf{Resident Size} \\ \toprule
+    1 & {3,285,742} & {297.7\%} & {806.8M} \\
+    2 & {6,696,612} & {482.1\%} & {756.1M} \\
+    3 & {8,493,772} & {729.5\%} & {341.4M} \\
+    4 & {11,102,969} & {1036.9\%} & {326.0M} \\
+    5 & {12,630,475} & {1311.0\%} & {260.8M} \\
+    6 & {14,082,501} & {1590.3\%} & {334.0M} \\
 \end{tabular}
 \caption{Storm-MC: Email Throughput in Enron Topology.}
-\end{adjustwidth}
 \label{table:storm_mc_enron}
+\end{adjustwidth}
 \end{table}
-\medskip	
 
-
-\medskip
 \begin{table}[!htb]
 \begin{adjustwidth}{-0.5in}{-0.5in}
 \centering
 \small
-\begin{tabular}{@{}llllll@{}}
-    {Parallelism} & {Email Throughput} & {CPU Utilisation} & {Memory Usage} \\ \toprule
-    1 & {9,624.53} & {406.6\%} & {1.94G} \\
-    2 & {15,897.62} & {945.1\%} & {2.93G} \\
-    3 & {18,481.66} & {1,427.4\%} & {3.32G} \\
-    4 & {20,517.13} & {1,891.2\%} & {3.56G} \\
-    5 & {20,091.93} & {2167.4\%} & {3.65G} \\
-    6 & {23,769.80} & {2388.6\%} & {4.09G} \\
+\begin{tabular}{@{}rccl@{}}
+    \textbf{Parallelism} & \textbf{Emails Processed} & \textbf{CPU Utilisation} & \textbf{Resident Size} \\ \toprule
+    1 & {2,943,709} & {406.6\%} & {1.94G} \\
+    2 & {4,832,874} & {945.1\%} & {2.93G} \\
+    3 & {5,623,028} & {1,427.4\%} & {3.32G} \\
+    4 & {6,238,395} & {1,891.2\%} & {3.56G} \\
+    5 & {6,105,155} & {2167.4\%} & {3.65G} \\
+    6 & {7,242,298} & {2388.6\%} & {4.09G} \\
 \end{tabular}
 \caption{Apache Storm: Email Throughput in Enron Topology.}
-\end{adjustwidth}
 \label{table:storm_enron}
+\end{adjustwidth}
 \end{table}
-\medskip
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}[!htb]
+
+{\centering \includegraphics[width=\maxwidth]{figure/enron-plot-1} 
+
+}
+
+\caption[Global Email Throughput over time]{Global Email Throughput over time}\label{fig:enron-plot}
+\end{figure}
+
+
+\end{knitrout}
+
+As can be seen from the tables, the difference in throughput in Enron Topology is less staggering than in WordCount. We believe this is due to the fact that the throughput is limited by the file reads in the spout. However, as the parallelism increases the improvement in throughput of Storm-MC becomes more apparent as shown in Figure \ref{fig:enron-plot}. This figure also shows that the throughput is fairly volatile. This could be due to the fact that the file is loaded into main memory in chunks and hence the throughput drops when the spout is trying to read from a file in between these chunks.
 
 \subsection{RollingSort Topology}
 
-The RollingSort topology is ported over from the aforementioned storm-benchmark project. This topology includes one spout and one bolt. The spout produces hundred character-long strings of random digits from zero to eight. The bolt stores a rolling window of hundred of these messages and sorts them every \textbf{x} seconds.
+The RollingSort topology was ported over from the aforementioned storm-benchmark project. This topology only includes one spout and one bolt. The spout produces hundred character-long strings of random digits from zero to eight. The bolt stores a rolling window of hundred of these messages and sorts them every 10 seconds. This benchmark is considered to be memory-bound: a bolt stores a window of tuples in memory and performs a non-linear time sort. The results of running this benchmark on Storm-MC and Apache Storm can be seen in tables \ref{table:storm_mc_rolling} and \ref{table:storm_rolling}.
 
-This benchmark is included because it is considered memory-intensive.
-
-\medskip
 \begin{table}[!htb]
 \begin{adjustwidth}{-0.5in}{-0.5in}
 \centering
 \small
-\begin{tabular}{@{}llllll@{}}
+\begin{tabular}{@{}rccccl@{}}
     {Parallelism} & {RandomMessageSpout} & {SortBolt} & {CPU Utilisation} & {Memory Usage} \\ \toprule
     1 & {249,143,444} & {249,142,400} & {186.2\%} & {504.3M} \\
     2 & {444,261,351} & {444,259,400} & {352.0\%} & {401.7M} \\
@@ -837,20 +894,21 @@ This benchmark is included because it is considered memory-intensive.
     4 & {412,429,850} & {412,428,600} & {675.2\%} & {314.2M} \\
     5 & {470,813,184} & {470,811,300} & {835.8\%} & {423.2M} \\
     6 & {498,957,255} & {498,954,600} & {989.6\%} & {235.1M} \\
+    7 & {519,744,352} & {519,741,700} & {1,149.0\%} & {637.9M} \\
+    8 & {532,285,376} & {532,283,800} & {1,302.9\%} & {618.1M} \\
+    9 & {501,519,539} & {501,517,700} & {1,430.4\%} & {579.4M} \\
+    10 & {555,468,830} & {555,467,000} & {1,651.6\%} & {564.7M} \\ 
 \end{tabular}
 \caption{Storm-MC: Tuples processed per component in RollingSort Topology.}
 \end{adjustwidth}
 \label{table:storm_mc_rolling}
 \end{table}
-\medskip	
 
-
-\medskip
 \begin{table}[!htb]
 \begin{adjustwidth}{-0.5in}{-0.5in}
 \centering
 \small
-\begin{tabular}{@{}llllll@{}}
+\begin{tabular}{@{}rccccl@{}}
     {Parallelism} & {RandomMessageSpout} & {SortBolt} & {CPU Utilisation} & {Memory Usage} \\ \toprule
     1 & {173,906,935} & {173,900,300} & {267.3\%} & {3.0G} \\
     2 & {226,583,924} & {226,579,200} & {468.3\%} & {3.0G} \\
@@ -858,14 +916,17 @@ This benchmark is included because it is considered memory-intensive.
     4 & {362,675,336} & {362,663,600} & {815.2\%} & {2.8G} \\
     5 & {409,470,032} & {409,462,100} & {969.4\%} & {2.7G} \\
     6 & {435,471,042} & {435,459,600} & {1139.6\%} & {2.6G} \\
+    7 & {395,386,336} & {395,309,900} & {\%} & {} \\
+    8 & {366,680,402} & {366,553,300} & {\%} & {} \\
+    9 & {359,091,633} & {358,942,200} & {\%} & {} \\
+    10 & {313,912,451} & {313,811,300} & {\%} & {} \\
 \end{tabular}
 \caption{Apache Storm: Tuples processed per component in RollingSort Topology.}
 \end{adjustwidth}
 \label{table:storm_rolling}
 \end{table}
-\medskip
 
-\todo{change x depending on the actual benchmark.}
+While Storm-MC still outperforms Apache Storm, the difference in performance is marginal. This is due to the fact that the topology only has two components and the application is mostly memory bound. Performance of Storm-MC shines on topologies that are either CPU-bound and have several components working serially such as WordCount.
 
 \section{Challenges}
 \label{sec:challenges}
@@ -874,7 +935,7 @@ In this section we are going to discuss challenges we encountered while porting 
 
 \begin{description}
 	\item[Unfamiliarity with Clojure] \hfill \\
-	
+	One of the main
 	\item[Lack of Documentation] \hfill \\
 	
 \end{description}

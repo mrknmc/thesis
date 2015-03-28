@@ -1,6 +1,6 @@
 \chapter{Background}
 
-In this chapter we give background information necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm \ref{sec:storm_overview}, explain the concepts (\ref{sec:concepts}) used in Storm, show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), and finally  describe the serialisation used by Storm.
+In this chapter we give background information necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm (\ref{sec:storm_overview}), explain the concepts used in Storm (\ref{sec:concepts}), show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), and finally describe the serialisation used by Storm (\ref{sec:serialisation}).
 
 \section{Storm Overview}
 \label{sec:storm_overview}
@@ -107,7 +107,7 @@ The master node runs a server daemon called Nimbus. The main role of Nimbus is t
 	\item[Distribute the topology source code] \hfill \\
 	Nimbus ensures that the workers involved in the topology computation have the source code by sending it to all nodes of the cluster.
 	\item[Schedule the topology] \hfill \\
-	Nimbus runs a scheduler that distributes the work among workers of the cluster. Similarly to validation, the user can use his own scheduler by implementing the \texttt{IScheduler} interface or use the default scheduler provided by Storm. The default scheduler uses a simple Round-robin strategy. \citep{Aniello_Baldoni_Querzoni_2013}
+	Nimbus runs a scheduler that distributes the work among workers of the cluster. Similarly to validation, the user can use his own scheduler by implementing the \texttt{IScheduler} interface or use the default scheduler provided by Storm. The default scheduler uses a simple Round-robin strategy \citep{Aniello_Baldoni_Querzoni_2013}.
 	\item[Activate the topology] \hfill \\
 	Nimbus transitions the topology to active state which tells the worker nodes to start executing it.
 	\item[Monitor the topology] \hfill \\

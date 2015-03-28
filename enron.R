@@ -1,11 +1,10 @@
-# ---- countbolt-plot ----
+# ---- enron-plot ----
 
 library("ggplot2")
 library("ggthemes")
 library("reshape2")
 library(scales)
 library(grid)
-
 
 format_si <- function(...) {
   # Format a vector of numeric values according
@@ -44,18 +43,22 @@ format_si <- function(...) {
   }
 }
 
-mat <- read.csv(file="csv/count.csv")
-# melt by parallelism
-t <- melt(mat, id.vars=c("parallelism"))
-# create plot
-k <- ggplot(t, aes(x=parallelism, y=value, fill=variable, color=variable)) +
+mat <- read.csv(file="csv/enron.csv")
+# Compute global throughput
+mat$value <- mat$value * mat$parallelism
+# Add header label
+mat$parallelism <- paste("Parallelism:", mat$parallelism)
+# Convert back to seconds
+mat$time <- mat$time * 4
+# Take every second measurement
+t <- mat[seq(1, nrow(mat), 2), ]
+k <- ggplot(t, aes(x=time, y=value,fill=variable,color=variable)) +
+    facet_wrap(~parallelism, nrow = 3, ncol = 2, scales="free") +
     scale_fill_grey(end=0.7, name="Library", labels=c("Apache Storm", "Storm-MC")) +
     scale_colour_grey(end=0.7, name="Library", labels=c("Apache Storm", "Storm-MC")) +
+    scale_y_continuous(labels=format_si(), name="Global Throughput (Emails / s)\n") +
     theme_bw() +
-    theme(legend.position="top", legend.key = element_blank())
+    theme(legend.position="top", legend.key = element_blank()) +
+    xlab("\nTime (seconds)")
 
-k + geom_line(size=1.5) + geom_point(size=4, type=21) +
-    scale_y_continuous(limits=c(0, 550000000), labels=format_si(), name="Tuples Processed\n") +
-    scale_x_continuous(breaks=1:10, name="\nParallelism")
-    #geom_hline(yintercept=0, size=0.4, color="black")
-
+k + geom_point() + geom_line() + geom_smooth(method = "lm", se=FALSE, color="red", aes(group=variable))

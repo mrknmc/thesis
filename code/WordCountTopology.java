@@ -8,5 +8,5 @@ public class WordCountTopology {
                 new WordCount(), 12).fieldsGrouping("split", new Fields("word"));
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("word-count", conf, builder.createTopology());
-  }
+    }
 }
