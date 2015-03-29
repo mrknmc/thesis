@@ -85,9 +85,9 @@ In the subsequent sections we will show that these threads were in fact unnecess
 \section{Storm-MC Design}
 \label{sec:storm_mc_arch}
 
-The design we adopted for porting worker nodes is to only have one worker process running all the executor threads of a topology.
+The design we adopted for porting worker nodes is to only have one worker executing all the executors of a topology. This design simplified the communication model and removed unnecessary abstractions.
 
-Additionally, the code for the Nimbus service was merged with the worker. This was done because there is no need to run Nimbus and worker specific code at the same time. Once Nimbus sets up the topology, all the work is done by the worker. Hence they can be executed serially.
+Additionally, the code for the Nimbus service was merged with the worker. This was done because there is no need to run Nimbus and worker specific code in parallel. Once Nimbus sets up the topology, all the work is done by the worker. Hence they can be executed serially.
 
 \subsection{Nimbus}
 
