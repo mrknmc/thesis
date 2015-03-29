@@ -9,7 +9,6 @@
 % MAKE TABLES STICK OUT
 \usepackage{chngpage}
 
-
 % TEXT IN MATH MODE
 \usepackage{amsmath}
 
