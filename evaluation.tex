@@ -1,6 +1,6 @@
 \chapter{Evaluation}
 
-In this chapter we evaluate Storm-MC. We describe the metrics used to evaluate performance of Storm-MC (\ref{sec:metrics}), list the configuration used for benchmarking (\ref{sec:system_conf}), compare Storm-MC to Apache Storm executing in local mode on a set of different topologies (\ref{sec:performance}), and finally talk about challenges encountered while designing Storm-MC (\ref{sec:challenges}).
+This chapter evaluates Storm-MC. We describe the metrics used to evaluate performance of Storm-MC (\ref{sec:metrics}), list the configuration used for benchmarking (\ref{sec:system_conf}), compare Storm-MC to Apache Storm executing in local mode on a set of different topologies (\ref{sec:performance}), and finally talk about challenges encountered while designing Storm-MC (\ref{sec:challenges}).
 
 \section{Evaluation Metrics}
 \label{sec:metrics}
@@ -9,11 +9,11 @@ The system was evaluated on the following metrics:
 
 \begin{description}
 	\item[Throughput] \hfill \\
-	The number of tuples processed by every component in the given time of the topology is recorded.
+	The number of tuples processed by every component of the topology in the given time is recorded.
 	\item[CPU Utilisation] \hfill \\
-	Usage of CPU is recorded every \textbf{x} seconds throughout execution and the average is computed.
-	\item[Memory Usage] \hfill \\
-	Main memory usage is recorded every \textbf{x} seconds throughout execution and the average is computed.
+	The CPU utilisation is recorded every second throughout program execution and the average is computed.
+	\item[Resident Memory Size] \hfill \\
+	The resident size of main memory is recorded every second throughout program execution and the average is computed.
 \end{description}
 
 \section{System Configuration}
@@ -24,23 +24,34 @@ The system was evaluated on the following metrics:
 All performance benchmarks were ran using the following software packages:
 
 \begin{itemize}
-	\item Apache Storm version 0.9.2
-	\item Storm-MC version 0.1.6
-	\item A fork of IBM Storm Email Benchmarks version 0.1.10
-	\item Storm-benchmark version 0.1.0
+	\item Apache Storm version 0.9.2 \footnote{\url{https://github.com/mrknmc/storm/releases/v0.9.2-fix}}
+	\item Storm-MC version 0.1.6 \footnote{\url{https://github.com/mrknmc/storm-mc/releases/0.1.6}}
+	\item A fork of IBM Storm Email Benchmarks version 0.1.12 \footnote{\url{https://github.com/mrknmc/benchmarks/releases/0.1.12}}
+	\item Storm-benchmark version 0.1.0 \footnote{\url{https://github.com/manuzhang/storm-benchmark}}
 \end{itemize}
 
 The Apache Storm source code had to be adapted to include a workaround for a deadlock bug present in version 0.9.2. This bug caused a topology to exit with threads left in Zombie state under certain conditions. This prevented Storm from logging the benchmark metrics after execution. Hence a workaround was added so the results were logged.
 
 Version 0.1.6 is the latest version of Storm-MC as of this moment. The first release was version 0.1.0 which was production-ready but since then there were 6 minor versions fixing bugs as they were discovered during testing.
 
-IBM open sourced a suite of benchmarks which they used to compare Apache Storm to their real-time stream system IBM Infosphere Streams \citep{InfoSphereStreams}. These benchmarks were adapted and used to benchmark Storm-MC against Apache Storm.
+IBM open sourced a suite of benchmarks which they used to compare Apache Storm to their real-time stream system IBM Infosphere Streams \citep{InfoSphereStreams}. These benchmarks were adapted and used to benchmark Storm-MC against Apache Storm. The current version is 0.1.12.
 
 Finally, a number of spout and bolt components were used from the storm-benchmark project which Apache Storm developers use to benchmark Storm.
 
-Since Storm-MC reuses package names from Apache Storm, the same benchmark is directly executable by both libraries. This saved a lot of time and furthermore there is no need to maintain two benchmarks suites.
+Since Storm-MC reuses package names from Apache Storm, the same benchmark is directly executable by both libraries. This saved a lot of time and furthermore there is no need to maintain two benchmarks suites. An example topology submission to Storm-MC and Apache Storm, respectively would look as follows:
 
-\todo{Go into more detail which components were re-used and where?}
+\begin{minted}{bash}
+java -Dstorm.home=storm-mc -cp storm-multicore-0.1.6.jar
+    ...
+    -Dstorm.jar=storm-email-benchmark.jar
+    com.ibm.streamsx.storm.email.benchmark.FileReadWordCount wordcount
+java -Dstorm.home=apache-storm -cp storm-core-0.9.2-incubating.jar
+    ...
+    -Dstorm.jar=storm-email-benchmark.jar
+    com.ibm.streamsx.storm.email.benchmark.FileReadWordCount wordcount
+\end{minted}
+
+In this example the Storm home directory was set, the corresponding library was added to the Java classpath, the JAR file containing the benchmark was submitted, and the main class and topology name were specified.
 
 \subsection{Hardware Setup}
 
@@ -55,16 +66,14 @@ The machine used for benchmarking is the Informatics Student Compute server (\te
 
 \subsection{Storm Configuration}
 
-As mentioned before, when submitting a topology the programmer needs to submit a configuration file as well. To ensure that the performance difference between Apache Storm and Storm-MC was not caused by different configuration, the default configuration file from Storm 0.9.2 was used to benchmark both projects.
-
-%Most notably, the size of the ring buffer used by executors (\texttt{topology.executor.receive.buffer.size}) was set to 1024 and the wait strategy employed by executors when there are no tuples to pick up (\texttt{topology.disruptor.wait.strategy}) was set to \texttt{BlockingWaitStrategy}.
+As mentioned before, when submitting a topology the programmer needs to submit a configuration file as well. To ensure that the performance difference between Apache Storm and Storm-MC was not caused by different configuration, the default configuration file from Storm 0.9.2 was used to benchmark both projects. Most notably, the size of the ring buffer used by executors \\ (\texttt{topology.executor.receive.buffer.size}) was set to 1024 and the wait strategy employed by executors when there are no tuples to pick up \\ (\texttt{topology.disruptor.wait.strategy}) was set to \texttt{BlockingWaitStrategy}.
 
 \section{Results}
 \label{sec:performance}
 
-To assess performance of Storm-MC, 4 different benchmarks were executed, each with a different focus. The benchmarks were executed for a constant period of time (five minutes) after which the system was killed and metrics were collected. To avoid any performance differences caused by varying amounts of heap memory required by the tested systems, the programs were run with the following flag: \texttt{-Xmx10240M}. This flag sets the maximum amount of heap memory used by the JVM to 10 GB which was more than enough for all benchmarks.
+To assess performance of Storm-MC, 3 different benchmarks were executed, each with a different focus. The benchmarks were executed for a constant period of time - five minutes - after which the system was killed and metrics were collected. To avoid any performance differences caused by varying amounts of heap memory required by the tested systems, the programs were run with the following flag: \texttt{-Xmx10240M}. This flag sets the maximum amount of heap memory used by the JVM to 10 GB which was more than enough for all benchmarks.
 
-The parallelism of components was varied from one to six and average CPU utilisation and resident memory size were recorded by the Unix \texttt{top} program \citep{UnixTop}. Maximum CPU utilisation with 40 threads is 4,000\%. Resident memory size is the amount of non-swapped physical memory a task has used. This metric can be deceiving as it depends on how OS manages memory but it is the only fairly reliable memory metric reported by \texttt{top} that can be used for Java programs.
+The parallelism of components was varied from one to six and average CPU utilisation and resident memory size were recorded by the Unix \texttt{top} program \citep{UnixTop}. Maximum CPU utilisation with 40 threads is 4,000\%. Resident memory size is the amount of non-swapped physical memory a task has used. This metric can be deceiving as it depends on how OS manages memory but it is the only fairly reliable memory metric reported by \texttt{top} that can be used for Java programs. We only employ this metric to show proportional difference in memory usage between Storm and Storm-MC.
 
 \subsection{WordCount Topology}
 
@@ -136,7 +145,7 @@ Of note, the resident size used by Storm-MC is also less than half of the reside
 
 \subsection{Enron Topology}
 
-Next, Enron topology from the IBM benchmarks was tested for performance. In this topology, serialised emails from the Enron email dataset are read from a file by a \texttt{ReadEmailsDecompressSpout} spout. They are then deserialised by \texttt{AvroDeserializeBolt} bolt, filtered by \texttt{NewFilterBolt} bolt, modified by \texttt{ModifyBolt} bolt, and finally metrics are recorded by a \texttt{NewMetricsBolt} bolt. Additionally, the \texttt{NewMetricsBolt} bolt sends its local average email throughput to a global (excluded from the parallelism setting) \texttt{GlobalMetricsBolt} bolt every four seconds. This bolt then records the global average email throughput.
+Next, Enron topology from the IBM benchmarks was tested for performance. In this topology, serialised emails from the Enron email dataset are read from a file by a \texttt{ReadEmailsDecompressSpout} spout. They are then deserialised by \texttt{AvroDeserializeBolt} bolt, filtered by \texttt{NewFilterBolt} bolt, modified by \texttt{ModifyBolt} bolt, and finally metrics are recorded by a \texttt{NewMetricsBolt} bolt. Additionally, every instance of the \texttt{NewMetricsBolt} bolt sends its local average email throughput to a global (excluded from the parallelism setting) \texttt{GlobalMetricsBolt} bolt every four seconds. This bolt then records the global average email throughput.
 
 Similarly to the WordCount topology, this topology is serial in nature. However, whereas the spout in  WordCount topology keeps a small number of sentences in memory, the Enron topology has a spout that produces tuples by reading from a file. Thus, this benchmark is mostly I/O-bound. The average email throughput in Storm-MC and Apache Storm is shown in tables \ref{table:storm_mc_enron} and \ref{table:storm_enron}, respectively. 
 
@@ -230,46 +239,6 @@ The RollingSort topology was ported over from the aforementioned storm-benchmark
 \end{table}
 
 While Storm-MC still outperforms Apache Storm, the difference in performance is marginal. This is due to the fact that the topology only has two components and the application is mostly memory bound. Storm-MC provides speed improvements for topologies that are mostly CPU-bound and have several components working serially such as WordCount. Furthermore, Storm-MC beats Storm significantly when the parallelism is high, as in previous topologies.
-
-\subsection{Twitter Topology}
-
-The last benchmark that was executed is Twitter topology. It has a \texttt{TwitterSpout} spout generating a group of Twitter hashtags each with a different probability. The hashtags are sent to a \texttt{WordCountBolt}  bolt which counts hashtag frequency, similarly to WordCount topology. The hashtag is then sent along with the current frequency to the \texttt{RankObjects} bolt which keeps the ten most popular hashtags in memory. This bolt sends the ten most popular hashtags to a global \texttt{MergeObjects} bolt at a regular interval (two seconds) which merges results from all \texttt{RankObjects} bolts. The results of running this benchmark on Storm-MC and Apache Storm can be seen in tables \ref{table:storm_mc_twitter} and \ref{table:storm_twitter}, respectively.
-
-%\begin{table}[!htb]
-%\begin{adjustwidth}{-0.5in}{-0.5in}
-%\centering
-%\small
-%\begin{tabular}{@{}rcccccl@{}}
-%    {Parallelism} & {TwitterSpout} & {WordCountBolt} & {RankObjects} & {CPU Utilisation} & {Memory Usage} \\ \toprule
-%    1 & {51,698,434} & {51,697,410} & {51,696,914} & {\%} & {} \\
-%    2 & {38,115,722} & {38,114,090} & {38,113,874} & {\%} & {} \\
-%    3 & {} & {} & {} & {\%} & {} \\
-%    4 & {} & {} & {} & {\%} & {} \\
-%    5 & {} & {} & {} & {\%} & {} \\
-%    6 & {14,} & {} & {} & {\%} & {} \\
-%\end{tabular}
-%\caption{Storm-MC: Tuples processed per component in Twitter Topology.}
-%\label{table:storm_mc_twitter}
-%\end{adjustwidth}
-%\end{table}
-%
-%\begin{table}[!htb]
-%\begin{adjustwidth}{-0.5in}{-0.5in}
-%\centering
-%\small
-%\begin{tabular}{@{}rcccccl@{}}
-%    {Parallelism} & {TwitterSpout} & {WordCountBolt} & {RankObjects} & {CPU Utilisation} & {Memory Usage} \\ \toprule
-%    1 & {37,705,615} & {37,705,435} & {37,705,523} & {\%} & {} \\
-%    2 & {30,978,183} & {30,978,180} & {30,978,221} & {\%} & {} \\
-%    3 & {14,468,426} & {14,468,425} & {14,468,478} & {\%} & {} \\
-%    4 & {12,742,123} & {12,742,159} & {12,742,219} & {\%} & {} \\
-%    5 & {12,318,329} & {12,318,373} & {12,318,431} & {\%} & {} \\
-%    6 & {11,843,872} & {11,843,898} & {11,843,983} & {\%} & {} \\
-%\end{tabular}
-%\caption{Apache Storm: Tuples processed per component in Twitter Topology.}
-%\label{table:storm_twitter}
-%\end{adjustwidth}
-%\end{table}
 
 \section{Challenges}
 \label{sec:challenges}
