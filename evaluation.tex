@@ -235,41 +235,41 @@ While Storm-MC still outperforms Apache Storm, the difference in performance is 
 
 The last benchmark that was executed is Twitter topology. It has a \texttt{TwitterSpout} spout generating a group of Twitter hashtags each with a different probability. The hashtags are sent to a \texttt{WordCountBolt}  bolt which counts hashtag frequency, similarly to WordCount topology. The hashtag is then sent along with the current frequency to the \texttt{RankObjects} bolt which keeps the ten most popular hashtags in memory. This bolt sends the ten most popular hashtags to a global \texttt{MergeObjects} bolt at a regular interval (two seconds) which merges results from all \texttt{RankObjects} bolts. The results of running this benchmark on Storm-MC and Apache Storm can be seen in tables \ref{table:storm_mc_twitter} and \ref{table:storm_twitter}, respectively.
 
-\begin{table}[!htb]
-\begin{adjustwidth}{-0.5in}{-0.5in}
-\centering
-\small
-\begin{tabular}{@{}rcccccl@{}}
-    {Parallelism} & {TwitterSpout} & {WordCountBolt} & {RankObjects} & {CPU Utilisation} & {Memory Usage} \\ \toprule
-    1 & {51,698,434} & {51,697,410} & {51,696,914} & {\%} & {} \\
-    2 & {38,115,722} & {38,114,090} & {38,113,874} & {\%} & {} \\
-    3 & {} & {} & {} & {\%} & {} \\
-    4 & {} & {} & {} & {\%} & {} \\
-    5 & {} & {} & {} & {\%} & {} \\
-    6 & {} & {} & {} & {\%} & {} \\
-\end{tabular}
-\caption{Storm-MC: Tuples processed per component in Twitter Topology.}
-\label{table:storm_mc_twitter}
-\end{adjustwidth}
-\end{table}
-
-\begin{table}[!htb]
-\begin{adjustwidth}{-0.5in}{-0.5in}
-\centering
-\small
-\begin{tabular}{@{}rcccccl@{}}
-    {Parallelism} & {TwitterSpout} & {WordCountBolt} & {RankObjects} & {CPU Utilisation} & {Memory Usage} \\ \toprule
-    1 & {37,705,615} & {37,705,435} & {37,705,523} & {\%} & {} \\
-    2 & {30,978,183} & {30,978,180} & {30,978,221} & {\%} & {} \\
-    3 & {14,468,426} & {14,468,425} & {14,468,478} & {\%} & {} \\
-    4 & {12,742,123} & {12,742,159} & {12,742,219} & {\%} & {} \\
-    5 & {12,318,329} & {12,318,373} & {12,318,431} & {\%} & {} \\
-    6 & {11,843,872} & {11,843,898} & {11,843,983} & {\%} & {} \\
-\end{tabular}
-\caption{Apache Storm: Tuples processed per component in Twitter Topology.}
-\label{table:storm_twitter}
-\end{adjustwidth}
-\end{table}
+%\begin{table}[!htb]
+%\begin{adjustwidth}{-0.5in}{-0.5in}
+%\centering
+%\small
+%\begin{tabular}{@{}rcccccl@{}}
+%    {Parallelism} & {TwitterSpout} & {WordCountBolt} & {RankObjects} & {CPU Utilisation} & {Memory Usage} \\ \toprule
+%    1 & {51,698,434} & {51,697,410} & {51,696,914} & {\%} & {} \\
+%    2 & {38,115,722} & {38,114,090} & {38,113,874} & {\%} & {} \\
+%    3 & {} & {} & {} & {\%} & {} \\
+%    4 & {} & {} & {} & {\%} & {} \\
+%    5 & {} & {} & {} & {\%} & {} \\
+%    6 & {14,} & {} & {} & {\%} & {} \\
+%\end{tabular}
+%\caption{Storm-MC: Tuples processed per component in Twitter Topology.}
+%\label{table:storm_mc_twitter}
+%\end{adjustwidth}
+%\end{table}
+%
+%\begin{table}[!htb]
+%\begin{adjustwidth}{-0.5in}{-0.5in}
+%\centering
+%\small
+%\begin{tabular}{@{}rcccccl@{}}
+%    {Parallelism} & {TwitterSpout} & {WordCountBolt} & {RankObjects} & {CPU Utilisation} & {Memory Usage} \\ \toprule
+%    1 & {37,705,615} & {37,705,435} & {37,705,523} & {\%} & {} \\
+%    2 & {30,978,183} & {30,978,180} & {30,978,221} & {\%} & {} \\
+%    3 & {14,468,426} & {14,468,425} & {14,468,478} & {\%} & {} \\
+%    4 & {12,742,123} & {12,742,159} & {12,742,219} & {\%} & {} \\
+%    5 & {12,318,329} & {12,318,373} & {12,318,431} & {\%} & {} \\
+%    6 & {11,843,872} & {11,843,898} & {11,843,983} & {\%} & {} \\
+%\end{tabular}
+%\caption{Apache Storm: Tuples processed per component in Twitter Topology.}
+%\label{table:storm_twitter}
+%\end{adjustwidth}
+%\end{table}
 
 \section{Challenges}
 \label{sec:challenges}
