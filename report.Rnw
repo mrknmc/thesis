@@ -103,10 +103,9 @@ We show that running applications on Storm-MC can provide substantial improvemen
 \section*{Acknowledgements}
 I would like to thank my supervisor, Dr. Stratis Viglas, for providing guidance every step of the way.
 
-Furthermore, I would like to thank Daniela Kellerova who made sure I do not go insane while working on this project.
+Furthermore, I would like to thank my parents who supported me during my studies at the University of Edinburgh. Without them this project would not be possible.
 
-Finally, I would like to thank my parents who supported my studies at the University of Edinburgh. Without them this project would not be possible.
-
+Finally, I would like to thank Daniela Kellerova who made sure I do not go insane while working on this project.
 \pagenumbering{Roman}
 
 \tableofcontents

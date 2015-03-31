@@ -44,7 +44,7 @@ During profiling we found that a topology with one worker and three executors wa
 \begin{table}[htb!]
 \centering
 \small
-\begin{tabular}{@{}ll@{}}
+\begin{tabular}{@{}lc@{}}
     \textbf{Spout Parallelism} & \textbf{\# of Threads} \\ \toprule
     Main Thread & 1  \\
 	Worker Sender \& Receiver Threads & 2  \\
@@ -54,7 +54,7 @@ During profiling we found that a topology with one worker and three executors wa
     Various Timers \& Event Loops & 14  \\
     Zookeper Server & 28  \\
 \end{tabular}
-\caption{Threads used by Storm to execute a topology with three executors.}
+\caption[Storm thread usage]{Storm thread usage: topology with three executors.}
 \label{table:breakdown}
 \end{table}
 
@@ -69,7 +69,7 @@ To find out what state the threads were actually in at any given time the topolo
 	TIMED WAITING & 22  \\
     WAITING & 25  \\
 \end{tabular}
-\caption{Average number of recorded thread states over a three minute period.}
+\caption[Storm thread states]{Storm thread states: topology with three executors}
 \label{table:dump}
 \end{table}
 

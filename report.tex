@@ -122,10 +122,9 @@ We show that running applications on Storm-MC can provide substantial improvemen
 \section*{Acknowledgements}
 I would like to thank my supervisor, Dr. Stratis Viglas, for providing guidance every step of the way.
 
-Furthermore, I would like to thank Daniela Kellerova who made sure I do not go insane while working on this project.
+Furthermore, I would like to thank my parents who supported me during my studies at the University of Edinburgh. Without them this project would not be possible.
 
-Finally, I would like to thank my parents who supported my studies at the University of Edinburgh. Without them this project would not be possible.
-
+Finally, I would like to thank Daniela Kellerova who made sure I do not go insane while working on this project.
 \pagenumbering{Roman}
 
 \tableofcontents
@@ -497,7 +496,7 @@ During profiling we found that a topology with one worker and three executors wa
 \begin{table}[htb!]
 \centering
 \small
-\begin{tabular}{@{}ll@{}}
+\begin{tabular}{@{}lc@{}}
     \textbf{Spout Parallelism} & \textbf{\# of Threads} \\ \toprule
     Main Thread & 1  \\
 	Worker Sender \& Receiver Threads & 2  \\
@@ -507,7 +506,7 @@ During profiling we found that a topology with one worker and three executors wa
     Various Timers \& Event Loops & 14  \\
     Zookeper Server & 28  \\
 \end{tabular}
-\caption{Threads used by Storm to execute a topology with three executors.}
+\caption[Storm thread usage]{Storm thread usage: topology with three executors.}
 \label{table:breakdown}
 \end{table}
 
@@ -522,7 +521,7 @@ To find out what state the threads were actually in at any given time the topolo
 	TIMED WAITING & 22  \\
     WAITING & 25  \\
 \end{tabular}
-\caption{Average number of recorded thread states over a three minute period.}
+\caption[Storm thread states]{Storm thread states: topology with three executors}
 \label{table:dump}
 \end{table}
 
@@ -816,7 +815,7 @@ The number of tuples processed by each component in Storm-MC and Apache Storm is
 	6 & {56,747,319} & {56,744,629} & {497,285,149} & {1,195.3\%} & {824.8M} \\
 	10 & {40,341,798} & {40,336,962} & {353,490,567} & {1,967.4\%} & {2.7G} \\
 \end{tabular}
-\caption{Storm-MC: Tuples processed per component in WordCount Topology.}
+\caption{Storm-MC: Component throughput in WordCount Topology.}
 \label{table:storm_mc_wordcount}
 \end{adjustwidth}
 \end{table}
@@ -835,7 +834,7 @@ The number of tuples processed by each component in Storm-MC and Apache Storm is
 	6 & {17,402,418} & {17,388,691} & {152,374,303} & {1,342.1\%} & {2.3G} \\
 	10 & {12,229,523} & {12,211,100} & {107,002,632} & {2,136.7\%} & {2.8G} \\
 \end{tabular}
-\caption{Apache Storm: Tuples processed per component in WordCount Topology.}
+\caption{Apache Storm: Component throughput in WordCount Topology.}
 \label{table:storm_wordcount}
 \end{adjustwidth}
 \end{table}
@@ -847,7 +846,7 @@ The number of tuples processed by each component in Storm-MC and Apache Storm is
 
 }
 
-\caption[Tuples processed by CountBolt in Storm-MC and Apache Storm]{Tuples processed by CountBolt in Storm-MC and Apache Storm}\label{fig:countbolt-plot}
+\caption[CountBolt throughput in Apache Storm and Storm-MC]{CountBolt throughput in Apache Storm and Storm-MC}\label{fig:countbolt-plot}
 \end{figure}
 
 
@@ -862,7 +861,7 @@ Furthermore, it can be seen that after the parallelism is increased beyond three
 
 }
 
-\caption[Number of threads used by Storm and Storm-MC]{Number of threads used by Storm and Storm-MC}\label{fig:threads-plot}
+\caption[Number of threads used by Apache Storm and Storm-MC]{Number of threads used by Apache Storm and Storm-MC}\label{fig:threads-plot}
 \end{figure}
 
 
@@ -875,7 +874,7 @@ The number of threads required to execute a topology is a linear function of the
 	49 \ + \ 2 \times \sum\limits_{c}^{components} parallelism(c) && \text{ for Apache Storm.} \\
 	2 \ + \ \sum\limits_{c}^{components} parallelism(c) && \text{ for Storm-MC.}
 \end{eqnarray*}
-\caption{Number of threads used by Storm and Storm-MC.}
+\caption{Number of threads used by Apache Storm and Storm-MC.}
 \end{figure}
 
 \textbf{N.B.}\@\xspace: This is a general formula that applies to all topologies, not just WordCount.
@@ -940,7 +939,7 @@ Similarly to the WordCount topology, this topology is serial in nature. However,
 
 }
 
-\caption[Global Email Throughput over time]{Global Email Throughput over time. Standard error shown in light grey.}\label{fig:enron-plot}
+\caption[Global email throughput over time with standard error]{Global email throughput over time with standard error.}\label{fig:enron-plot}
 \end{figure}
 
 
@@ -978,7 +977,7 @@ This benchmark is considered to be memory-bound: the bolt stores a window of tup
     9 & {501,519,539} & {501,517,700} & {1,430.4\%} & {579.4M} \\
     10 & {555,468,830} & {555,467,000} & {1,651.6\%} & {564.7M} \\ 
 \end{tabular}
-\caption{Storm-MC: Tuples processed per component in RollingSort Topology.}
+\caption{Storm-MC: Component throughput in RollingSort Topology.}
 \label{table:storm_mc_rolling}
 \end{adjustwidth}
 \end{table}
@@ -1000,7 +999,7 @@ This benchmark is considered to be memory-bound: the bolt stores a window of tup
     9 & {359,091,633} & {358,942,200} & {1,689.5\%} & {2.7G} \\
     10 & {313,912,451} & {313,811,300} & {1,889.5\%} & {2.7G} \\
 \end{tabular}
-\caption{Apache Storm: Tuples processed per component in RollingSort Topology.}
+\caption{Apache Storm: Component throughput in RollingSort Topology.}
 \label{table:storm_rolling}
 \end{adjustwidth}
 \end{table}
@@ -1010,11 +1009,13 @@ While Storm-MC still outperforms Apache Storm, the difference in performance is 
 \section{Challenges}
 \label{sec:challenges}
 
-In this section we are going to discuss challenges we encountered while porting Apache Storm to multi-core machines.
+In this section we are going to discuss challenges we encountered while porting Apache Storm to multi-core machines. We also try to provide a critical analysis of the project.
 
 \begin{description}
+	\item[Backwards Compatibility] \hfill \\
+	A big challenge while working on this project was ensuring that the final system is backwards compatible with Apache Storm. Doing this ensured that existing applications developed for Apache Storm can be executed with Storm-MC. On the other hand, this was sometimes limiting the possible performance improvements.
 	\item[Unfamiliarity with Clojure] \hfill \\
-	One of the main challenges while working on this project was learning a new programming language - Clojure. Since most of the implementation of Apache Storm is written in Clojure, this language had to be studied and its concepts well understood for us to be able to write code that worked with the existing codebase. By the end of the project writing Clojure became as simple as writing Java.
+	One of the main challenges while working on this project was learning a new programming language - Clojure. Since most of the implementation of Apache Storm is written in Clojure, this language had to be studied and its concepts well understood for us to be able to write code that worked with the existing codebase. By the end of the project writing Clojure has become second nature to us but initially progress was slow.
 	\item[Lack of Documentation] \hfill \\
 	Even though Apache Storm is a popular project documentation is available only for the high level concepts used within Storm. The implementation details are often obscured away in hard to understand functions. Since the documentation is lacking our knowledge of Storm had to be obtained by reading the source code of an initially unfamiliar language. By the end of the project the Storm-MC code became well documented and we might attempt back-porting to Apache Storm.
 \end{description}
@@ -1046,17 +1047,17 @@ Storm-MC could be improved in a number of ways:
 
 \begin{description}
 	\item[Storm-MC as a Server] \hfill \\
-	Storm-MC could be updated to enable it to run as a server. This could have several benefits such as being able to execute multiple topologies at the same time with a thin wrapper that could control their execution just like with Apache Storm. This was not implemented as we assumed most of the time users are executing only one topology per machine.
+	Storm-MC could be updated to allow server-like execution. This could have several benefits such as being able to execute multiple topologies at the same time with a thin wrapper that could control their execution just like with Apache Storm. This was not implemented as part of this project as we assumed most of the time users are executing only one topology per machine.
 	\item[Higher Level Abstractions] \hfill \\
-	Defining components of a Storm-MC topology is fairly simple. Programmers only need to define how components are connected, how they process tuples, and what tuples they emit. However, this could be taken even further with the user only specifying high-level functions and the Storm-MC library figuring out how to distribute the work. In Apache Storm this is implemented in Trident which was not ported as part of this project.
+	Defining components of a Storm-MC topology is fairly simple. Users only need to define how components are connected, how they process tuples, and what tuples they emit. However, this could be taken even further with the user only specifying high-level functions and the Storm-MC library figuring out how to distribute the work. In Apache Storm this is implemented in Trident which was not ported as part of this project.
 	\item[Automatic Parallelism] \hfill \\
 	Sometimes when configuring a topology it may be difficult to predict the rate at which spouts are going to produce tuples. If the rate is underestimated consumers could be lagging behind producers. On the other hand, if the rate is overestimated consumers could be idle, not doing any useful work. Thus it might be advantageous to have an automatic parallelism setting which could add or remove consumers based on the current tuple rate.
 	
 	It may seem that this would be trivial to implement with a pool of threads representing one component. However, there are several problems that need to be considered. For example, fields grouping guarantees that tuples with the same field values go to the same executor. Changing the parallelism at runtime breaks this guarantee.
 	
-	Alternatively each executor could use a pool of threads. This comes with its own set of problems: the executor object would have to provide synchronised access to the pool which would only increase latency. Hence, implementing automatic parallelism was out of the scope of this project.
+	Alternatively each executor could use a pool of threads. This comes with its own set of problems: the executor object would have to provide synchronised access to the pool which would only increase latency.
 	\item[Performance Comparison with Distributed Storm] \hfill \\
-	The benchmarks in this report compared Storm-MC to Apache Storm running in local mode. It would be interesting to see how Storm-MC compares to Apache Storm running on a cluster. One could compare the number of nodes to the number of CPUs required to execute a topology. This could provide 
+	The benchmarks in this report compared Storm-MC to Apache Storm running in local mode. It would be interesting to see how Storm-MC compares to Apache Storm running on a cluster. One could compare the number of nodes required in a cluster to the number of cores required in a multi-core server to achieve certain throughput for a given topology. This could provide insight into when it becomes advantageous to deploy the topology to a cluster.
 \end{description}
 \clearpage{}
 

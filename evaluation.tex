@@ -96,7 +96,7 @@ The number of tuples processed by each component in Storm-MC and Apache Storm is
 	10 & {40,341,798} & {40,336,962} & {353,490,567} & {1,967.4\%} & {2.7G} \\
 %	20 & {55,442,981} & {55,430,441} & {485,763,957} & {3161.5\%} & {2.1} \\
 \end{tabular}
-\caption{Storm-MC: Tuples processed per component in WordCount Topology.}
+\caption{Storm-MC: Component throughput in WordCount Topology.}
 \label{table:storm_mc_wordcount}
 \end{adjustwidth}
 \end{table}
@@ -116,17 +116,17 @@ The number of tuples processed by each component in Storm-MC and Apache Storm is
 	10 & {12,229,523} & {12,211,100} & {107,002,632} & {2,136.7\%} & {2.8G} \\
 %	20 & {19,950,916} & {19,892,159} & {174,299,740} & {2,813.7\%} & {3.5G} \\
 \end{tabular}
-\caption{Apache Storm: Tuples processed per component in WordCount Topology.}
+\caption{Apache Storm: Component throughput in WordCount Topology.}
 \label{table:storm_wordcount}
 \end{adjustwidth}
 \end{table}
 
-<<countbolt-plot, echo=FALSE, cache=FALSE, fig.cap="Tuples processed by CountBolt in Storm-MC and Apache Storm", fig.align="center", message=F, warning=F, fig.pos="!htb", fig.height=3.5>>=
+<<countbolt-plot, echo=FALSE, cache=FALSE, fig.cap="CountBolt throughput in Apache Storm and Storm-MC", fig.align="center", message=F, warning=F, fig.pos="!htb", fig.height=3.5>>=
 @
 
 Furthermore, it can be seen that after the parallelism is increased beyond three the throughput of Apache Storm tails off and starts going down. This can be attributed to the number of threads ran by Apache Storm. For Storm-MC this tailing off occurs with parallelism of six where the overhead of multiple producers possibly trying to publish to the same queue becomes apparent. Moreover, with parallelism set to 6, Storm-MC executes with 20 threads which is close to the number of physical cores of the machine. However, it should be noted that even with parallelism equal to 10, Storm-MC still processes more than three times as many tuples as Storm.
 
-<<threads-plot, echo=FALSE, cache=FALSE, fig.cap="Number of threads used by Storm and Storm-MC", fig.align="center", fig.pos="!htb", fig.height=3.5>>=
+<<threads-plot, echo=FALSE, cache=FALSE, fig.cap="Number of threads used by Apache Storm and Storm-MC", fig.align="center", fig.pos="!htb", fig.height=3.5>>=
 @
 
 The number of threads required to execute a topology is a linear function of the parallelism for both Storm and Storm-MC. However, as shown in Figure \ref{fig:threads-plot}, the number of threads required by Storm increases more rapidly than Storm-MC. For example, with parallelism set to 10, Storm creates 109 threads whereas Storm-MC creates only 32. More formally, the number of threads required by both systems can be expressed as:
@@ -136,7 +136,7 @@ The number of threads required to execute a topology is a linear function of the
 	49 \ + \ 2 \times \sum\limits_{c}^{components} parallelism(c) && \text{ for Apache Storm.} \\
 	2 \ + \ \sum\limits_{c}^{components} parallelism(c) && \text{ for Storm-MC.}
 \end{eqnarray*}
-\caption{Number of threads used by Storm and Storm-MC.}
+\caption{Number of threads used by Apache Storm and Storm-MC.}
 \end{figure}
 
 \textbf{N.B.}\@\xspace: This is a general formula that applies to all topologies, not just WordCount.
@@ -194,7 +194,7 @@ Similarly to the WordCount topology, this topology is serial in nature. However,
 \end{adjustwidth}
 \end{table}
 
-<<enron-plot, echo=FALSE, cache=FALSE, fig.cap="Global Email Throughput over time. Standard error shown in light grey.", fig.align="center", fig.pos="!htb", fig.height=6.5>>=
+<<enron-plot, echo=FALSE, cache=FALSE, fig.cap="Global email throughput over time with standard error.", fig.align="center", fig.pos="!htb", fig.height=6.5>>=
 @
 
 As can be seen from the tables, the difference in throughput in Enron Topology is less staggering than in WordCount. This is due to the fact that the throughput is limited by the file reads of the spout. However, as the parallelism increases the improvement in throughput of Storm-MC becomes more apparent as shown in Figure \ref{fig:enron-plot}. This figure also shows that the throughput is fairly volatile. This is due to the fact that the file is loaded into main memory in chunks and hence the throughput drops when the spout is trying to read from a file in between the loads. As before, the resident size used by Storm-MC is significantly lower than that of Storm.
@@ -229,7 +229,7 @@ This benchmark is considered to be memory-bound: the bolt stores a window of tup
     9 & {501,519,539} & {501,517,700} & {1,430.4\%} & {579.4M} \\
     10 & {555,468,830} & {555,467,000} & {1,651.6\%} & {564.7M} \\ 
 \end{tabular}
-\caption{Storm-MC: Tuples processed per component in RollingSort Topology.}
+\caption{Storm-MC: Component throughput in RollingSort Topology.}
 \label{table:storm_mc_rolling}
 \end{adjustwidth}
 \end{table}
@@ -251,7 +251,7 @@ This benchmark is considered to be memory-bound: the bolt stores a window of tup
     9 & {359,091,633} & {358,942,200} & {1,689.5\%} & {2.7G} \\
     10 & {313,912,451} & {313,811,300} & {1,889.5\%} & {2.7G} \\
 \end{tabular}
-\caption{Apache Storm: Tuples processed per component in RollingSort Topology.}
+\caption{Apache Storm: Component throughput in RollingSort Topology.}
 \label{table:storm_rolling}
 \end{adjustwidth}
 \end{table}
@@ -261,11 +261,13 @@ While Storm-MC still outperforms Apache Storm, the difference in performance is 
 \section{Challenges}
 \label{sec:challenges}
 
-In this section we are going to discuss challenges we encountered while porting Apache Storm to multi-core machines.
+In this section we are going to discuss challenges we encountered while porting Apache Storm to multi-core machines. We also try to provide a critical analysis of the project.
 
 \begin{description}
+	\item[Backwards Compatibility] \hfill \\
+	A big challenge while working on this project was ensuring that the final system is backwards compatible with Apache Storm. Doing this ensured that existing applications developed for Apache Storm can be executed with Storm-MC. On the other hand, this was sometimes limiting the possible performance improvements.
 	\item[Unfamiliarity with Clojure] \hfill \\
-	One of the main challenges while working on this project was learning a new programming language - Clojure. Since most of the implementation of Apache Storm is written in Clojure, this language had to be studied and its concepts well understood for us to be able to write code that worked with the existing codebase. By the end of the project writing Clojure became as simple as writing Java.
+	One of the main challenges while working on this project was learning a new programming language - Clojure. Since most of the implementation of Apache Storm is written in Clojure, this language had to be studied and its concepts well understood for us to be able to write code that worked with the existing codebase. By the end of the project writing Clojure has become second nature to us but initially progress was slow.
 	\item[Lack of Documentation] \hfill \\
 	Even though Apache Storm is a popular project documentation is available only for the high level concepts used within Storm. The implementation details are often obscured away in hard to understand functions. Since the documentation is lacking our knowledge of Storm had to be obtained by reading the source code of an initially unfamiliar language. By the end of the project the Storm-MC code became well documented and we might attempt back-porting to Apache Storm.
 \end{description}
