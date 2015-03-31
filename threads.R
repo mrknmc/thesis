@@ -11,6 +11,6 @@ k <- ggplot(t, aes(x=parallelism, y=value, fill=variable, color=variable)) +
     theme_bw() +
     theme(legend.position="top", legend.key = element_blank())
 
-k + geom_line(size=1.5) + geom_point(size=4, type=21) +
+k + geom_line(size=1) + geom_point(size=4, type=21) +
     scale_y_continuous(name="# of Threads\n") +
     scale_x_continuous(breaks=1:10, name="\nParallelism")

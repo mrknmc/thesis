@@ -65,7 +65,7 @@ On the other hand, chip makers have been able to pack more and more transistors 
 
 In this report we present Storm-MC, an API-compatible port of Apache Storm for multi-core. This system combines an easy to use API with implementation tailored to multi-core environments. This allows us to take existing applications written with Storm in mind and run them efficiently on a single server.
 
-We show that running applications on Storm-MC can provide substantial improvement in throughput (up to 3.3x) compared to running them on Apache Storm in local mode.
+Through a series of benchmarks we show that running applications on Storm-MC can provide substantial improvement in throughput (up to 3.3x) compared to running them on Apache Storm in local mode.
 }
 
 \maketitle
@@ -73,9 +73,14 @@ We show that running applications on Storm-MC can provide substantial improvemen
 \section*{Acknowledgements}
 I would like to thank my supervisor, Dr. Stratis Viglas, for providing guidance every step of the way.
 
+\medskip
+
 Furthermore, I would like to thank my parents who supported me during my studies at the University of Edinburgh. Without them this project would not be possible.
 
-Finally, I would like to thank Daniela Kellerova who made sure I do not go insane while working on this project.
+\medskip
+
+Finally, I would like to thank Daniela Kellerova who kept me sane while I worked on this project.
+
 \pagenumbering{Roman}
 
 \tableofcontents
@@ -99,35 +104,34 @@ Finally, I would like to thank Daniela Kellerova who made sure I do not go insan
 
 In recent years, there has been an explosion of cloud computing software. After Google published their paper on MapReduce \citep{dean2010mapreduce}, many new open-source frameworks for distributed computation have emerged, most notably Apache Hadoop \citep{ApacheHadoop} for batch processing and Apache Storm \citep{ApacheStorm} for real-time data stream processing.
 
-These frameworks split the work that needs to be carried out and distribute it across nodes of a cluster. Commercial companies and researchers have been able to utilise these frameworks and create distributed systems which can accomplish things that would not be otherwise possible. This has mostly been allowed by the low price and good horizontal scaling properties of commodity hardware.
+These frameworks split the work that needs to be carried out and distribute it across nodes of a commodity hardware cluster. Commercial companies and researchers have been able to utilise these frameworks and create distributed systems which can accomplish things that would not be otherwise possible \citep{Solovey}. This has mostly been allowed by the low price and good scale-out properties of commodity hardware.
 
+At the same time, chip makers have been increasing the number of cores in processors and now we are at a point where servers with 10-core processors are considered standard. Moreover, most high-end servers have multiple processor sockets thus increasing the parallelisation possible with a single machine even further.
 
-At the same time, chip makers have been increasing the number of cores in processors and now we are at a point where servers with 10-core processors are standard. Moreover, most high-end servers support multiple processor sockets thus furthering the parallelisation possible with a single machine even more.
+The number of cores is increasing but the price of highly parallel machines has gone down. In 2008, a typical Hadoop node had two dual-core processors and 4 GB of random access memory (RAM) \citep{Kumar:2013:HSD:2536274.2536314}. Nowadays, a server with two eight-core processors and 256 GB of RAM can be purchased for roughly \$10,000 USD \citep{Kumar:2013:HSD:2536274.2536314}. Hence a single server today might have better processing power than a small cluster from a few years ago. If this trend continues there will be processors with even more cores in the near future with higher processing power than most clusters today.
 
-The price of multi-core servers has been going down as well. In 2008, a typical Hadoop node had two dual-core processors and 4 GB of random access memory (RAM). Nowadays, a server with two eight-core processors and 256 GB of RAM can be purchased for roughly \$10,000 USD \citep{Kumar:2013:HSD:2536274.2536314}. Hence a single server today might have better processing power than a small cluster from a few years ago \citep{Kumar:2013:HSD:2536274.2536314}. If this trend continues there will be processors with even more cores in the near future.
+Moreover, tiled processors have emerged as competitors to traditional processors in throughput-based computations \cite{Tilera}. These processors use a large number of tiles connected by an on-chip network and even though the single-thread performance of each tile is lower than the performance of a conventional core, the increased parallelism yields higher throughput \cite{DBLP:conf/isca/Lotfi-KamranGFVKPAJIOF12}.
 
-Moreover, tiled processors have emerged as competitors to traditional processors in throughput-based computations \cite{Tilera}. These processors use a large number of tiles connected by an on-chip network and even though the single-thread performance of each tile is lower than the performance of a conventional core, the increased parallelism yields higher per-server throughput \cite{DBLP:conf/isca/Lotfi-KamranGFVKPAJIOF12}.
+Seeing these trends, we believe there is a place for a real-time data stream processing system running on a single multi-core machine.
 
-It is generally believed that writing parallel software is hard. The traditional techniques of message passing and shared memory require the programmer to manage the concurrency at a fairly low level. Apache Storm has become the de facto tool used in stream processing on a cluster and according to their ``Powered By" page there are tens of companies already using Storm to process their real-time data streams \cite{PoweredBy}. We believe there is a place for a real-time data stream processing system on multi-core and Storm's popularity and simple application programming interface (API) makes it the ideal candidate for porting.
-
-\section{Main Idea}
-
-The main idea of this report is to take the existing Apache Storm project and port it to multi-core. This is implemented in Storm-MC - a library with an API compatible with Apache Storm. Porting the Storm API allows programmers to take an existing application written with Apache Storm in mind and run it on a multi-core server. This way, we can avoid network latency and enjoy the significant performance improvements of a shared-memory environment.
+It is generally believed that writing parallel software is hard. The traditional techniques of message passing and shared memory require the programmer to manage concurrency at a fairly low level. Furthermore, Apache Storm has become the \textit{de facto} tool used in stream processing on a cluster and according to their ``Powered By" page there are tens of companies already using Storm to process their real-time data streams \cite{PoweredBy}. We think that Storm's popularity and easy to use application programming interface (API) makes it the ideal candidate for porting to multi-core.
 
 \section{Project Contributions}
 
-The primary contribution presented in this report is a port of Apache Storm that is tailored to multi-core environments.
+The main idea of this project is to take the existing Apache Storm project and port it to multi-core. This is implemented in Storm-MC - a library with an API compatible with Apache Storm. This compatibility enables programmers to take an existing application written with Apache Storm in mind and run it on a single multi-core server using Storm-MC. This way, they can avoid network latency and enjoy the substantial performance improvements of a shared-memory environment.
+
+Through a series of benchmarks we show that with its simpler design, Storm-MC offers substantial improvement in throughput for data stream processing applications over Apache Storm running in local mode.
 
 \section{Structure of the Report}
 
 The remainder of the report is structured as follows:
 
 \begin{itemize}
-	\item \textbf{Chapter 2} presents an overview of related literature and gives background on data stream processing and multi-core architectures.
-	\item \textbf{Chapter 3} explains the concepts used in Apache Storm as well as the architecture of a Storm cluster.
-	\item \textbf{Chapter 4} describes how Apache Storm was ported to multi-core and explains the design of Storm-MC.
-	\item \textbf{Chapter 5} discusses the evaluation results of Storm-MC.
-	\item \textbf{Chapter 6} presents conclusions of this report.
+	\item Chapter 2 presents an overview of related literature and gives background on data stream processing and multi-core architectures.
+	\item Chapter 3 explains the concepts used in Apache Storm as well as the architecture of a Storm cluster.
+	\item Chapter 4 describes how Apache Storm was ported to multi-core and explains the design of Storm-MC.
+	\item Chapter 5 presents results of benchmarking Storm-MC against Apache Storm running in local mode.
+	\item Chapter 6 summarises this report and presents considerations for future work.
 \end{itemize}
 \clearpage{}
 
@@ -408,12 +412,12 @@ Furthermore, since Nimbus is a Thrift service Thrift generates all the code requ
 
 \clearpage{}\chapter{Bringing Storm to Multi-core}
 
-The following chapter explains the design of Storm-MC. We describe how Apache Storm behaves in a multi-core environment (\ref{sec:storm_on_mc}), how the Storm architecture was ported over to multi-core (\ref{sec:storm_mc_arch}), how Storm-MC was implemented  (\ref{sec:implementation}), and we list feature differences between Apache Storm and Storm-MC (\ref{sec:differences}).
+The following chapter explains how the Storm was ported to multi-core. We describe how Apache Storm behaves in a multi-core environment (\ref{sec:storm_on_mc}), discuss the design of Storm-MC (\ref{sec:storm_mc_arch}), describe how Storm-MC was implemented (\ref{sec:implementation}), and list feature differences between Apache Storm and Storm-MC (\ref{sec:differences}).
 
 \section{Apache Storm on Multi-core}
 \label{sec:storm_on_mc}
 
-To begin, we discuss why Apache Storm does not perform optimally in a multi-core environment. Storm can be ran in local mode where it emulates execution on a cluster. This mode exists so that it is possible to debug and develop topologies without needing access to a cluster. However, there are several reasons why the local mode is not as performant as it could be.
+To begin, we discuss why Apache Storm does not perform optimally in a multi-core environment. Storm can be ran in local mode where it emulates execution on a cluster. This mode exists so that it is possible to develop and debug topologies without needing access to a cluster. However, there are several reasons why the local mode is not as performant as it could be.
 
 \subsection{Tuple Processing Overhead}
 
@@ -430,21 +434,21 @@ After the component thread has executed the task it puts the tuple on the execut
 
 Alternatively, if the tuple is forwarded to an executor in the same worker process it is put on the receive queue of the corresponding executor directly after task execution.
 
-The queues used in Storm are implemented as ring buffers using the LMAX Disruptor library \citep{LMAXDisruptor}. Detailed background on how Disruptor works and its performance benchmarks can be found in \citep{Thompson_Farley_Barker_Gee_Stewart_2011}.
+The queues used in tuple processing are implemented as ring buffers using the Disruptor library \citep{LMAXDisruptor}. Detailed background on how Disruptor works and its performance benchmarks can be found in \citep{Thompson_Farley_Barker_Gee_Stewart_2011}. In summary, due to less write contention, lower concurrency overhead, and being more cache-friendly the Disruptor pattern can offer latency of inter-thread messages lower than 50 nanoseconds and a throughput of over 25 million messages per second \cite{Thompson_Farley_Barker_Gee_Stewart_2011}.
 
-There is significant overhead required to simulate sending tuples to executors in other worker nodes. For one, there is the overhead from the tuple passing through the three queues of a worker. The authors of LMAX Disruptor showed that a three step pipeline has half the throughput of a single consumer-producer pipeline \citep{DisruptorWiki}.
+There is significant overhead required to emulate sending tuples to executors in other worker nodes. For one, there is the overhead from the tuple passing through the three queues of a worker. The authors of LMAX Disruptor showed that a three step pipeline can have half the throughput of a single consumer-producer pipeline \citep{DisruptorWiki}.
 
-Furthermore, to emulate over-the-network messages Storm uses a \texttt{Hashmap} of \texttt{LinkedBlockingQueue}s which according to \cite{Thompson_Farley_Barker_Gee_Stewart_2011} has several orders of magnitude lower performance than the Disruptor. Due to less write contention, lower concurrency overhead, and being more cache-friendly the Disruptor pattern can offer latency of inter-thread messages lower than 50 nanoseconds and a throughput of over 25 million messages per second \cite{Thompson_Farley_Barker_Gee_Stewart_2011}.
+Furthermore, to emulate over-the-network messages Storm uses a \texttt{Hashmap} of \texttt{LinkedBlockingQueue}s which according to \cite{Thompson_Farley_Barker_Gee_Stewart_2011} has several orders of magnitude lower performance than the Disruptor. 
 
 \subsection{Thread Overhead}
 
 \begin{description}
 	\item[Acker Bolt] \hfill \\
-	The Acker bolt ensures that tuples propagate through a topology. In Storm it is included in every topology. It can be disabled via the configuration file in which case it is mostly idle since it does not receive any tuples. However, it can still use up resources especially if it waits fort tuples using a busy waiting strategy.
+	The Acker bolt ensures that tuples propagate through the topology even if a failure in processing occurs. It provides the so-called at-least-once semantics. In Storm it is included in every topology. It can be disabled via the configuration file in which case it is mostly idle not receiving any tuples. However, it can still use up resources especially if it waits fort tuples using a busy waiting strategy.
 	\item[Heartbeats \& Timers] \hfill \\
 	Every worker has a heartbeat thread that simulates sending heartbeat messages to the Nimbus node. It does this by writing to a local cache which is persisted to a file by a write on every heartbeat. Since the write is implemented using the \texttt{java.io} package the write is blocking - the thread cannot continue until the write is completed. While heartbeats are essential in cluster mode to signal the node being alive, there is no need for them in local mode.
 	\item[Zookeeper Emulation] \hfill \\
-	More overhead is produced by a local Zookeper server which emulates the Zookeeper nodes of a cluster. Running the Zookeeper server is a massive addition to the list of overheads as shown in the following paragraphs. The purpose of Zookeeper is to maintain states of running topologies and nodes of the cluster. As we will show in the following sections maintaining this state on multi-core is not necessary.
+	More overhead is produced by a local Zookeper server which emulates the Zookeeper nodes of a cluster. Running the Zookeeper server is a massive addition to the list of overheads as shown in the following paragraphs. The purpose of Zookeeper is to maintain state of running topologies and nodes of the cluster. As we will show in the following sections maintaining this state on multi-core is not necessary.
 \end{description}
 
 During profiling we found that a topology with one worker and three executors was being executed with 55 threads (not including system JVM threads and threads created by the profiler). Table \ref{table:breakdown} shows a breakdown of what the individual threads were used for.
@@ -499,16 +503,23 @@ Additionally, the source code for the Nimbus service was merged with the worker 
 
 \subsection{Porting Nimbus}
 
+Nimbus in Apache Storm performs as a server that clients can send topologies to for execution. In Storm-MC, we opted for a different design. Storm-MC is designed as a standard Java library that applications can import and use to create and execute topologies in the main method of their application. This means that Storm-MC does not support running multiple topologies at the same time. However, to do that one only needs to run the topology in a separate process. This is because, unlike when executing on a cluster, different topologies do not need to share any state and it is more natural to execute them as separate processes. This design decision has the added benefit of each process having its own part of main memory thus reducing cache conflicts as shown in [39] and providing higher security by not having different topologies share memory space.
+
+The interaction with the Nimbus service in Storm is usually through a shell script with a path to a JAR file of the topology and the main class to execute. This shell script was ported over to Storm-MC but instead of communicating with a service it spawns a new separate process that executes the topology.
+
+Unlike Apache Storm, Storm-MC does not support topology scheduling. Since within one process there is always only one topology running at a time and the hardware configuration of the machine does not change, the parallelism is clearly defined by the number of executors per component specified by the topology configuration.
+One way to implement scheduling could be to pin threads to specific cores. Un- fortunately, Java does not provide support for CPU affinity; the assignments are handled automatically by the JVM. Potentially, this could be achieved by using C or C++, both of which support CPU affinity, but this was not implemented in Storm-MC.
+
 The role of Nimbus in Storm-MC has effectively been reduced to validating the topology and its configuration and passing the topology along to the worker source code which handles topology execution.
 
 \subsection{Porting Worker Nodes}
 
 In Apache Storm, a worker node runs a supervisor daemon, which in turns launches worker processes which run executors which execute tasks. There are thus three ways to control the parallelism of a component in Apache Storm: setting the number of workers, setting the number of executors per component, and setting the number of tasks per executor.
 
-In Storm-MC, however, there is only one worker wrapper which runs all executors and their tasks - only one task executes within an executor. Hence, the parallelism of a component is controlled by only one variable: number of executors per component. This represents the number of threads that will function as the component within a topology. This design has several benefits:
+In Storm-MC, however, there is only one worker wrapper which runs all executors and their tasks. Furthermore, only one task executes within an executor since tasks execute serially. Hence, the parallelism of a component is controlled by only one variable: number of executors per component. This represents the number of threads that will function as the component within a topology. This design has several benefits:
 
 \begin{itemize}
-	\item All the communication occurs within one worker process.
+	\item All the communication occurs within one worker wrapper.
 	\item The supervisor daemon can be removed as there is no need to synchronise or monitor workers.
 	\item There is no need to simulate over-the-network message passing.
 	\item Message passing between executor threads within a worker stays the same as in Apache Storm.
@@ -526,37 +537,41 @@ A comparison of an Apache Storm worker node and its Storm-MC equivalent is shown
 \end{subfigure}\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=0.95\linewidth]{pdf/local_worker.pdf}
-  \caption{Worker node equivalent in Storm-MC.}
+  \caption{Worker wrapper in Storm-MC.}
   \label{fig:comparison2}
 \end{subfigure}
 \caption{Comparison of a worker in Storm and Storm-MC}
 \label{fig:comparison}
 \end{figure}
 
-The role of the worker wrapper is to launch executors and provide them with a shared context through which they can communicate. This is done with a map of Disruptor queues which the executors use as receive queues they pick tuples from.
+The role of the worker wrapper is to launch executors and provide them with a shared context through which they can communicate. This is done with a map of Disruptor queues which the executors use as receive queues to pick tuples from.
 
-Moreover, the worker wrapper contains a map of components and streams. This map specifies which bolts subscribe to a stream component produces. Executors use this map to figure out who they should send tuples to.
+Moreover, the worker wrapper contains a map of components and streams. This map specifies which bolts subscribe to a stream a component produces. Executors use this map to figure out who they should send tuples to.
 
 Additionally, the worker wrapper has a timer which components can use to get tick tuples at regular intervals. As mentioned before, bolts can use tick tuples to trigger events at regular intervals. For example, one might want to sort a window of tuples based on some criteria every five minutes.
+
+\todo{mention metrics here?}
 
 Finally, a worker contains a configurable-size thread pool \texttt{ExecutorService}. Storm-MC executors can use this service via the topology context to launch background tasks on a shared thread pool.
 
 \subsection{Removing State}
 
-Storm-MC is completely stateless. The cluster state that was managed by Zookeeper in Apache Storm was completely stripped away. In Storm workers use the Zookeeper cluster state to communicate with Nimbus and vice versa. For example, when Nimbus creates topology assignments it informs workers via the cluster state. In Storm-MC, we adopted a more functional approach where worker is just a function invoked by the Nimbus part of the source code.
+Storm-MC is completely stateless. The cluster state that was managed by Zookeeper in Apache Storm was completely stripped away. In Storm, workers use the Zookeeper cluster state to communicate with Nimbus and vice versa. For example, when Nimbus creates topology assignments it informs workers via the cluster state. In Storm-MC, we adopted a more functional approach where worker is just a function invoked by the Nimbus part of the source code.
 
-While this is not something that is visible to a user of Storm-MC, it required a great effort as all the code that used Zookeeper had to be refactored.
+While this is not something that is visible to a user of Storm-MC, it required a great effort as all the code that referenced the Zookeeper library had to be refactored.
 
 \subsection{Removing Serialisation}
 
-Similarly to removing the Zookeeper state, great amount of work was put into removing the dependency of Storm-MC on Apache Thrift. This was mostly done to reduce code bloat and remove an unnecessary dependency since there is no serialisation required in a multi-core environment. Moreover, code generated by Thrift does not use standard Java camelCase naming conventions but instead uses underscore\_case. For example, Thrift generates method names such as \\ \texttt{get\_component\_common}.
+Similarly to removing the Zookeeper state, great amount of work was put into removing the dependency of Storm-MC on Apache Thrift. This was mostly done to reduce code bloat and remove an unnecessary dependency since there is no serialisation required in a multi-core environment.
 
-This required refactoring all the data types generated automatically by Thrift. This not only reduced the size of the codebase significantly but also made the code more readable and self-documenting than the code generated by Thrift.
+Moreover, code generated by Thrift does not use standard Java camelCase naming conventions but instead uses underscore\_case. For example, Thrift generates method names such as \texttt{get\_component\_common}.
+
+Removing Thrift required refactoring all the data types generated automatically by Thrift. This not only reduced the size of the codebase significantly but also made the code more readable and self-documenting than the code generated by Thrift.
 
 \section{Implementation Details}
 \label{sec:implementation}
 
-Most of the implementation was ported over from Storm-MC with adjustments where necessary. The problem with porting software is that there is a lot of functionality that needs to be changed but the changes required are usually not substantial. This section outlines details of Storm-MC implementation.
+Most of the implementation of Storm-MC was ported over from Apache Storm with adjustments where necessary. The problem with describing implementation of ported software is that there is a lot of functionality that needed to be changed but the changes required were usually not substantial. This is the case with Storm-MC as well. This section tries to outline the implementation of Storm-MC.
 
 \subsection{Topology Submission}
 
@@ -626,7 +641,7 @@ The implementation of an executor processing a tuple is as follows:
 
 The codebase of Apache Storm is fairly large - 54,985 lines of code as reported by \texttt{cloc} \citep{Cloc}. Thus we had to prioritise features that were ported over to Storm-MC. Table \ref{table:features} presents a list of Storm features and shows which were ported over to Storm-MC and which were not.
 
-\begin{table}[h!]
+\begin{table}[htb!]
 \centering
 \small
 \begin{tabular}{@{}lcc@{}}
@@ -653,17 +668,13 @@ Additionally, Storm-MC has support for topology metrics. This way, components ca
 
 As mentioned before, Storm-MC supports tick tuples which can be used  to trigger component-local events at regular intervals.
 
-Unlike Storm executing on a cluster, Storm-MC does not support running multiple topologies at the same time. However, to do that one only needs to run the topology in a separate process. This is because unlike when executing on the cluster different topologies do not need to share any state and it is more natural to execute them as separate processes. This design decision has the added benefit of each process having its own part of main memory thus reducing cache conflicts as shown in \citep{Chandra:2005:PIC:1042442.1043432} and providing higher security by not having different topologies share memory space.
 
-Storm-MC does not support topology scheduling. Since within one process there is always only one topology running at a time and the hardware configuration of the machine does not change, the parallelism is clearly defined by the number of executors per component specified in the topology configuration.
 
-One way to implement scheduling could be to pin threads to specific cores. Unfortunately, Java does not provide support for CPU affinity; the assignments are handled automatically by the JVM. Potentially, this could be achieved by using C or C++, both of which support CPU affinity, but this was not implemented in Storm-MC.
 
 Apache Storm supports an alternative high-level API called Trident which then gets converted into spouts and bolts by the Storm library. Trident was omitted from Storm-MC but it would be possible to implement it on top of the current API.
 
 Moreover, Apache Storm collects JVM metrics with a bolt called \texttt{SystemBolt}. This bolt is added automatically to all Storm topologies. This bolt is not included in Storm-MC topologies automatically but users can choose to add this bolt on their own.
 
-Finally, Nimbus in Apache Storm performs as a server that clients can send topologies to for execution. In Storm-MC, we opted for a different design as outlined in previous sections. The interaction with the Nimbus service is usually through a shell script with a path to a JAR file of the topology and the main class to execute. This shell script was ported over to Storm-MC but instead of communicating with a service it spawns a new separate process that executes the topology.
 
 \clearpage{}
 
@@ -930,7 +941,7 @@ While Storm-MC still outperforms Apache Storm, the difference in performance is 
 \section{Challenges}
 \label{sec:challenges}
 
-In this section we are going to discuss challenges we encountered while porting Apache Storm to multi-core machines. We also try to provide a critical analysis of the project.
+In this section we discuss challenges we encountered while porting Apache Storm to multi-core. We also try to provide a critical analysis of the project.
 
 \begin{description}
 	\item[Backwards Compatibility] \hfill \\

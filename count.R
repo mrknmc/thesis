@@ -54,7 +54,7 @@ k <- ggplot(t, aes(x=parallelism, y=value, fill=variable, color=variable)) +
     theme_bw() +
     theme(legend.position="top", legend.key = element_blank())
 
-k + geom_line(size=1.5) + geom_point(size=4, type=21) +
+k + geom_line(size=1) + geom_point(size=4, type=21) +
     scale_y_continuous(limits=c(0, 550000000), labels=format_si(), name="Tuples Processed\n") +
     scale_x_continuous(breaks=1:10, name="\nParallelism")
     #geom_hline(yintercept=0, size=0.4, color="black")

@@ -95,7 +95,7 @@ On the other hand, chip makers have been able to pack more and more transistors 
 
 In this report we present Storm-MC, an API-compatible port of Apache Storm for multi-core. This system combines an easy to use API with implementation tailored to multi-core environments. This allows us to take existing applications written with Storm in mind and run them efficiently on a single server.
 
-We show that running applications on Storm-MC can provide substantial improvement in throughput (up to 3.3x) compared to running them on Apache Storm in local mode.
+Through a series of benchmarks we show that running applications on Storm-MC can provide substantial improvement in throughput (up to 3.3x) compared to running them on Apache Storm in local mode.
 }
 
 \maketitle
@@ -103,9 +103,14 @@ We show that running applications on Storm-MC can provide substantial improvemen
 \section*{Acknowledgements}
 I would like to thank my supervisor, Dr. Stratis Viglas, for providing guidance every step of the way.
 
+\medskip
+
 Furthermore, I would like to thank my parents who supported me during my studies at the University of Edinburgh. Without them this project would not be possible.
 
-Finally, I would like to thank Daniela Kellerova who made sure I do not go insane while working on this project.
+\medskip
+
+Finally, I would like to thank Daniela Kellerova who kept me sane while I worked on this project.
+
 \pagenumbering{Roman}
 
 \tableofcontents

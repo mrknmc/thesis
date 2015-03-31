@@ -62,4 +62,4 @@ k <- ggplot(t, aes(x=time, y=value,fill=variable,color=variable)) +
     theme(legend.position="top", legend.key = element_blank()) +
     xlab("\nTime (seconds)")
 
-k + geom_smooth(method = "lm", alpha=0.7, size=0, fill="grey",color="grey", se=TRUE, aes(group=variable)) + geom_point() + geom_line()
+k + geom_smooth(method = "lm", alpha=0.7, size=0, fill="grey",color="grey", se=TRUE, aes(group=variable)) + geom_point() + geom_line(size=0.5)
