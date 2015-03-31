@@ -105,15 +105,26 @@
 \author{Mark Nemec}
 \course{Computer Science}
 \project{4th Year Project Report}
-
 \date{\today}
 
-\abstract{This is the abstract.}
+\abstract{
+In recent years there has been a growing usage of data stream processing systems. However, data stream processing has been a province of distributed systems such as Apache Storm. This is because clusters offer better scale-out properties.
+
+On the other hand, chip makers have been able to pack more and more transistors into a single processor chip. This resulted in a steady increase of the number of cores used in a single processor chip. It is possible that scale-out processors with high number of processor cores will be used for future throughput-based applications.
+
+In this report we present Storm-MC, an API-compatible port of Apache Storm for multi-core. This system combines an easy to use API with implementation tailored to multi-core environments. This allows us to take existing applications written with Storm in mind and run them efficiently on a single server.
+
+We show that running applications on Storm-MC can provide substantial improvement in throughput (up to 3.3x) compared to running them on Apache Storm in local mode.
+}
 
 \maketitle
 
 \section*{Acknowledgements}
-Acknowledgements go here.
+I would like to thank my supervisor, Dr. Stratis Viglas, for providing guidance every step of the way.
+
+Furthermore, I would like to thank Daniela Kellerova who made sure I do not go insane while working on this project.
+
+Finally, I would like to thank my parents who supported my studies at the University of Edinburgh. Without them this project would not be possible.
 
 \pagenumbering{Roman}
 
@@ -1020,11 +1031,13 @@ This final chapter concludes with a summary of contributions of this project (\r
 The primary contribution of this project is Storm-MC - a library aimed at data stream processing applications. The benefits of using Storm-MC are twofold:
 
 \begin{itemize}
-\item It offers the same easy-to-use API as Apache Storm.
-\item It is tailored to multi-core environments.
+	\item It offers the same easy-to-use API as Apache Storm.
+	\item It is tailored to multi-core environments.
 \end{itemize}
 
-Since Storm-MC uses the same API as Apache Storm, applications written with Storm in mind can be ported to use Storm-MC with minimum amount of effort. Moreover, the Storm API allows programmers to create data stream processing applications on multi-core with an unprecedented ease. All of this comes with the superior performance Storm-MC offers compared to running Apache Storm in local mode, as shown in Section \ref{sec:performance}.
+Since Storm-MC uses the same API as Apache Storm, applications written with Storm in mind can be ported to use Storm-MC with minimum amount of effort. Thus if an application requires parallelism satisfiable by a single multi-core machine, it can be executed on one machine instead of a cluster.
+
+Moreover, the Storm API allows programmers to create data stream processing applications on multi-core with an unprecedented ease. All of this comes with the superior performance Storm-MC offers compared to running Apache Storm in local mode, as shown in Section \ref{sec:performance}.
 
 \section{Future Work}
 \label{sec:future_work}

@@ -8,11 +8,13 @@ This final chapter concludes with a summary of contributions of this project (\r
 The primary contribution of this project is Storm-MC - a library aimed at data stream processing applications. The benefits of using Storm-MC are twofold:
 
 \begin{itemize}
-\item It offers the same easy-to-use API as Apache Storm.
-\item It is tailored to multi-core environments.
+	\item It offers the same easy-to-use API as Apache Storm.
+	\item It is tailored to multi-core environments.
 \end{itemize}
 
-Since Storm-MC uses the same API as Apache Storm, applications written with Storm in mind can be ported to use Storm-MC with minimum amount of effort. Moreover, the Storm API allows programmers to create data stream processing applications on multi-core with an unprecedented ease. All of this comes with the superior performance Storm-MC offers compared to running Apache Storm in local mode, as shown in Section \ref{sec:performance}.
+Since Storm-MC uses the same API as Apache Storm, applications written with Storm in mind can be ported to use Storm-MC with minimum amount of effort. Thus if an application requires parallelism satisfiable by a single multi-core machine, it can be executed on one machine instead of a cluster.
+
+Moreover, the Storm API allows programmers to create data stream processing applications on multi-core with an unprecedented ease. All of this comes with the superior performance Storm-MC offers compared to running Apache Storm in local mode, as shown in Section \ref{sec:performance}.
 
 \section{Future Work}
 \label{sec:future_work}
