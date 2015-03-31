@@ -49,8 +49,8 @@ mat <- read.csv(file="csv/count.csv")
 t <- melt(mat, id.vars=c("parallelism"))
 # create plot
 k <- ggplot(t, aes(x=parallelism, y=value, fill=variable, color=variable)) +
-    scale_fill_grey(end=0.7, name="Library", labels=c("Apache Storm", "Storm-MC")) +
-    scale_colour_grey(end=0.7, name="Library", labels=c("Apache Storm", "Storm-MC")) +
+    scale_fill_brewer(palette="Set1",  name="Library", labels=c("Apache Storm", "Storm-MC")) +
+    scale_colour_brewer(palette="Set1", name="Library", labels=c("Apache Storm", "Storm-MC")) +
     theme_bw() +
     theme(legend.position="top", legend.key = element_blank())
 

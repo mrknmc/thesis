@@ -6,8 +6,8 @@ library("reshape2")
 threads <- read.csv(file="csv/threads.csv",sep=",")
 t <- melt(threads, id.vars=c("parallelism"))
 k <- ggplot(t, aes(x=parallelism, y=value, fill=variable, color=variable)) +
-    scale_fill_grey(end=0.7, name="Library", labels=c("Apache Storm", "Storm-MC")) +
-    scale_colour_grey(end=0.7, name="Library", labels=c("Apache Storm", "Storm-MC")) +
+    scale_fill_brewer(palette="Set1",  name="Library", labels=c("Apache Storm", "Storm-MC")) +
+    scale_colour_brewer(palette="Set1",name="Library", labels=c("Apache Storm", "Storm-MC")) +
     theme_bw() +
     theme(legend.position="top", legend.key = element_blank())
 

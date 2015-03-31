@@ -33,6 +33,8 @@
 
 \usepackage{minted}
 
+\renewcommand{\listoflistingscaption}{List of Listings}
+
 \usepackage{subcaption}
 
 
@@ -64,12 +66,12 @@
 \section*{Acknowledgements}
 Acknowledgements go here.
 
+\pagenumbering{Roman}
+
 \tableofcontents
 \listoffigures
 \listoftables
 \listoflistings
-
-\pagenumbering{arabic}
 
 <<external-code, echo=FALSE, cache=FALSE>>=
 	read_chunk('count.R')
@@ -77,6 +79,9 @@ Acknowledgements go here.
 	read_chunk('dump.R')
 	read_chunk('enron.R')
 @
+
+\cleardoublepage
+\pagenumbering{arabic}
 
 \clearpage{}\chapter{Introduction}
 
@@ -268,7 +273,7 @@ There are several core concepts used by Storm and hence by extension Storm-MC as
   Every bolt needs to have a type of stream grouping associated with it. This grouping decides the means of distributing the tuples coming from the bolt's input streams amongst the instances of the bolt task. Following are the possible types of stream grouping:
   \begin{description}
   	\item[Shuffle] Randomly partition the tuples among all the bolt tasks.
-  	\item[Fields] Hash on a subset of the tuple fields.
+  	\item[Fields] Hash on a subset of the tuple fields. All tuples with same values of those fields will go to same bolt task.
   	\item[All] Replicate the entire stream to all the bolt tasks.
   	\item[Direct] The producer of the tuple decides which task of the bolt will receive this tuple.
   	\item[Global] Send the entire stream to a single bolt task.
@@ -298,7 +303,7 @@ There are two additional bolts running for every topology:
 
 \begin{figure}[!htb]
 	\centering
-	\includegraphics[scale=0.6]{pdf/wordcount_topology.pdf}
+	\includegraphics[scale=0.475]{pdf/wordcount_topology.pdf}
 	\caption{WordCount topology.}
 	\label{fig:wordcount_topology}
 \end{figure}
@@ -775,7 +780,7 @@ The number of tuples processed by each component in Storm-MC and Apache Storm is
 \end{adjustwidth}
 \end{table}
 
-<<countbolt-plot, echo=FALSE, cache=FALSE, fig.cap="Tuples processed by CountBolt in Storm-MC and Apache Storm", fig.align="center", fig.pos="!htb", fig.height=3.5>>=
+<<countbolt-plot, echo=FALSE, cache=FALSE, fig.cap="Tuples processed by CountBolt in Storm-MC and Apache Storm", fig.align="center", message=F, warning=F, fig.pos="!htb", fig.height=3.5>>=
 @
 
 Furthermore, it can be seen that after the parallelism is increased beyond three the throughput of Apache Storm tails off and starts going down. This can be attributed to the number of threads ran by Apache Storm. For Storm-MC this tailing off occurs with parallelism of six where the overhead of multiple producers possibly trying to publish to the same queue becomes apparent. Moreover, with parallelism set to 6, Storm-MC executes with 20 threads which is close to the number of physical cores of the machine. However, it should be noted that even with parallelism equal to 10, Storm-MC still processes more than three times as many tuples as Storm.
@@ -799,7 +804,16 @@ Of note, the resident size used by Storm-MC is also less than half of the reside
 
 \subsection{Enron Topology}
 
-Next, Enron topology from the IBM benchmarks was tested for performance. In this topology, serialised emails from the Enron email dataset are read from a file by a \texttt{ReadEmailsDecompressSpout} spout. They are then deserialised by \texttt{AvroDeserializeBolt} bolt, filtered by \texttt{NewFilterBolt} bolt, modified by \texttt{ModifyBolt} bolt, and finally metrics are recorded by a \texttt{NewMetricsBolt} bolt. Additionally, every instance of the \texttt{NewMetricsBolt} bolt sends its local average email throughput to a global (excluded from the parallelism setting) \texttt{GlobalMetricsBolt} bolt every four seconds. This bolt then records the global average email throughput.
+Next, Enron topology from the IBM benchmarks was tested for performance. In this topology, serialised emails from the Enron email dataset are read from a file by a \texttt{ReadEmailsDecompressSpout} spout. They are then deserialised by \texttt{AvroDeserializeBolt} bolt, filtered by \texttt{NewFilterBolt} bolt, modified by \texttt{ModifyBolt} bolt, and finally metrics are recorded by a \texttt{NewMetricsBolt} bolt. Additionally, every instance of the \texttt{NewMetricsBolt} bolt sends its local average email throughput to a global (excluded from the parallelism setting) \texttt{GlobalMetricsBolt} bolt every four seconds. This bolt then records the global average email throughput. Figure \ref{fig:enron_topology} shows this topology graphically.
+
+\begin{figure}[!htb]
+\begin{adjustwidth}{-0.5in}{-0.5in}
+	\centering
+	\includegraphics[scale=0.475]{pdf/enron_topology.pdf}
+	\caption{Enron topology.}
+	\label{fig:enron_topology}
+\end{adjustwidth}
+\end{figure}
 
 Similarly to the WordCount topology, this topology is serial in nature. However, whereas the spout in  WordCount topology keeps a small number of sentences in memory, the Enron topology has a spout that produces tuples by reading from a file. Thus, this benchmark is mostly I/O-bound. The average email throughput in Storm-MC and Apache Storm is shown in tables \ref{table:storm_mc_enron} and \ref{table:storm_enron}, respectively. 
 
@@ -839,21 +853,30 @@ Similarly to the WordCount topology, this topology is serial in nature. However,
 \end{adjustwidth}
 \end{table}
 
-<<enron-plot, echo=FALSE, cache=FALSE, fig.cap="Global Email Throughput over time", fig.align="center", fig.pos="!htb", fig.height=6.5>>=
+<<enron-plot, echo=FALSE, cache=FALSE, fig.cap="Global Email Throughput over time. Standard error shown in light grey.", fig.align="center", fig.pos="!htb", fig.height=6.5>>=
 @
 
 As can be seen from the tables, the difference in throughput in Enron Topology is less staggering than in WordCount. This is due to the fact that the throughput is limited by the file reads of the spout. However, as the parallelism increases the improvement in throughput of Storm-MC becomes more apparent as shown in Figure \ref{fig:enron-plot}. This figure also shows that the throughput is fairly volatile. This is due to the fact that the file is loaded into main memory in chunks and hence the throughput drops when the spout is trying to read from a file in between the loads. As before, the resident size used by Storm-MC is significantly lower than that of Storm.
 
 \subsection{RollingSort Topology}
 
-The RollingSort topology was ported over from the aforementioned storm-benchmark project. This topology only includes one spout sending tuples to one bolt. The \texttt{RandomMessageSpout} spout produces hundred character-long strings of random digits from zero to eight. The \texttt{SortBolt} bolt then stores a rolling window of hundred of such messages and sorts them every 10 seconds. This benchmark is considered to be memory-bound: the bolt stores a window of tuples in memory and performs a non-linear time sort. The results of running this benchmark on Storm-MC and Apache Storm can be seen in tables \ref{table:storm_mc_rolling} and \ref{table:storm_rolling}, respectively.
+The RollingSort topology was ported over from the aforementioned storm-benchmark project. This topology only includes one spout sending tuples to one bolt. The \texttt{RandomMessageSpout} spout produces hundred character-long strings of random digits from zero to eight. The \texttt{SortBolt} bolt then stores a rolling window of hundred of such messages and sorts them every 10 seconds. The graphic representation of this topology can be seen in Figure \ref{fig:rolling_topology}.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.475]{pdf/rolling_topology.pdf}
+	\caption{RollingSort topology.}
+	\label{fig:rolling_topology}
+\end{figure}
+
+This benchmark is considered to be memory-bound: the bolt stores a window of tuples in memory and performs a non-linear time sort. The results of running this benchmark on Storm-MC and Apache Storm can be seen in tables \ref{table:storm_mc_rolling} and \ref{table:storm_rolling}, respectively.
 
 \begin{table}[!htb]
 \begin{adjustwidth}{-0.5in}{-0.5in}
 \centering
 \small
 \begin{tabular}{@{}rccccl@{}}
-    {Parallelism} & {RandomMessageSpout} & {SortBolt} & {CPU Utilisation} & {Memory Usage} \\ \toprule
+    \textbf{Parallelism} & \textbf{RandomMessageSpout} & \textbf{SortBolt} & \textbf{CPU Utilisation} & \textbf{Memory Usage} \\ \toprule
     1 & {249,143,444} & {249,142,400} & {186.2\%} & {504.3M} \\
     2 & {444,261,351} & {444,259,400} & {352.0\%} & {401.7M} \\
     3 & {350,861,061} & {350,859,800} & {514.7\%} & {382.9M} \\
@@ -875,7 +898,7 @@ The RollingSort topology was ported over from the aforementioned storm-benchmark
 \centering
 \small
 \begin{tabular}{@{}rccccl@{}}
-    {Parallelism} & {RandomMessageSpout} & {SortBolt} & {CPU Utilisation} & {Memory Usage} \\ \toprule
+    \textbf{Parallelism} & \textbf{RandomMessageSpout} & \textbf{SortBolt} & \textbf{CPU Utilisation} & \textbf{Memory Usage} \\ \toprule
     1 & {173,906,935} & {173,900,300} & {267.3\%} & {3.0G} \\
     2 & {226,583,924} & {226,579,200} & {468.3\%} & {3.0G} \\
     3 & {310,949,455} & {310,943,000} & {634.6\%} & {2.9G} \\
@@ -903,57 +926,80 @@ In this section we are going to discuss challenges we encountered while porting 
 	\item[Unfamiliarity with Clojure] \hfill \\
 	One of the main challenges while working on this project was learning a new programming language - Clojure. Since most of the implementation of Apache Storm is written in Clojure, this language had to be studied and its concepts well understood for us to be able to write code that worked with the existing codebase. By the end of the project writing Clojure became as simple as writing Java.
 	\item[Lack of Documentation] \hfill \\
-	Even though Apache Storm is a popular project documentation is available only for the high level concepts used within Storm. The implementation details are often obscured away in hard to understand functions. Since the documentation is lacking our knowledge of Storm had to be obtained by reading the source code of an initially unfamiliar language.
+	Even though Apache Storm is a popular project documentation is available only for the high level concepts used within Storm. The implementation details are often obscured away in hard to understand functions. Since the documentation is lacking our knowledge of Storm had to be obtained by reading the source code of an initially unfamiliar language. By the end of the project the Storm-MC code became well documented and we might attempt back-porting to Apache Storm.
 \end{description}
 
 \clearpage{}
 
 \clearpage{}\chapter{Conclusion}
 
+This final chapter concludes with a summary of contributions of this project (\ref{sec:contribs}) and discusses future work that could stem from this project (\ref{sec:future_work}).
+
+\section{Summary of Contributions}
+\label{sec:contribs}
+
+The primary contribution of this project is Storm-MC - a library aimed at data stream processing applications. The benefits of using Storm-MC are twofold:
+
+\begin{itemize}
+\item It offers the same easy-to-use API as Apache Storm.
+\item It is tailored to multi-core environments.
+\end{itemize}
+
+Since Storm-MC uses the same API as Apache Storm, applications written with Storm in mind can be ported to use Storm-MC with minimum amount of effort. Moreover, the Storm API allows programmers to create data stream processing applications on multi-core with an unprecedented ease. All of this comes with the superior performance Storm-MC offers compared to running Apache Storm in local mode, as shown in Section \ref{sec:performance}.
+
 \section{Future Work}
+\label{sec:future_work}
 
-\todo{Add Trident.}
+Storm-MC could be improved in a number of ways:
 
-\todo{Make Storm-MC a server.}
+\begin{description}
+	\item[Storm-MC as a Server] \hfill \\
+	Storm-MC could be updated to enable it to run as a server. This could have several benefits such as being able to execute multiple topologies at the same time with a thin wrapper that could control their execution just like with Apache Storm. This was not implemented as we assumed most of the time users are executing only one topology per machine.
+	\item[Higher Level Abstractions] \hfill \\
+	Defining components of a Storm-MC topology is fairly simple. Programmers only need to define how components are connected, how they process tuples, and what tuples they emit. However, this could be taken even further with the user only specifying high-level functions and the Storm-MC library figuring out how to distribute the work. In Apache Storm this is implemented in Trident which was not ported as part of this project.
+	\item[Automatic Parallelism] \hfill \\
+	Sometimes when configuring a topology it may be difficult to predict the rate at which spouts are going to produce tuples. If the rate is underestimated consumers could be lagging behind producers. On the other hand, if the rate is overestimated consumers could be idle, not doing any useful work. Thus it might be advantageous to have an automatic parallelism setting which could add or remove consumers based on the current tuple rate.
+	
+	It may seem that this would be trivial to implement with a pool of threads representing one component. However, there are several problems that need to be considered. For example, fields grouping guarantees that tuples with the same field values go to the same executor. Changing the parallelism at runtime breaks this guarantee.
+	
+	Alternatively each executor could use a pool of threads. This comes with its own set of problems: the executor object would have to provide synchronised access to the pool which would only increase latency. Hence, implementing automatic parallelism was out of the scope of this project.
+	\item[Performance Comparison with Distributed Storm] \hfill \\
+	The benchmarks in this report compared Storm-MC to Apache Storm running in local mode. It would be interesting to see how Storm-MC compares to Apache Storm running on a cluster. One could compare the number of nodes to the number of CPUs required to execute a topology. This could provide 
+\end{description}
 \clearpage{}
+
+\pagenumbering{Roman}
 
 \begin{appendices}
 	\clearpage{}\chapter{Listings}
 \label{ch:listings}
 
 \begin{listing}[!htb]
-\inputminted{java}{code/RandomSentenceSpout.java}
-\caption{RandomSentenceSpout.java}
+\inputminted[frame=lines,linenos]{java}{code/RandomSentenceSpout.java}
+\caption[RandomSentenceSpout.java]{RandomSentenceSpout.java: Definition of a spout that emits a randomly chosen sentence from a predefined collection of sentences.}
 \label{listing:wordcount_spout}
 \end{listing}
 
-Listing \ref{listing:wordcount_spout} shows the definition of a spout that emits a randomly chosen sentence from a predefined collection of sentences.
-
 \begin{listing}[!htb]
-\inputminted{java}{code/SplitSentence.java}
-\caption{SplitSentence.java}
+\inputminted[frame=lines,linenos]{java}{code/SplitSentence.java}
+\caption[SplitSentence.java]{SplitSentence.java: Definition of a bolt that executes a Python script.}
 \label{listing:wordcount_split}
 \end{listing}
 
 \begin{listing}[!htb]
-\inputminted{python}{code/splitsentence.py}
-\caption{splitsentence.py}
+\inputminted[frame=lines,linenos]{python}{code/splitsentence.py}
+\caption[splitsentence.py]{splitsentence.py: Definition of a bolt that splits sentences on whitespace in Python.}
 \label{listing:wordcount_split_py}
 \end{listing}
 
-Listings \ref{listing:wordcount_split} and \ref{listing:wordcount_split_py} show how a bolt defined in Python can be part of this Java-defined topology.
-
 \begin{listing}[!htb]
-\inputminted{java}{code/WordCount.java}
-\caption{WordCount.java}
+\inputminted[frame=lines,linenos]{java}{code/WordCount.java}
+\caption[WordCount.java]{WordCount.java: Definition of a bolt that counts word frequencies.}
 \label{listing:wordcount_count}
 \end{listing}
 
-Finally, listing \ref{listing:wordcount_count} shows how a bolt that counts the number of word occurrences can be implemented.
-
 \clearpage{}
 \end{appendices}
-
 
 \printbibliography
 

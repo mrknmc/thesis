@@ -1,7 +1,35 @@
 \chapter{Conclusion}
 
+This final chapter concludes with a summary of contributions of this project (\ref{sec:contribs}) and discusses future work that could stem from this project (\ref{sec:future_work}).
+
+\section{Summary of Contributions}
+\label{sec:contribs}
+
+The primary contribution of this project is Storm-MC - a library aimed at data stream processing applications. The benefits of using Storm-MC are twofold:
+
+\begin{itemize}
+\item It offers the same easy-to-use API as Apache Storm.
+\item It is tailored to multi-core environments.
+\end{itemize}
+
+Since Storm-MC uses the same API as Apache Storm, applications written with Storm in mind can be ported to use Storm-MC with minimum amount of effort. Moreover, the Storm API allows programmers to create data stream processing applications on multi-core with an unprecedented ease. All of this comes with the superior performance Storm-MC offers compared to running Apache Storm in local mode, as shown in Section \ref{sec:performance}.
+
 \section{Future Work}
+\label{sec:future_work}
 
-\todo{Add Trident.}
+Storm-MC could be improved in a number of ways:
 
-\todo{Make Storm-MC a server.}
+\begin{description}
+	\item[Storm-MC as a Server] \hfill \\
+	Storm-MC could be updated to enable it to run as a server. This could have several benefits such as being able to execute multiple topologies at the same time with a thin wrapper that could control their execution just like with Apache Storm. This was not implemented as we assumed most of the time users are executing only one topology per machine.
+	\item[Higher Level Abstractions] \hfill \\
+	Defining components of a Storm-MC topology is fairly simple. Programmers only need to define how components are connected, how they process tuples, and what tuples they emit. However, this could be taken even further with the user only specifying high-level functions and the Storm-MC library figuring out how to distribute the work. In Apache Storm this is implemented in Trident which was not ported as part of this project.
+	\item[Automatic Parallelism] \hfill \\
+	Sometimes when configuring a topology it may be difficult to predict the rate at which spouts are going to produce tuples. If the rate is underestimated consumers could be lagging behind producers. On the other hand, if the rate is overestimated consumers could be idle, not doing any useful work. Thus it might be advantageous to have an automatic parallelism setting which could add or remove consumers based on the current tuple rate.
+	
+	It may seem that this would be trivial to implement with a pool of threads representing one component. However, there are several problems that need to be considered. For example, fields grouping guarantees that tuples with the same field values go to the same executor. Changing the parallelism at runtime breaks this guarantee.
+	
+	Alternatively each executor could use a pool of threads. This comes with its own set of problems: the executor object would have to provide synchronised access to the pool which would only increase latency. Hence, implementing automatic parallelism was out of the scope of this project.
+	\item[Performance Comparison with Distributed Storm] \hfill \\
+	The benchmarks in this report compared Storm-MC to Apache Storm running in local mode. It would be interesting to see how Storm-MC compares to Apache Storm running on a cluster. One could compare the number of nodes to the number of CPUs required to execute a topology. This could provide 
+\end{description}

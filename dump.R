@@ -23,8 +23,8 @@ b <- melt(dump, id.vars="Time")
 k <- ggplot(b, aes(group=variable,y=value,x=Time,fill=variable)) +
     scale_x_discrete(breaks=seq(0,180, by=30), name="\nTime (seconds)") +
     scale_y_discrete(breaks=seq(0,90, by=10), name="# of Threads\n") +
-    scale_fill_grey(end=0.7, name="Thread State") +
-    scale_colour_grey(end=0.7, name="Thread State") +
+    scale_fill_brewer(palette="Set1", name="Thread State") +
+    scale_colour_brewer(palette="Set1", name="Thread State") +
     theme_bw() +
     theme(legend.position="top", legend.key = element_blank())
 

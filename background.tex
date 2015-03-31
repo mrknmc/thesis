@@ -36,7 +36,7 @@ There are several core concepts used by Storm and hence by extension Storm-MC as
   Every bolt needs to have a type of stream grouping associated with it. This grouping decides the means of distributing the tuples coming from the bolt's input streams amongst the instances of the bolt task. Following are the possible types of stream grouping:
   \begin{description}
   	\item[Shuffle] Randomly partition the tuples among all the bolt tasks.
-  	\item[Fields] Hash on a subset of the tuple fields.
+  	\item[Fields] Hash on a subset of the tuple fields. All tuples with same values of those fields will go to same bolt task.
   	\item[All] Replicate the entire stream to all the bolt tasks.
   	\item[Direct] The producer of the tuple decides which task of the bolt will receive this tuple.
   	\item[Global] Send the entire stream to a single bolt task.
@@ -66,7 +66,7 @@ There are two additional bolts running for every topology:
 
 \begin{figure}[!htb]
 	\centering
-	\includegraphics[scale=0.6]{pdf/wordcount_topology.pdf}
+	\includegraphics[scale=0.475]{pdf/wordcount_topology.pdf}
 	\caption{WordCount topology.}
 	\label{fig:wordcount_topology}
 \end{figure}

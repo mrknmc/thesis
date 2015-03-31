@@ -57,6 +57,9 @@
 % INCLUDE CODE FILES
 \usepackage{minted}
 
+% CHANGE LIST OF LISTINGS CAPTION
+\renewcommand{\listoflistingscaption}{List of Listings}
+
 % ALLOW TWO FIGURES NEXT TO EACH OTHER
 \usepackage{subcaption}
 
@@ -93,12 +96,12 @@
 \section*{Acknowledgements}
 Acknowledgements go here.
 
+\pagenumbering{Roman}
+
 \tableofcontents
 \listoffigures
 \listoftables
 \listoflistings
-
-\pagenumbering{arabic}
 
 <<external-code, echo=FALSE, cache=FALSE>>=
 	read_chunk('count.R')
@@ -106,6 +109,9 @@ Acknowledgements go here.
 	read_chunk('dump.R')
 	read_chunk('enron.R')
 @
+
+\cleardoublepage
+\pagenumbering{arabic}
 
 \include{introduction}
 
@@ -121,14 +127,11 @@ Acknowledgements go here.
 
 \include{conclusion}
 
+\pagenumbering{Roman}
+
 \begin{appendices}
 	\include{appendix}
 \end{appendices}
-
-% use the following and \cite{} as above if you use BibTeX
-% otherwise generate bibtem entries
-%\bibliographystyle{unsrtnat}
-%\bibliography{report}
 
 \printbibliography
 

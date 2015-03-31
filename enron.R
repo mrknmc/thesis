@@ -52,13 +52,14 @@ mat$parallelism <- paste("Parallelism:", mat$parallelism)
 mat$time <- mat$time * 4
 # Take every second measurement
 t <- mat[seq(1, nrow(mat), 2), ]
+#k <- ggplot(t, aes(x=time, y=value)) +
 k <- ggplot(t, aes(x=time, y=value,fill=variable,color=variable)) +
     facet_wrap(~parallelism, nrow = 3, ncol = 2, scales="free") +
-    scale_fill_grey(end=0.7, name="Library", labels=c("Apache Storm", "Storm-MC")) +
-    scale_colour_grey(end=0.7, name="Library", labels=c("Apache Storm", "Storm-MC")) +
+    scale_fill_brewer(name="Library", palette="Set1", labels=c("Apache Storm", "Storm-MC")) +
+    scale_colour_brewer(name="Library", palette="Set1", labels=c("Apache Storm", "Storm-MC")) +
     scale_y_continuous(labels=format_si(), name="Global Throughput (Emails / s)\n") +
     theme_bw() +
     theme(legend.position="top", legend.key = element_blank()) +
     xlab("\nTime (seconds)")
 
-k + geom_point() + geom_line() + geom_smooth(method = "lm", size=1.2, alpha=0.8, se=FALSE, aes(group=variable, color=variable))
+k + geom_smooth(method = "lm", alpha=0.7, size=0, fill="grey",color="grey", se=TRUE, aes(group=variable)) + geom_point() + geom_line()

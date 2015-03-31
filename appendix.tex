@@ -2,32 +2,26 @@
 \label{ch:listings}
 
 \begin{listing}[!htb]
-\inputminted{java}{code/RandomSentenceSpout.java}
-\caption{RandomSentenceSpout.java}
+\inputminted[frame=lines,linenos]{java}{code/RandomSentenceSpout.java}
+\caption[RandomSentenceSpout.java]{RandomSentenceSpout.java: Definition of a spout that emits a randomly chosen sentence from a predefined collection of sentences.}
 \label{listing:wordcount_spout}
 \end{listing}
 
-Listing \ref{listing:wordcount_spout} shows the definition of a spout that emits a randomly chosen sentence from a predefined collection of sentences.
-
 \begin{listing}[!htb]
-\inputminted{java}{code/SplitSentence.java}
-\caption{SplitSentence.java}
+\inputminted[frame=lines,linenos]{java}{code/SplitSentence.java}
+\caption[SplitSentence.java]{SplitSentence.java: Definition of a bolt that executes a Python script.}
 \label{listing:wordcount_split}
 \end{listing}
 
 \begin{listing}[!htb]
-\inputminted{python}{code/splitsentence.py}
-\caption{splitsentence.py}
+\inputminted[frame=lines,linenos]{python}{code/splitsentence.py}
+\caption[splitsentence.py]{splitsentence.py: Definition of a bolt that splits sentences on whitespace in Python.}
 \label{listing:wordcount_split_py}
 \end{listing}
 
-Listings \ref{listing:wordcount_split} and \ref{listing:wordcount_split_py} show how a bolt defined in Python can be part of this Java-defined topology.
-
 \begin{listing}[!htb]
-\inputminted{java}{code/WordCount.java}
-\caption{WordCount.java}
+\inputminted[frame=lines,linenos]{java}{code/WordCount.java}
+\caption[WordCount.java]{WordCount.java: Definition of a bolt that counts word frequencies.}
 \label{listing:wordcount_count}
 \end{listing}
-
-Finally, listing \ref{listing:wordcount_count} shows how a bolt that counts the number of word occurrences can be implemented.
 

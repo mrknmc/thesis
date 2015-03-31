@@ -1,4 +1,5 @@
-public static class SplitSentence extends ShellBolt implements IRichBolt {
+public static class SplitSentence extends ShellBolt
+    implements IRichBolt {
 
     public SplitSentence() {
         super("python", "splitsentence.py");
