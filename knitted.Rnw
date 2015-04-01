@@ -425,7 +425,7 @@ Furthermore, since Nimbus is a Thrift service Thrift generates all the code requ
 
 \clearpage{}\chapter{Bringing Storm to Multi-core}
 
-The following chapter explains how the Storm was ported to multi-core. We describe how Apache Storm behaves in a multi-core environment (\ref{sec:storm_on_mc}), discuss the design of Storm-MC (\ref{sec:storm_mc_arch}), describe how Storm-MC was implemented (\ref{sec:implementation}), and list feature differences between Apache Storm and Storm-MC (\ref{sec:differences}).
+The following chapter explains how Storm was ported to multi-core. We describe how Apache Storm behaves in a multi-core environment (\ref{sec:storm_on_mc}), discuss the design of Storm-MC (\ref{sec:storm_mc_arch}), outline how Storm-MC was implemented (\ref{sec:implementation}), and list feature differences between Apache Storm and Storm-MC (\ref{sec:differences}).
 
 \section{Apache Storm on Multi-core}
 \label{sec:storm_on_mc}
@@ -443,28 +443,30 @@ To begin, we discuss why Apache Storm does not perform optimally in a multi-core
 
 Figure \ref{fig:worker_inside} shows how tuple processing is implemented inside a Storm worker process. The tuple is read from a message buffer by the receiver thread of the worker and put on a receive queue of the target executor. The tuple is then picked up by the component thread of the executor for task execution.
 
-After the component thread has executed the task it puts the tuple on the executor send queue. There, it is picked up by the executor sender thread which puts the tuple on the global send queue of the worker. Finally, the global sender thread of the worker serialises the tuple and sends it downstream.
+After the component thread has executed the task it optionally puts a newly created tuple on the executor send queue. There, it is picked up by the executor sender thread which puts the tuple on the global send queue of the worker. Finally, the global sender thread of the worker serialises the tuple and sends it downstream via the network.
 
-Alternatively, if the tuple is forwarded to an executor in the same worker process it is put on the receive queue of the corresponding executor directly after task execution.
+Alternatively, if the tuple is targeted to an executor in the same worker process it is put on the receive queue of the corresponding executor directly after task execution.
 
 The queues used in tuple processing are implemented as ring buffers using the Disruptor library \citep{LMAXDisruptor}. Detailed background on how Disruptor works and its performance benchmarks can be found in \citep{Thompson_Farley_Barker_Gee_Stewart_2011}. In summary, due to less write contention, lower concurrency overhead, and being more cache-friendly the Disruptor pattern can offer latency of inter-thread messages lower than 50 nanoseconds and a throughput of over 25 million messages per second \cite{Thompson_Farley_Barker_Gee_Stewart_2011}.
 
 There is significant overhead required to emulate sending tuples to executors in other worker nodes. For one, there is the overhead from the tuple passing through the three queues of a worker. The authors of LMAX Disruptor showed that a three step pipeline can have half the throughput of a single consumer-producer pipeline \citep{DisruptorWiki}.
 
-Furthermore, to emulate over-the-network messages Storm uses a \texttt{Hashmap} of \texttt{LinkedBlockingQueue}s which according to \cite{Thompson_Farley_Barker_Gee_Stewart_2011} has several orders of magnitude lower performance than the Disruptor. 
+Furthermore, to emulate over-the-network messages Storm uses a map of \\ \texttt{LinkedBlockingQueue}s which according to \cite{Thompson_Farley_Barker_Gee_Stewart_2011} have several orders of magnitude lower performance than Disruptor queues.
 
 \subsection{Thread Overhead}
 
+Another major overhead stems from Apache Storm running too many threads even for simple topologies. As we show most of these threads are not necessary in a multi-core environment.
+
 \begin{description}
 	\item[Acker Bolt] \hfill \\
-	The Acker bolt ensures that tuples propagate through the topology even if a failure in processing occurs. It provides the so-called at-least-once semantics. In Storm it is included in every topology. It can be disabled via the configuration file in which case it is mostly idle not receiving any tuples. However, it can still use up resources especially if it waits fort tuples using a busy waiting strategy.
+	The Acker bolt ensures that tuples propagate through the topology even if a failure in processing occurs. It provides the so-called at-least-once semantics. In Storm it is included in every topology. It can be disabled via the configuration file in which case it is mostly idle not receiving any tuples. However, it can still use up resources especially if it waits fort tuples using a busy waiting strategy (more on waiting strategies in Section \ref{subsubsec:waiting}). Furthermore, since fault tolerance cannot be guaranteed on a single multi-core machine, the Acker bolt is not necessary.
 	\item[Heartbeats \& Timers] \hfill \\
 	Every worker has a heartbeat thread that simulates sending heartbeat messages to the Nimbus node. It does this by writing to a local cache which is persisted to a file by a write on every heartbeat. Since the write is implemented using the \texttt{java.io} package the write is blocking - the thread cannot continue until the write is completed. While heartbeats are essential in cluster mode to signal the node being alive, there is no need for them in local mode.
 	\item[Zookeeper Emulation] \hfill \\
 	More overhead is produced by a local Zookeper server which emulates the Zookeeper nodes of a cluster. Running the Zookeeper server is a massive addition to the list of overheads as shown in the following paragraphs. The purpose of Zookeeper is to maintain state of running topologies and nodes of the cluster. As we will show in the following sections maintaining this state on multi-core is not necessary.
 \end{description}
 
-During profiling we found that a topology with one worker and three executors was being executed with 55 threads (not including system JVM threads and threads created by the profiler). Table \ref{table:breakdown} shows a breakdown of what the individual threads were used for.
+During profiling we found that a simple topology with three components running with one worker and one executor per component was being executed with 55 threads (not including system JVM threads and threads created by the profiler). Table \ref{table:breakdown} shows a breakdown of what the individual threads were used for.
 
 \begin{table}[htb!]
 \centering
@@ -503,9 +505,9 @@ To find out what state the threads were actually in at any given time the topolo
 
 Even though three minutes may seem to be a short amount of time the fact that there is almost no variation shows that it is sufficient. As can be seen from the table, most of the threads were either in state \texttt{WAITING} or \texttt{TIMED WAITING}. According to the Java documentation on thread states \citep{JavaThreads} these two states are used for threads that are waiting for an action from a different thread and cannot be scheduled by the scheduler until that action is executed.
 
-On average there were eight threads in state \texttt{RUNNABLE} which JVM uses to mark threads which are executing on the JVM and are possibly waiting for resources from the operating system (OS) such as processor \citep{JavaThreads}. Hence, these are threads directly competing to be scheduled by the OS. This means that for three components running in parallel there are five threads doing potentially unnecessary work.
+However, on average there were eight threads in state \texttt{RUNNABLE} which JVM uses to mark threads which are executing on the JVM and are possibly waiting for resources from the operating system (OS) such as processor \citep{JavaThreads}. Hence, these threads are directly competing to be scheduled by the OS. This means that for three components running in parallel there are five threads doing potentially unnecessary work.
 
-In the subsequent sections we will show that these threads were in fact unnecessary and we will discuss how the number of threads was reduced. In fact, to execute the same topology on Storm-MC requires only 5 threads.
+In the subsequent sections we show that these threads were in fact unnecessary and we will discuss how the total number of threads was reduced. In fact, to execute the same topology on Storm-MC requires only 5 threads.
 
 \section{Storm-MC Design}
 \label{sec:storm_mc_arch}
@@ -516,12 +518,14 @@ Additionally, the source code for the Nimbus service was merged with the worker 
 
 \subsection{Porting Nimbus}
 
-Nimbus in Apache Storm performs as a server that clients can send topologies to for execution. In Storm-MC, we opted for a different design. Storm-MC is designed as a standard Java library that applications can import and use to create and execute topologies in the main method of their application. This means that Storm-MC does not support running multiple topologies at the same time. However, to do that one only needs to run the topology in a separate process. This is because, unlike when executing on a cluster, different topologies do not need to share any state and it is more natural to execute them as separate processes. This design decision has the added benefit of each process having its own part of main memory thus reducing cache conflicts as shown in [39] and providing higher security by not having different topologies share memory space.
+Nimbus in Apache Storm performs as a server that clients can send topologies to for execution. In Storm-MC, we opted for a different design. Storm-MC is designed as a standard Java library that applications can import and use to create and execute topologies in the main method of their application.
 
-The interaction with the Nimbus service in Storm is usually through a shell script with a path to a JAR file of the topology and the main class to execute. This shell script was ported over to Storm-MC but instead of communicating with a service it spawns a new separate process that executes the topology.
+This means that Storm-MC does not support running multiple topologies at the same time. However, to do that one only needs to run every topology in a separate process. This is because, unlike when executing on a cluster, different topologies do not need to share any state and it is more natural to execute them as separate processes. This design decision has the added benefit of each process having its own part of main memory thus reducing cache conflicts as shown in [39] and providing higher security by not having different topologies share memory space.
 
-Unlike Apache Storm, Storm-MC does not support topology scheduling. Since within one process there is always only one topology running at a time and the hardware configuration of the machine does not change, the parallelism is clearly defined by the number of executors per component specified by the topology configuration.
-One way to implement scheduling could be to pin threads to specific cores. Un- fortunately, Java does not provide support for CPU affinity; the assignments are handled automatically by the JVM. Potentially, this could be achieved by using C or C++, both of which support CPU affinity, but this was not implemented in Storm-MC.
+The interaction with the Nimbus service in Storm is usually through a shell script with a path to a JAR file of the topology and the main class to execute. This shell script was ported over to Storm-MC but instead of communicating with a service it spawns a new separate Java process that executes the topology.
+
+Unlike Apache Storm, Storm-MC does not support topology scheduling. Since within one process there is always only one topology running at a time and the hardware configuration of the machine does not change during execution, the parallelism is clearly defined by the number of executors per component specified in the topology configuration.
+One way to implement scheduling could be to pin threads to specific cores. Unfortunately, Java does not provide support for CPU affinity; the assignments are handled automatically by JVM. Potentially, this could be achieved by using C or C++, both of which support CPU affinity, but this was not implemented in Storm-MC.
 
 The role of Nimbus in Storm-MC has effectively been reduced to validating the topology and its configuration and passing the topology along to the worker source code which handles topology execution.
 
@@ -529,13 +533,13 @@ The role of Nimbus in Storm-MC has effectively been reduced to validating the to
 
 In Apache Storm, a worker node runs a supervisor daemon, which in turns launches worker processes which run executors which execute tasks. There are thus three ways to control the parallelism of a component in Apache Storm: setting the number of workers, setting the number of executors per component, and setting the number of tasks per executor.
 
-In Storm-MC, however, there is only one worker wrapper which runs all executors and their tasks. Furthermore, only one task executes within an executor since tasks execute serially. Hence, the parallelism of a component is controlled by only one variable: number of executors per component. This represents the number of threads that will function as the component within a topology. This design has several benefits:
+In Storm-MC, however, there is only one worker wrapper which runs all executors and their tasks. Furthermore, only one task executes within an executor. This limit is due to the fact that tasks execute serially and hence there is no speedup to be gained by one executor running more than one task. Hence, the parallelism of a component is controlled by only one variable: the number of executors per component. This represents the number of threads that will function as the component within a topology. This design has several benefits:
 
 \begin{itemize}
 	\item All the communication occurs within one worker wrapper.
 	\item The supervisor daemon can be removed as there is no need to synchronise or monitor workers.
 	\item There is no need to simulate over-the-network message passing.
-	\item Message passing between executor threads within a worker stays the same as in Apache Storm.
+	\item Tuple passing between executor threads within a worker stays the same as in Apache Storm.
 \end{itemize}
 
 A comparison of an Apache Storm worker node and its Storm-MC equivalent is shown in Figure \ref{fig:comparison}.
@@ -559,13 +563,13 @@ A comparison of an Apache Storm worker node and its Storm-MC equivalent is shown
 
 The role of the worker wrapper is to launch executors and provide them with a shared context through which they can communicate. This is done with a map of Disruptor queues which the executors use as receive queues to pick tuples from.
 
-Moreover, the worker wrapper contains a map of components and streams. This map specifies which bolts subscribe to a stream a component produces. Executors use this map to figure out who they should send tuples to.
+Moreover, the worker wrapper contains a map of components and streams. This map specifies which bolts subscribe to a stream a component produces. Executors use this map to figure out which components they should send tuples to.
 
 Additionally, the worker wrapper has a timer which components can use to get tick tuples at regular intervals. As mentioned before, bolts can use tick tuples to trigger events at regular intervals. For example, one might want to sort a window of tuples based on some criteria every five minutes.
 
 \todo{mention metrics here?}
 
-Finally, a worker contains a configurable-size thread pool \texttt{ExecutorService}. Storm-MC executors can use this service via the topology context to launch background tasks on a shared thread pool.
+Finally, the worker wrapper provides access to a fixed-size thread pool through a Java \texttt{ExecutorService}. Storm-MC executors can use this service to launch background tasks on a shared thread pool.
 
 \subsection{Removing State}
 
@@ -577,20 +581,20 @@ While this is not something that is visible to a user of Storm-MC, it required a
 
 Similarly to removing the Zookeeper state, great amount of work was put into removing the dependency of Storm-MC on Apache Thrift. This was mostly done to reduce code bloat and remove an unnecessary dependency since there is no serialisation required in a multi-core environment.
 
-Moreover, code generated by Thrift does not use standard Java camelCase naming conventions but instead uses underscore\_case. For example, Thrift generates method names such as \texttt{get\_component\_common}.
+Moreover, code generated by Thrift does not use standard Java camelCase naming conventions but instead uses underscore\_case. For example, Thrift generates method names such as \texttt{get\_component\_common} which make the API a little less elegant.
 
 Removing Thrift required refactoring all the data types generated automatically by Thrift. This not only reduced the size of the codebase significantly but also made the code more readable and self-documenting than the code generated by Thrift.
 
 \section{Implementation Details}
 \label{sec:implementation}
 
-Most of the implementation of Storm-MC was ported over from Apache Storm with adjustments where necessary. The problem with describing implementation of ported software is that there is a lot of functionality that needed to be changed but the changes required were usually not substantial. This is the case with Storm-MC as well. This section tries to outline the implementation of Storm-MC.
+Most of the implementation of Storm-MC was ported over from Apache Storm with adjustments where necessary. The problem with describing implementation of ported software is that there is a lot of functionality that needed to be changed but the changes usually did not require a complete overhaul. This is the case with Storm-MC as well.
 
 \subsection{Topology Submission}
 
-Topologies are built using an instance of the \texttt{TopologyBuilder} class which uses the builder pattern - same as in Apache Storm. While the basis  of this class was reused from Storm, the internals had to be refactored so they work with data types used by Storm-MC. Once a topology is built it is submitted to an instance of \texttt{LocalCluster} class. This class is used in Storm for emulating the cluster on a local machine. Storm-MC adapted the class for backwards compatibility. This way, code created for Storm needs minimal adaptation to work on Storm-MC. A topology is submitted for execution via the \texttt{submitTopology} method which takes three arguments: the name of the topology, a Java Map with configuration, and a topology built by \texttt{TopologyBuilder}.
+Topologies are built using an instance of the \texttt{TopologyBuilder} class which uses the builder pattern - same as in Apache Storm. While the basis  of this class was reused from Storm, the internals had to be refactored so they work with the non-Thrift data types used by Storm-MC. Once a topology is built, it is submitted to an instance of the \texttt{LocalCluster} class. This class is used in Storm for emulating the cluster on a local machine and Storm-MC adapted the class for backwards compatibility. This way, code created for Storm needs minimal adaptation to work on Storm-MC. A topology is submitted for execution via the \texttt{submitTopology} method which takes three arguments: the name of the topology, a Java Map with configuration, and a topology built by \texttt{TopologyBuilder}.
 
-Users can submit a configuration file written in YAML. This is done by setting a JVM property called \texttt{storm.conf.file}. This file can for example define the capacity of the Disruptor queues, what waiting strategy should the components employ when there are no tuples to pick up, and what hooks they want executed every time a tuple is processed. Furthermore, users can define their own topology validator by implementing the \texttt{ITopologyValidator} interface.
+Along with a topology, users of Storm-MC can submit a configuration file written in YAML. This is done by setting a JVM property called \texttt{storm.conf.file}. This file can define the capacity of the Disruptor queues, the waiting strategy used by components when there are no tuples to pick up, and hooks they want executed every time a tuple is processed. Additionally, this file can define which implementation of \texttt{ITopologyValidator} to use for topology validation.
 
 \subsection{Tuple Processing}
 
@@ -603,17 +607,18 @@ Users can submit a configuration file written in YAML. This is done by setting a
 
 The implementation of tuple processing in Storm-MC is depicted in Figure \ref{fig:worker_inside_mc}. As can be seen from the figure, the queues used for remote message sending present in Storm were stripped away and there is only one Disruptor queue for every executor. Once an executor is done processing a tuple it puts it directly on the receive queue of its downstream bolts.
 
-In Apache Storm, every executor runs two threads, one for tuple processing and one for tuple sending. In Storm-MC, however, there is only one thread per executor. Hence, the number of queues a tuple needs to pass through in a component is lowered as compared to Apache Storm.
+In Apache Storm, every executor runs two threads, a component thread for tuple processing and a sender thread for tuple sending. Thus the component thread is not slowed down by competing with other executors trying to access the worker send queue; the sender thread takes care of that. In Storm-MC, an executor runs only one thread. This design works because executors do not have to compete for access to the worker send queue which is not needed. Hence, the number of queues a tuple needs to pass through in a component is lowered as compared to Apache Storm.
 
 Tuple processing in Storm-MC is a variant of multiple producer single consumer problem. In general, multiple producer single consumer problems are hard to optimise since there needs to be some form of synchronisation between multiple producers trying to produce an entry at the same time. In Disruptor queues this is implemented using the atomic Compare-and-Swap (CAS) operation. This operation ensures that even if multiple threads attempt to modify a variable only one of them succeeds and all threads involved are able to tell whether it was them that succeeded. Hence, one thread will succeed at claiming the next entry of a Disruptor queue and others will have to retry.
 
 Alternatively, locks can be used used to synchronise access but lock-free queues using CAS are considered to be more efficient than locks because they do not require a kernel context switch \cite{Thompson_Farley_Barker_Gee_Stewart_2011}. However, even with CAS a processor must lock its instruction pipeline to ensure atomicity and employ a memory barrier to make the changes visible to other threads.
 
-We investigated other data structures besides Disruptor queues that could be used for tuple exchange in Storm-MC but Disruptor queues are considered state of the art in low-latency parallel systems. This is one area that Apache Storm did really well and we were not able to further optimise.
+We investigated other data structures besides Disruptor queues that could be used for tuple exchange in Storm-MC but Disruptor queues are considered state of the art in low-latency parallel systems. This is one area that Apache Storm got right and we were not able to further optimise.
 
 Other options we considered were \texttt{ArrayBlockingQueue} and \texttt{LinkedBlockingQueue} both of which are in the Java standard library. However, the Disruptor shows superior throughput and latency compared to these options as shown in \citep{DisruptorWiki}.
 
 \subsubsection{Waiting Strategies}
+\label{subsubsec:waiting}
 
 There are four different waiting strategies an executor can employ while waiting for a tuple to become available:
 
@@ -621,32 +626,32 @@ There are four different waiting strategies an executor can employ while waiting
 	\item[BlockingWaitStrategy] \hfill \\
 	This strategy uses a lock and a condition variable. The thread waits on the condition variable and is signalled once a new tuple becomes available. This strategy wastes the minimum number of CPU cycles when an executor is waiting.
 	\item[SleepingWaitStrategy] \hfill \\
-	This strategy initially spins for hundred iterations, then uses \texttt{Thread.yield()}, and finally uses \texttt{LockSupport.parkNanos(1L)} to sleep. Thus after quiet periods this strategy might introduce latency spikes.
+	This strategy initially spins for hundred iterations, then uses \texttt{Thread.yield()}, and finally uses \texttt{LockSupport.parkNanos(1L)} to sleep. Thus after quiet periods this strategy might introduce slight latency spikes.
 	\item[YieldingWaitStrategy] \hfill \\
-	This strategy initially spins for hundred iterations and then uses \texttt{Thread.yield()}. This strategy is a good compromise between CPU utilisation and great performance.
+	This strategy initially spins for hundred iterations and then uses \texttt{Thread.yield()}. This strategy is a good compromise between CPU utilisation and performance.
 	\item[BusySpinWaitStrategy] \hfill \\
-	In this strategy the thread is in a so-called tight loop, where it checks whether a new entry is available and only breaks out of the loop if there is a new entry. This strategy has the best performance but works well only if the number of CPU cores is higher than the number of active threads since it maximises CPU utilisation.
+	With this strategy the thread is in a so-called tight loop, where it checks whether a new entry is available every iteration of the loop and only breaks out of the loop if there is a new entry. This strategy guarantees the best performance but since it maximises CPU utilisation it works well only if the number of CPU cores is higher than the number of active threads.
 \end{description}
 
-The default strategy used in Storm-MC is \texttt{BlockingWaitStrategy} but users can change the strategy in the configuration file.
+The default strategy used in Storm-MC is \texttt{BlockingWaitStrategy} but users can change the strategy in the configuration file. Using other waiting strategies can lead to improved performance but since this can also be done in Apache Storm we do not further differentiate between them.
 
 \subsubsection{Tuple Pools}
 
-Once a component wants to send a new tuple to its downstream components it needs to initialise a Java Tuple object. Here, we saw room for improvement since this might need to be done at very high rates, possibly million times per second.
+Once a component wants to send a new tuple to its downstream components it needs to initialise a Java tuple object. Here, we saw room for improvement since this might need to be done at very high rates, possibly million times per second.
 
-Hence, a tuple pool was implemented where executors could place tuples after they were done with them so the tuples could be reused by other executors. However, access to this pool also had to be synchronised and hence accessing the pool introduced higher latency than simply initialising new tuples. Moreover, Java garbage collector actually does a good job of re-claiming unused memory and thus the idea of using a tuple pool was abandoned.
+Hence, a tuple pool was implemented where executors could place tuples after they were done with them so the tuples could be reused by other executors. However, access to this pool also had to be synchronised and hence accessing the pool introduced higher latency than simply initialising new tuples. Moreover, Java garbage collector actually does a good job of re-claiming unused memory. For these reasons, the idea of using a tuple pool was abandoned.
 
-This problem could potentially be circumvented by using different constructs to achieve tuple passing but backwards compatibility with programs written for Apache Storm was deemed more important than the potential gain in performance.
+This problem could potentially be circumvented by using different constructs to implement tuple passing but backwards compatibility with programs written for Apache Storm was deemed more important than the slight potential gain in performance.
 
-\subsection{Executors}
+\subsection{Executor Algorithm}
 
 The implementation of an executor processing a tuple is as follows:
 
 \begin{enumerate}
-	\item The executor repeatedly tries to pick a tuple from its Disruptor queue. If there are no tuples to be picked up it employs a waiting strategy between trials.
-	\item Once it picks up a tuple, it processes it as per the component it represents.
-	\item If it emits a new tuple it attempts to send it downstream by repeatedly trying to claim an entry of the downstream ring buffer.
-	\item Once it successfully claims an entry it proceeds back to step 1.
+	\item The executor tries to pick a tuple from its receive queue. If there are no tuples to be picked up it employs a waiting strategy as per the configuration of the topology.
+	\item Once a new tuple becomes available, the executor tries to process as many tuples as possible (more tuples could have been added to the queue while the executor was ``waking up"). The executor then processes this batch of tuples as per the component it represents.
+	\item If the executor emits a new tuple it attempts to send it downstream by repeatedly trying to claim an entry of the downstream receive queue.
+	\item Once the executor successfully claims an entry it publishes the tuple and goes back to step 1.
 \end{enumerate}
 
 \section{Differences between Apache Storm and Storm-MC}
@@ -673,9 +678,11 @@ The codebase of Apache Storm is fairly large - 54,985 lines of code as reported 
 \label{table:features}
 \end{table}
 
+\todo{maybe move below to implementation/design}
+
 A feature that we deemed very important is support for multi-language topologies. Thus, Storm-MC allows you to define components in other languages such as Python or Ruby and connect them into a Java topology. An example of a component defined in Python can be seen in Listing \ref{listing:wordcount_split_py}.
 
-Storm-MC has support for task hooks just like Storm. Task hooks allow you to capture a number of events and execute custom code when the event occurs at a registered component. Hooks are created by subclassing \texttt{BaseTaskHook}. They can, for example, be used to update a web server with the latest performance metrics.
+Storm-MC has support for task hooks just like Storm. Task hooks allow users of Storm-MC to capture a number of events and execute custom code when the event occurs at a registered component. Hooks can be created by implementing \texttt{ITaskHook}. They can be used to, for example, update a web server with the latest performance metrics.
 
 Additionally, Storm-MC has support for topology metrics. This way, components can record metrics such as number of tuples processed or a count of event occurrences. These metrics can then be automatically consumed by a bolt that subclasses the \texttt{MetricsConsumerBolt} class.
 
@@ -684,10 +691,12 @@ As mentioned before, Storm-MC supports tick tuples which can be used  to trigger
 
 
 
-Apache Storm supports an alternative high-level API called Trident which then gets converted into spouts and bolts by the Storm library. Trident was omitted from Storm-MC but it would be possible to implement it on top of the current API.
+Apache Storm supports an alternative high-level API called Trident which gets converted into spouts and bolts by the Storm library. Trident was omitted from Storm-MC but it would be possible to implement it in the future on top of the current API similarly as in Apache Storm.
 
-Moreover, Apache Storm collects JVM metrics with a bolt called \texttt{SystemBolt}. This bolt is added automatically to all Storm topologies. This bolt is not included in Storm-MC topologies automatically but users can choose to add this bolt on their own.
+Moreover, Apache Storm collects JVM metrics with a bolt called \texttt{SystemBolt}. This bolt is added automatically to all Storm topologies. This bolt is not included in Storm-MC topologies automatically but users can choose to add this bolt on their own. This way the overhead is reduced if this bolt is not required but it can still be used if deemed necessary.
 
+
+\todo{Mention profiling.}
 
 \clearpage{}
 
@@ -695,20 +704,20 @@ Moreover, Apache Storm collects JVM metrics with a bolt called \texttt{SystemBol
 
 \clearpage{}\chapter{Evaluation}
 
-This chapter evaluates Storm-MC. We describe the metrics used to evaluate performance of Storm-MC (\ref{sec:metrics}), list the configuration used for benchmarking (\ref{sec:system_conf}), compare Storm-MC to Apache Storm executing in local mode on a set of different topologies (\ref{sec:performance}), and finally talk about challenges encountered while designing Storm-MC (\ref{sec:challenges}).
+This chapter evaluates Storm-MC. We describe the metrics used to evaluate performance of Storm-MC (\ref{sec:metrics}), list the configuration used for benchmarking (\ref{sec:system_conf}), compare Storm-MC to Apache Storm executing in local mode on a set of different topologies (\ref{sec:performance}), and finally talk about challenges encountered while building Storm-MC (\ref{sec:challenges}).
 
 \section{Evaluation Metrics}
 \label{sec:metrics}
 
-The system was evaluated on the following metrics:
+The performance of Apache Storm and Storm-MC was evaluated on the following three metrics:
 
 \begin{description}
 	\item[Throughput] \hfill \\
-	The number of tuples processed by every component of the topology in the given time is recorded.
+	The tuple throughput per component was computed over a period of five minutes. This metric provides an insight into implementation performance of the evaluated systems.
 	\item[CPU Utilisation] \hfill \\
-	The CPU utilisation is recorded every second throughout program execution and the average is computed.
+	The average CPU utilisation was computed by sampling the instant CPU utilisation every second throughout program execution. This metric shows how utilised the machine was while running a topology with the same configuration on both systems.
 	\item[Resident Memory Size] \hfill \\
-	The resident size of main memory is recorded every second throughout program execution and the average is computed.
+	The average resident size was computed by sampling the instant resident size every second throughout program execution. This metric provides an insight into how much main memory both systems consume to run a topology with the same configuration.
 \end{description}
 
 \section{System Configuration}
@@ -716,35 +725,55 @@ The system was evaluated on the following metrics:
 
 \subsection{Software Setup}
 
-All performance benchmarks were ran using the following software packages:
+All performance benchmarks in this chapter were executed on the following versions of Apache Storm and Storm-MC:
 
 \begin{itemize}
 	\item Apache Storm version 0.9.2 \footnote{\url{https://github.com/mrknmc/storm/releases/v0.9.2-fix}}
 	\item Storm-MC version 0.1.6 \footnote{\url{https://github.com/mrknmc/storm-mc/releases/0.1.6}}
+\end{itemize}
+
+The Apache Storm source code had to be adapted to include a workaround for a deadlock bug present in version 0.9.2. This bug caused a topology to exit with threads left in Zombie state under certain conditions. This prevented Storm from logging the benchmark metrics after execution. Hence a workaround was added so the metrics were logged.
+
+Version 0.1.6 is the latest version of Storm-MC as of this moment. The first release was version 0.1.0 which was production-ready but since then there were 6 minor versions fixing bugs as they were discovered during testing.
+
+Furthermore, the following versions of benchmark libraries were used to implement the performance benchmarks described in this chapter:
+
+\begin{itemize}
 	\item A fork of IBM Storm Email Benchmarks version 0.1.12 \footnote{\url{https://github.com/mrknmc/benchmarks/releases/0.1.12}}
 	\item Storm-benchmark version 0.1.0 \footnote{\url{https://github.com/manuzhang/storm-benchmark}}
 \end{itemize}
 
-The Apache Storm source code had to be adapted to include a workaround for a deadlock bug present in version 0.9.2. This bug caused a topology to exit with threads left in Zombie state under certain conditions. This prevented Storm from logging the benchmark metrics after execution. Hence a workaround was added so the results were logged.
+IBM open sourced a project with a suite of benchmarks which they used to compare Apache Storm to their real-time data stream system IBM Infosphere Streams \citep{InfoSphereStreams}. We forked this project and used the Enron topology to benchmark Storm-MC against Apache Storm. The current version of the fork is 0.1.12.
 
-Version 0.1.6 is the latest version of Storm-MC as of this moment. The first release was version 0.1.0 which was production-ready but since then there were 6 minor versions fixing bugs as they were discovered during testing.
+Apache Storm developers use a project called storm-benchmark when testing the performance of Apache Storm. The FileReadWordCount and RollingSort topologies from this project were adapted and used to benchmark Storm-MC against Apache Storm. 
 
-IBM open sourced a suite of benchmarks which they used to compare Apache Storm to their real-time stream system IBM Infosphere Streams \citep{InfoSphereStreams}. These benchmarks were adapted and used to benchmark Storm-MC against Apache Storm. The current version is 0.1.12.
-
-Finally, a number of spout and bolt components were used from the storm-benchmark project which Apache Storm developers use to benchmark Storm.
-
-Since Storm-MC reuses package names from Apache Storm, the same benchmark is directly executable by both libraries. This saved a lot of time and furthermore there is no need to maintain two benchmarks suites. An example topology submission to Storm-MC and Apache Storm, respectively would look as follows:
+Since Storm-MC reuses package names from Apache Storm, the same benchmark is directly executable by both libraries. This way there was no need to maintain two different benchmarks suites and it can be easily shown that the same code was executed for both systems. An example topology submission to Storm-MC and Apache Storm, respectively, would look as follows:
 
 \begin{minted}{bash}
-java -Dstorm.home=storm-mc -cp storm-multicore-0.1.6.jar
-    ...
-    -Dstorm.jar=storm-email-benchmark.jar
+storm-mc jar storm-email-benchmark.jar
     com.ibm.streamsx.storm.email.benchmark.FileReadWordCount wordcount
-java -Dstorm.home=apache-storm -cp storm-core-0.9.2-incubating.jar
-    ...
-    -Dstorm.jar=storm-email-benchmark.jar
+
+storm jar storm-email-benchmark.jar
     com.ibm.streamsx.storm.email.benchmark.FileReadWordCount wordcount
 \end{minted}
+
+\begin{minted}{bash}
+java -cp storm-multicore-0.1.6.jar storm-email-benchmark.jar
+    ...
+    com.ibm.streamsx.storm.email.benchmark.FileReadWordCount wordcount
+java -cp storm-core-0.9.2-incubating.jar storm-email-benchmark.jar
+    ...
+    com.ibm.streamsx.storm.email.benchmark.FileReadWordCount wordcount
+\end{minted}
+
+There are several things being done in this one command:
+
+\begin{itemize}
+	\item The JAR file of the corresponding library is added to the Java classpath.
+	\item The JAR file of the benchmark library is added to the Java classpath.
+	\item The main class is specified.
+	\item The name of the topology is defined as an argument.
+\end{itemize}
 
 In this example the Storm home directory was set, the corresponding library was added to the Java classpath, the JAR file containing the benchmark was submitted, and the main class and topology name were specified.
 
