@@ -164,8 +164,6 @@ It is generally believed that writing parallel software is hard. The traditional
 
 The main idea of this project is to take the existing Apache Storm project and port it to multi-core. This is implemented in Storm-MC - a library with an API compatible with Apache Storm. This compatibility enables programmers to take an existing application written with Apache Storm in mind and run it on a single multi-core server using Storm-MC. This way, they can avoid network latency and enjoy the substantial performance improvements of a shared-memory environment.
 
-\todo{Add borrowing ideas from distributed systems to multi-core.}
-
 Through a series of benchmarks we show that with its simpler design, Storm-MC offers substantial improvement in throughput for data stream processing applications over Apache Storm running in local mode.
 
 \section{Structure of the Report}
@@ -190,7 +188,7 @@ The following chapter explains the concept of a data stream (\ref{sec:data_strea
 
 \textcite{golab2003issues} define data stream as as ``a real-time, continuous, ordered (implicitly by arrival time or explicitly by timestamp) sequence of items. It is impossible to control the order in which items arrive, nor is it feasible to locally store a stream in its entirety."
 
-\todo{need at least one more sentence here.}
+A Data stream system allows real-time analysis of such streams. Thus, users of the system can be quick to react to changes in the stream or be able to follow trends as they happen in real time.
 
 \subsection{Comparison to a Database Management System}
 
@@ -213,9 +211,7 @@ The assumption behind using a time window is that users of the real-time system 
 
 Even though an answer to a query might be only approximate it can have great value because the query is answered at the right time. Furthermore, even though the query may only run on a subset of the data it is still possible to detect trends or system failures. For example, Twitter are using Apache Storm to perform real-time analysis on millions of events per second for their analytics product Answers \citep{Solovey}.
 
-In research, several techniques have been developed to enable real-time data stream mining. For example, the MOA environment presented in \cite{Bifet:2010:MMO:1756006.1859903} enables running online machine learning methods using the WEKA machine learning workbench \citep{Holmes1994}.
-
-\todo{add another research example here}
+In research, several techniques have been developed to enable real-time data stream mining. For example, the MOA environment presented in \cite{Bifet:2010:MMO:1756006.1859903} which enables running online machine learning algorithms using the WEKA machine learning workbench \citep{Holmes1994}. In \cite{rainatwitter} authors present a real-time Opinion Mining (sentiment analysis) system built with Apache Storm and the Twitter Streaming API.
 
 \section{Multi-core}
 \label{sec:multicore}

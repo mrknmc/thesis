@@ -20,8 +20,6 @@ It is generally believed that writing parallel software is hard. The traditional
 
 The main idea of this project is to take the existing Apache Storm project and port it to multi-core. This is implemented in Storm-MC - a library with an API compatible with Apache Storm. This compatibility enables programmers to take an existing application written with Apache Storm in mind and run it on a single multi-core server using Storm-MC. This way, they can avoid network latency and enjoy the substantial performance improvements of a shared-memory environment.
 
-\todo{Add borrowing ideas from distributed systems to multi-core.}
-
 Through a series of benchmarks we show that with its simpler design, Storm-MC offers substantial improvement in throughput for data stream processing applications over Apache Storm running in local mode.
 
 \section{Structure of the Report}
