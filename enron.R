@@ -54,7 +54,7 @@ mat$time <- mat$time * 4
 t <- mat[seq(1, nrow(mat), 2), ]
 #k <- ggplot(t, aes(x=time, y=value)) +
 k <- ggplot(t, aes(x=time, y=value,fill=variable,color=variable)) +
-    facet_wrap(~parallelism, nrow = 3, ncol = 2, scales="free") +
+    facet_wrap(~parallelism, nrow = 5, ncol = 2, scales="free") +
     scale_fill_brewer(name="Library", palette="Set1", labels=c("Apache Storm", "Storm-MC")) +
     scale_colour_brewer(name="Library", palette="Set1", labels=c("Apache Storm", "Storm-MC")) +
     scale_y_continuous(labels=format_si(), name="Global Throughput (Emails / s)\n") +

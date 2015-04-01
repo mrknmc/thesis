@@ -91,7 +91,7 @@
 \abstract{
 In recent years the number of real-time data stream processing applications has been growing. However, data stream processing has been a province of distributed systems such as Apache Storm. This is because commodity hardware clusters offer good scale-out properties.
 
-On the other hand, chip makers have been able to pack more and more transistors into a single processor chip. This resulted in a steady increase in the number of cores used in a single processor chip. Furthermore, it is possible that scale-out processors with high number of processor cores will be used for future throughput-based applications.
+On the other hand, chip makers have been able to pack more and more transistors into a single processor chip. This resulted in a steady increase in the number of cores in a single processor chip. Furthermore, it is possible that scale-out processors with high number of processor cores will be used for future throughput-based applications.
 
 In this report we present Storm-MC, an API-compatible port of Apache Storm for multi-core. This system combines an easy to use API with implementation tailored to multi-core environments. This allows us to take existing applications written with Storm in mind and run them efficiently on a single server.
 

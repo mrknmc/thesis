@@ -25,6 +25,8 @@ There are several core concepts used by Storm and hence by extension Storm-MC as
   The programmer connects spouts and bolts in a directed graph called topology which describes how the components interact with each other. The topology is then submitted to Storm for execution.
 \end{description}
 
+It should be noted that spouts and bolts can be implemented not only in Java but other languages such as Python and Ruby.
+
 \subsection{Additional Concepts}
 
 There are several additional concepts which describe how components of a topology interact:
@@ -160,9 +162,3 @@ The cluster state contains worker assignments, information about topologies, and
 Since Storm topologies execute on a cluster all components need to be serialisable. This is achieved with Apache Thrift. Components are defined as Thrift objects and Thrift generates all the Java serialisation code automatically.
 
 Furthermore, since Nimbus is a Thrift service Thrift generates all the code required for remote procedure call (RPC) support. This allows defining topologies in any of the languages supported by Thrift and easy cross-language communication with the Nimbus service.
-
-\todo{multilang}
-
-\todo{metrics}
-
-\todo{hooks}
