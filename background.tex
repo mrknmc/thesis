@@ -1,6 +1,6 @@
-\chapter{Background}
+\chapter{Background on Storm}
 
-In this chapter we give background information necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm (\ref{sec:storm_overview}), explain the concepts used in Storm (\ref{sec:concepts}), show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), and finally describe the serialisation used by Storm (\ref{sec:serialisation}).
+In this chapter we give background information on Storm. This information is necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm (\ref{sec:storm_overview}), explain the concepts used in Storm (\ref{sec:concepts}), show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), and finally describe the serialisation used by Storm (\ref{sec:serialisation}).
 
 \section{Storm Overview}
 \label{sec:storm_overview}
@@ -27,13 +27,15 @@ There are several core concepts used by Storm and hence by extension Storm-MC as
 
 \subsection{Additional Concepts}
 
+There are several additional concepts which describe how components of a topology interact:
+
 \begin{description}
   \item[Stream] \hfill \\
   A stream is defined as an unbounded sequence of tuples. Streams can be thought of as edges of a topology connecting bolts and spouts (vertices).
   \item[Tuple] \hfill \\
   A tuple wraps named fields and their values. The values of the fields can be of different types. When a component emits a tuple to a stream it sends that tuple to every bolt subscribed to the stream.
   \item[Stream Grouping] \hfill \\
-  Every bolt needs to have a type of stream grouping associated with it. This grouping decides the means of distributing the tuples coming from the bolt's input streams amongst the instances of the bolt task. Following are the possible types of stream grouping:
+  Every bolt needs to have a type of stream grouping associated with it. This grouping decides the means of distributing the tuples coming from a bolt's input stream among task instances of the bolt. Following are the possible types of stream grouping:
   \begin{description}
   	\item[Shuffle] Randomly partition the tuples among all the bolt tasks.
   	\item[Fields] Hash on a subset of the tuple fields. All tuples with same values of those fields will go to same bolt task.
@@ -75,7 +77,7 @@ A classic example used to explain Storm topologies is the WordCount topology. In
 
 This may seem as a simplistic example but it is useful when demonstrating how easy it is to implement a working topology using the Storm API.
 
-Listing \ref{listing:wordcount_topology} shows how the topology is put together in Storm to form a graph of components. Storm uses the Builder design pattern \citep{gamma1994design} to build up the topology which is then submitted to Storm for execution. The last argument to the \texttt{setBolt}/\texttt{setSpout} method is the number of parallel tasks we want Storm to execute for the respective component. For implementation of the spout and bolts used in this topology, refer to appendix \ref{ch:listings}.
+Listing \ref{listing:wordcount_topology} shows how the topology is put together in Storm to form a graph of components. Storm uses the Builder design pattern \citep{gamma1994design} to build the topology which is then submitted to an emulated cluster for execution. The last argument to the~\texttt{setBolt}/\texttt{setSpout} method is the number of parallel tasks we want Storm to execute for the respective component. For implementation of the spout and the bolts used in this topology, refer to Appendix \ref{ch:listings}.
 
 \begin{listing}[!htb]
 \inputminted{java}{code/WordCountTopology.java}
@@ -89,13 +91,13 @@ Listing \ref{listing:wordcount_topology} shows how the topology is put together 
 \begin{figure}[!htb]
 	\centering
 	\includegraphics[scale=0.4]{pdf/storm_arch.pdf}
-	\caption{Apache Storm Architecture.}
+	\caption{Apache Storm architecture.}
 	\label{fig:storm_arch}
 \end{figure}
 
 %\todo{Maybe highlight similarities to Hadoop}
 
-A Storm cluster adopts the Master-Worker pattern. To set up a Storm topology, the user launches daemon processes on nodes of the cluster and submits the topology to the master node, also called Nimbus. The worker nodes receive task assignments from the master and execute the tasks assigned to them. The coordination between the master node and the worker nodes is handled by nodes running Apache Zookeeper. Figure \ref{fig:storm_arch} shows a graphical representation of Storm Architecture.
+A Storm cluster adopts the Master-Worker pattern. To set up a Storm topology, the user launches daemon processes on nodes of the cluster and submits the topology to the master node, also called Nimbus. The worker nodes receive task assignments from the master and execute the tasks assigned to them. The coordination between the master node and the worker nodes is handled by nodes running Apache Zookeeper. Figure \ref{fig:storm_arch} shows a graphical representation of Storm architecture.
 
 \subsection{Nimbus Node}
 
@@ -103,7 +105,7 @@ The master node runs a server daemon called Nimbus. The main role of Nimbus is t
 
 \begin{description}
 	\item[Validate the topology] \hfill \\
-	The topology is validated using a validator to ensure that the submitted topology is valid before trying to execute it. The user can use his own validator by implementing the \texttt{ITopologyValidator} interface or use the default validator provided by Storm.
+	The topology is validated using a validator to ensure the submitted topology is valid before trying to execute it. Programmers using Storm can write their own validator by implementing the \texttt{ITopologyValidator} interface.
 	\item[Distribute the topology source code] \hfill \\
 	Nimbus ensures that the workers involved in the topology computation have the source code by sending it to all nodes of the cluster.
 	\item[Schedule the topology] \hfill \\
@@ -148,7 +150,7 @@ The worker nodes run a daemon called Supervisor. There are 4 layers of abstracti
 \subsection{Zookeeper Nodes}
 \label{subsec:zookeeper}
 
-The Storm cluster contains a number of Zookeeper nodes which coordinate the communication between Nimbus and the worker nodes. Storm does this by storing the state of the cluster on the Zookeper nodes where both Nimbus and worker nodes can access it.
+A Storm cluster contains a number of Zookeeper nodes which coordinate the communication between Nimbus and the worker nodes. Storm does this by storing the state of the cluster on the Zookeper nodes where both Nimbus and worker nodes can access it.
 
 The cluster state contains worker assignments, information about topologies, and heartbeats sent by the worker nodes to be read by Nimbus. Apart from the cluster state, Storm is completely stateless. Hence, if the master node or a worker node fail the cluster continues executing and the node will get restarted if possible. The only time the cluster stops executing  completely is if all the Zookeper nodes die.
 
@@ -158,3 +160,9 @@ The cluster state contains worker assignments, information about topologies, and
 Since Storm topologies execute on a cluster all components need to be serialisable. This is achieved with Apache Thrift. Components are defined as Thrift objects and Thrift generates all the Java serialisation code automatically.
 
 Furthermore, since Nimbus is a Thrift service Thrift generates all the code required for remote procedure call (RPC) support. This allows defining topologies in any of the languages supported by Thrift and easy cross-language communication with the Nimbus service.
+
+\todo{multilang}
+
+\todo{metrics}
+
+\todo{hooks}

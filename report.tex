@@ -1,4 +1,4 @@
-\documentclass[bsc,logo,frontabs,twoside,singlespacing,normalheadings,parskip]{infthesis}\usepackage[]{graphicx}\usepackage[]{color}
+\documentclass[bsc,twoside,singlespacing,normalheadings,parskip]{infthesis}\usepackage[]{graphicx}\usepackage[]{color}
 %% maxwidth is the original width if it is less than linewidth
 %% otherwise use linewidth (to make sure the graphics do not exceed the margin)
 \makeatletter
@@ -87,7 +87,7 @@
 \usepackage{subcaption}
 
 
-\usepackage[]{hyperref}
+\usepackage[hidelinks]{hyperref}
 \hypersetup{
     pdftitle={Storm on Multi-core},
     pdfauthor={Mark Nemec},
@@ -108,9 +108,9 @@
 \date{\today}
 
 \abstract{
-In recent years there has been a growing usage of data stream processing systems. However, data stream processing has been a province of distributed systems such as Apache Storm. This is because clusters offer better scale-out properties.
+In recent years the number of real-time data stream processing applications has been growing. However, data stream processing has been a province of distributed systems such as Apache Storm. This is because commodity hardware clusters offer good scale-out properties.
 
-On the other hand, chip makers have been able to pack more and more transistors into a single processor chip. This resulted in a steady increase of the number of cores used in a single processor chip. It is possible that scale-out processors with high number of processor cores will be used for future throughput-based applications.
+On the other hand, chip makers have been able to pack more and more transistors into a single processor chip. This resulted in a steady increase in the number of cores used in a single processor chip. Furthermore, it is possible that scale-out processors with high number of processor cores will be used for future throughput-based applications.
 
 In this report we present Storm-MC, an API-compatible port of Apache Storm for multi-core. This system combines an easy to use API with implementation tailored to multi-core environments. This allows us to take existing applications written with Storm in mind and run them efficiently on a single server.
 
@@ -146,9 +146,9 @@ Finally, I would like to thank Daniela Kellerova who kept me sane while I worked
 
 \section{Motivation}
 
-In recent years, there has been an explosion of cloud computing software. After Google published their paper on MapReduce \citep{dean2010mapreduce}, many new open-source frameworks for distributed computation have emerged, most notably Apache Hadoop \citep{ApacheHadoop} for batch processing and Apache Storm \citep{ApacheStorm} for real-time data stream processing.
+In recent years, there has been an explosion of cloud computing software. After Google published their paper on MapReduce \citep{dean2010mapreduce}, many new open-source systems for distributed computation have emerged, most notably Apache Hadoop \citep{ApacheHadoop} for batch processing and Apache Storm \citep{ApacheStorm} for real-time data stream processing.
 
-These frameworks split the work that needs to be carried out and distribute it across nodes of a commodity hardware cluster. Commercial companies and researchers have been able to utilise these frameworks and create distributed systems which can accomplish things that would not be otherwise possible \citep{Solovey}. This has mostly been allowed by the low price and good scale-out properties of commodity hardware.
+These systems split the work that needs to be carried out and distribute it across nodes of a commodity hardware cluster. Commercial companies and researchers have been able to utilise these systems and create distributed systems which can accomplish things that would not be otherwise possible \cite{Solovey, Bifet:2010:MMO:1756006.1859903}. This has mostly been allowed by low price and good scale-out properties of commodity hardware.
 
 At the same time, chip makers have been increasing the number of cores in processors and now we are at a point where servers with 10-core processors are considered standard. Moreover, most high-end servers have multiple processor sockets thus increasing the parallelisation possible with a single machine even further.
 
@@ -163,6 +163,8 @@ It is generally believed that writing parallel software is hard. The traditional
 \section{Project Contributions}
 
 The main idea of this project is to take the existing Apache Storm project and port it to multi-core. This is implemented in Storm-MC - a library with an API compatible with Apache Storm. This compatibility enables programmers to take an existing application written with Apache Storm in mind and run it on a single multi-core server using Storm-MC. This way, they can avoid network latency and enjoy the substantial performance improvements of a shared-memory environment.
+
+\todo{Add borrowing ideas from distributed systems to multi-core.}
 
 Through a series of benchmarks we show that with its simpler design, Storm-MC offers substantial improvement in throughput for data stream processing applications over Apache Storm running in local mode.
 
@@ -181,24 +183,22 @@ The remainder of the report is structured as follows:
 
 \clearpage{}\chapter{Literature Review}
 
-The following chapter explains the concept of a data stream (\ref{sec:data_stream}), discusses advantages and disadvantages of multi-core (\ref{sec:multicore}), gives an overview of previous work on Apache Storm (\ref{sec:apache_storm}), and discusses other effort of porting distributed systems to multi-core (\ref{sec:similar_efforts}).
+The following chapter explains the concept of a data stream (\ref{sec:data_stream}), discusses advantages and disadvantages of multi-core (\ref{sec:multicore}), gives an overview of previous work on Apache Storm (\ref{sec:apache_storm}), and discusses similar efforts for porting distributed systems to multi-core (\ref{sec:similar_efforts}).
 
 \section{Data Stream}
 \label{sec:data_stream}
 
 \textcite{golab2003issues} define data stream as as ``a real-time, continuous, ordered (implicitly by arrival time or explicitly by timestamp) sequence of items. It is impossible to control the order in which items arrive, nor is it feasible to locally store a stream in its entirety."
 
+\todo{need at least one more sentence here.}
+
 \subsection{Comparison to a Database Management System}
 
-Historically, data has been stored into database management systems (DBMS) where it was later analysed the assumption being that there would be enough disk space to contain the data. This approach fits many purposes but real-time applications have recently started feeling the need to analyse rapidly changing data on-the-fly.
+Historically, data has been stored into database management systems (DBMS) where it was later analysed, the assumption being that there would be enough disk space to contain the data. This approach fits many purposes but real-time applications have recently started feeling the need to analyse huge amounts of rapidly changing data on the fly.
 
-This has brought on an advent of data stream processing. Several stream-processing frameworks have emerged such as Apache Storm \citep{ApacheStorm}, Apache Spark \citep{ApacheSpark}, and Yahoo S4 \citep{YahooS4}. These frameworks, usually ran on a cluster, provide the user with abstractions which greatly simplify writing a real-time data stream processing application.
+This has brought on the advent of data stream processing. Several stream-processing systems have emerged such as Apache Storm \citep{ApacheStorm}, Apache Spark \citep{ApacheSpark}, and Apache S4 \citep{YahooS4}. These systems, ran on a cluster, provide the programmer with abstractions which greatly simplify writing real-time data stream processing applications.
 
 Whereas DBMSs excel at getting an exact answer to a query, data streams usually provide an approximate answer. The answer is approximate because it is usually correct only within a certain window of time, the query is simplified because it can only be ran in one pass, or because it is used with a sampling rate which does not include all events. A typical data stream analysis using windows and sampling is shown in Figure \ref{fig:stream}.
-
-\subsection{Querying a Data Stream}
-
-The assumption behind using a time window is that users of the real-time system are most likely interested in the most recent events. Sampling, on the other hand, is used to reduce the number of events used for a query \citep{Gaber:2005:MDS:1083784.1083789}.
 
 \begin{figure}[!htb]
 	\centering
@@ -207,52 +207,59 @@ The assumption behind using a time window is that users of the real-time system 
 	\label{fig:stream}
 \end{figure}
 
-Even though the answer might only be approximate it can have great value because the query is answered at the right time. Furthermore, even though the query may run only on a subset of data it is still possible to detect trends or system failures. For example, Twitter are using Apache Storm to run real-time analysis on millions of events per second for their analytics product Answers \citep{Solovey}.
+\subsection{Querying a Data Stream}
 
-In research, several techniques have been developed to enable real-time data stream mining. For example, the MOA environment created by \citet{Bifet:2010:MMO:1756006.1859903} enables running online machine learning methods using the WEKA machine learning workbench \citep{Holmes1994}.
+The assumption behind using a time window is that users of the real-time system are most likely interested in the most recent events. Sampling, on the other hand, is used to reduce the number of events used to answer a query \citep{Gaber:2005:MDS:1083784.1083789}. This way the system can keep up with data and stay real-time.
+
+Even though an answer to a query might be only approximate it can have great value because the query is answered at the right time. Furthermore, even though the query may only run on a subset of the data it is still possible to detect trends or system failures. For example, Twitter are using Apache Storm to perform real-time analysis on millions of events per second for their analytics product Answers \citep{Solovey}.
+
+In research, several techniques have been developed to enable real-time data stream mining. For example, the MOA environment presented in \cite{Bifet:2010:MMO:1756006.1859903} enables running online machine learning methods using the WEKA machine learning workbench \citep{Holmes1994}.
+
+\todo{add another research example here}
 
 \section{Multi-core}
 \label{sec:multicore}
 
 \textcite{akhter2006multi} define multi-core processor as a processor that has two or more independent execution cores. This means that every thread has a hardware execution environment entirely to itself which enables threads to run in a truly parallel manner.
 
-Running an application on multi-core can in the best case produce a speedup equivalent to the number of cores. The best case is when an application is embarrassingly parallel i.e. there is no inter-thread communication. Even though data stream processing is not an embarrassingly parallel problem, running a producer-consumer application on multiple cores can produce significant speedup as shown in  \citep{Prat-Perez:2013:PPM:2450027.2450037}.
+Running an application on multi-core can in the best case produce a speedup equivalent to the number of cores. The best case is when an application is embarrassingly parallel i.e. there is no inter-thread communication. Even though data stream processing is not an embarrassingly parallel problem, running a producer-consumer application on multiple cores can produce significant speedup, as shown in  \citep{Prat-Perez:2013:PPM:2450027.2450037}.
+
+\todo{what was the speedup?}
 
 \subsection{Advantages Over Clusters}
 \label{subsec:advantages}
 
-There are several reasons why someone might prefer to deploy their data stream application to a single multi-core machine over a cluster:
+There are several reasons why someone might prefer to deploy their data stream application to a single multi-core machine rather than a cluster:
 
 \begin{description}
 	\item[Communication Overhead] \hfill \\
-	The latency of over-the-network communication is significantly higher than of two cores communicating on a single machine.
+	The latency of over-the-network communication is significantly higher than that of processor cores communicating in a single machine.
 	\item[Lower Cost than a Data Centre] \hfill \\
-	To run a distributed system on a cluster one would usually need to own a data centre. This comes with a high capital cost and increased maintenance costs than owning a single server.
+	To run a distributed system on a cluster one would usually need to own a data centre. This comes with a high capital cost and increased maintenance costs compared to owning a single server.
 	\item[More Control than with a Cloud Provider] \hfill \\
-	Alternatively, one could rent out nodes on cloud computing services such as Amazon EC2 or Rackspace. While the cost of such services is acceptable the user does not have full control over their system.
+	Alternatively, one could rent out nodes on cloud computing services such as Amazon EC2 or Rackspace. While the cost of such services is acceptable the user does not have full control over their system. This might be essential for high-security applications.
 \end{description}
 
 \subsection{Disadvantages Over Clusters}
 \label{subsec:disadvantages}
 
-On the other hand, there are certain disadvantages in running a computation on a single multi-core machine rather than a cluster:
+On the other hand, there are certain disadvantages in deploying a data stream application to a single multi-core machine rather than a cluster:
 
 \begin{description}
 	\item[Horizontal Scaling] \hfill \\
-	Commodity hardware clusters offer better horizontal scaling than a single multicore server. If one needs to add nodes to the cluster it is as easy as purchasing more commodity hardware. On a multi-core machine it is not that simple. For example, a top of the line Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} Processor E5-2699 has support for 36 threads. Beyond that one would need to add another socket which essentially doubles the price. Moreover, the server would need to support multiple processor sockets.
+	Commodity hardware clusters offer better horizontal scaling than a single multicore server. If one needs to add nodes to the cluster it is as easy as purchasing more commodity hardware. On a multi-core machine it is not that simple. For example, a top of the line Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} E5-2699 processor has support for 36 threads. Beyond that one would need to add another socket which essentially doubles the price. Moreover, the server would need to support multiple processor sockets.
 	\item[Higher Short-term Cost than with a Cloud Provider] \hfill \\
 	In short-term the cost of purchasing a server may be significantly higher than renting out a cluster from a cloud computing service. Thus, it makes most sense to run an application on multi-core as a medium- to long-term investment.
 	\item[More Maintenance than with a Cloud Provider] \hfill \\
-	Owning a server requires more maintenance than simply renting it out from a cloud provider. A cloud provider usually does  all the necessary maintenance and can provision a new machine very easily. Hence it is advantageous to use multi-core only if one can afford to maintain them as well.
+	Owning a server requires more maintenance than simply renting it out from a cloud provider. A cloud provider usually does  all the necessary maintenance and can easily provision a new machine. Hence it is advantageous to use a multi-core server only if one can afford to maintain it as well.
 \end{description}
-
 
 \section{Apache Storm}
 \label{sec:apache_storm}
 
-Apache Storm is an open source distributed real-time computation system. Storm was Originally created by Nathan Marz while working at BackType. \cite{NathanAbout} BackType was later acquired by Twitter which is when Storm became open source. Storm was incubated into Apache with version 0.9.1 and became a top-level Apache project in September 2014.
+Apache Storm is an open source distributed real-time computation system. Storm was originally created by Nathan Marz while working at BackType \cite{NathanAbout}. BackType was later acquired by Twitter and Storm became open source. Storm was incubated into the Apache Software Foundation with version 0.9.1 and became a top-level Apache project in September 2014.
 
-Storm was developed to run on top of a cluster where nodes execute components of a computation in parallel. Running Storm on a cluster of commodity hardware gives it good horizontal scaling properties. Running separate components in parallel allows the system to execute in real time.
+Storm was developed to run on top of a cluster where nodes execute components of a computation in parallel. Running Storm on a cluster of commodity hardware gives it good horizontal scaling properties. Running separate components in parallel allows the system to execute in real time and fully utilise available hardware.
 
 \subsection{Dependencies}
 
@@ -260,42 +267,40 @@ Storm has five major dependencies:
 
 \begin{description}
 	\item[Apache Zookeeper] \hfill \\
-	Apache Zookeeper \citep{ApacheZookeeper} is an open source server that allows reliable distributed coordination. Storm uses Apache Zookeeper to maintain state which is then read and written to by nodes of a Storm cluster. More detail on how Storm uses Zookeeper is given in section \ref{subsec:zookeeper}.
+	Apache Zookeeper \citep{ApacheZookeeper} is an open source server that allows reliable distributed coordination. Storm uses Apache Zookeeper to maintain state which is then read and written to by nodes of a Storm cluster. More details on how Storm uses Zookeeper is provided in section \ref{subsec:zookeeper}.
 	\item[Apache Thrift] \hfill \\
-	Apache Thrift \citep{ApacheThrift} is a cross-language framework for developing services. It allows you to write a definition file for services and data types required by your application and automatically generates interface code which supports remote procedure calls and serialisation of the data types.
+	Apache Thrift \citep{ApacheThrift} is a cross-language framework for network services. It allows you to write a definition file for services and data types required by your application and automatically generates source code which supports remote procedure calls and serialisation of the data types.
 	\item[Kryo] \hfill \\
-	Kryo \citep{EsotericKryo} is a serialisation library. It is used by Storm to serialise objects when sent over the network between nodes of a cluster.
+	Kryo \citep{EsotericKryo} is a serialisation library. It is used to serialise objects before they are sent between nodes of a Storm cluster.
 	\item[Netty] \hfill \\
 	Netty \citep{Netty} is an asynchronous event-driven network application framework. Storm utilises Netty to send intra-cluster messages. Thus when a node produces a result to be consumed by another node of the cluster it sends a message over the network using the TCP protocol implemented in Netty.
 	\item[LMAX Disruptor] \hfill \\
-	LMAX Disruptor \cite{LMAXDisruptor} is a high-performance data structure used to exchange data between concurrent threads. It uses a lock-free implementation of a ring buffer which components of a Storm program running on the same node a cluster use to exchange messages.
+	LMAX Disruptor \cite{LMAXDisruptor} is a high-performance data structure used to exchange data between concurrent threads. It uses an optionally lock-free implementation of a ring buffer which components of a Storm program running on the same node of a cluster use to exchange messages.
 \end{description}
 
 \subsection{Usage of Apache Storm}
 
-Storm works particularly well with sister Apache projects such as Apache Kafka \cite{ApacheKafka} and Apache HBase \cite{ApacheHBase}. Apache Kafka is a messaging broker that is often used as the missing link between producers and consumers of a cluster. Apache HBase is a big data-store that allows real-time random reads and writes modelled after Google's Bigtable project \cite{Chang:2008:BDS:1365815.1365816}.
+Storm works particularly well with sister Apache projects such as Apache Kafka \cite{ApacheKafka} and Apache HBase \cite{ApacheHBase}. Apache Kafka is a messaging broker that is often used as the missing link between producers and consumers of a cluster. For example, web API endpoints might send data to a Kafka queue and a Storm application can read data from the queue. Apache HBase is a big data-store that allows real-time random reads and writes. It is modelled after Google's Bigtable project \cite{Chang:2008:BDS:1365815.1365816}.
 
-Storm is reportedly used by 81 companies listed on their website \cite{PoweredBy} and many others. Storm's popularity is one of the reasons why it was chosen for this project. Furthermore, we believe that the concepts used in Storm (explained further in section \ref{sec:concepts}) apply to many different situations and many applications can be easily adapter to work on top of Storm.
+Storm is reportedly used by 81 companies listed on their website \cite{PoweredBy} and possibly many others. Storm's popularity is one of the reasons why it was chosen for this project. Furthermore, we believe that the concepts used in Storm (explained in Section \ref{sec:concepts}) apply to many different situations and many applications can be easily adapted to work on Storm.
 
-There has been significant research in optimising computations running on Apache Storm. For example, \cite{Chatzistergiou:2014:FHN:2661829.2661882} looked at how to reconfigure a Storm job by reallocating component tasks to minimise communication cost. A domain specific language for defining Storm jobs was proposed in \cite{DBLP:conf/fedcsis/ChandrasekaranSA14}. Finally, \cite{dimsonhailstorm} ported Storm to Haskell and looked at how to provide exactly once semantics.
+There has been significant research into optimising computations running on Apache Storm. For example, \cite{Chatzistergiou:2014:FHN:2661829.2661882} looked at how to reconfigure a Storm job by reallocating component tasks to minimise communication cost, \cite{DBLP:conf/fedcsis/ChandrasekaranSA14} proposed a domain specific language for defining Storm jobs, and finally \cite{dimsonhailstorm} looked at how to provide exactly-once semantics in a Haskell port of Storm.
 
 \section{Similar Efforts}
 \label{sec:similar_efforts}
 
 Currently data stream processing is a province of distributed systems such as the ones mentioned in the previous section. Most languages support parallel execution and there are many libraries that ease the process of writing parallel programs on a single multi-core machine. However, they are not tailored to data stream processing and usually require the programmer to do the heavy lifting rather than abstract it away.
 
-There has been effort to port Hadoop to multi-core in \citep{Kumar:2013:HSD:2536274.2536314} (Hone) as well as port of Google's MapReduce in \citep{ranger2007evaluating} (Phoenix). However, to our knowledge there has not been effort to port Storm or any other distributed real-time data stream system to multi-core.
+Apache Hadoop is an open-source distributed batch processing system. There has been effort to port Hadoop to multi-core in \citep{Kumar:2013:HSD:2536274.2536314} (Hone) as well as port of Google's MapReduce in \citep{ranger2007evaluating} (Phoenix). This effort suggests that borrowing ideas from distributed systems and applying them in the context of multi-core has potential. However, to our knowledge there has not been effort to port Storm or any other distributed real-time data stream processing system to multi-core.
 
 \section{Summary}
 
-Distributed real-time computation systems such as Apache Storm provide programmers with abstractions that make it very easy to implement a data stream processing applications on top of  a cluster. However, in case of single multi-core machines there are not any obvious software choices. While several frameworks that allow the programmer to parallelise the computation exist, they are not really tailored to data stream processing.
-
-The following chapters provide a closer analysis of Apache Storm as well as a port of Apache Storm for a single multi-core machine.
+Distributed real-time computation systems such as Apache Storm provide programmers with abstractions that make it easy to implement data stream processing applications on top of a cluster. However, in case of single multi-core machines there are not any obvious open-source software choices. While there exist several libraries that allow programmers to parallelise their computations, they are not tailored to data stream processing.
 \clearpage{}
 
-\clearpage{}\chapter{Background}
+\clearpage{}\chapter{Background on Storm}
 
-In this chapter we give background information necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm (\ref{sec:storm_overview}), explain the concepts used in Storm (\ref{sec:concepts}), show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), and finally describe the serialisation used by Storm (\ref{sec:serialisation}).
+In this chapter we give background information on Storm. This information is necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm (\ref{sec:storm_overview}), explain the concepts used in Storm (\ref{sec:concepts}), show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), and finally describe the serialisation used by Storm (\ref{sec:serialisation}).
 
 \section{Storm Overview}
 \label{sec:storm_overview}
@@ -322,13 +327,15 @@ There are several core concepts used by Storm and hence by extension Storm-MC as
 
 \subsection{Additional Concepts}
 
+There are several additional concepts which describe how components of a topology interact:
+
 \begin{description}
   \item[Stream] \hfill \\
   A stream is defined as an unbounded sequence of tuples. Streams can be thought of as edges of a topology connecting bolts and spouts (vertices).
   \item[Tuple] \hfill \\
   A tuple wraps named fields and their values. The values of the fields can be of different types. When a component emits a tuple to a stream it sends that tuple to every bolt subscribed to the stream.
   \item[Stream Grouping] \hfill \\
-  Every bolt needs to have a type of stream grouping associated with it. This grouping decides the means of distributing the tuples coming from the bolt's input streams amongst the instances of the bolt task. Following are the possible types of stream grouping:
+  Every bolt needs to have a type of stream grouping associated with it. This grouping decides the means of distributing the tuples coming from a bolt's input stream among task instances of the bolt. Following are the possible types of stream grouping:
   \begin{description}
   	\item[Shuffle] Randomly partition the tuples among all the bolt tasks.
   	\item[Fields] Hash on a subset of the tuple fields. All tuples with same values of those fields will go to same bolt task.
@@ -370,7 +377,7 @@ A classic example used to explain Storm topologies is the WordCount topology. In
 
 This may seem as a simplistic example but it is useful when demonstrating how easy it is to implement a working topology using the Storm API.
 
-Listing \ref{listing:wordcount_topology} shows how the topology is put together in Storm to form a graph of components. Storm uses the Builder design pattern \citep{gamma1994design} to build up the topology which is then submitted to Storm for execution. The last argument to the \texttt{setBolt}/\texttt{setSpout} method is the number of parallel tasks we want Storm to execute for the respective component. For implementation of the spout and bolts used in this topology, refer to appendix \ref{ch:listings}.
+Listing \ref{listing:wordcount_topology} shows how the topology is put together in Storm to form a graph of components. Storm uses the Builder design pattern \citep{gamma1994design} to build the topology which is then submitted to an emulated cluster for execution. The last argument to the~\texttt{setBolt}/\texttt{setSpout} method is the number of parallel tasks we want Storm to execute for the respective component. For implementation of the spout and the bolts used in this topology, refer to Appendix \ref{ch:listings}.
 
 \begin{listing}[!htb]
 \inputminted{java}{code/WordCountTopology.java}
@@ -384,12 +391,12 @@ Listing \ref{listing:wordcount_topology} shows how the topology is put together 
 \begin{figure}[!htb]
 	\centering
 	\includegraphics[scale=0.4]{pdf/storm_arch.pdf}
-	\caption{Apache Storm Architecture.}
+	\caption{Apache Storm architecture.}
 	\label{fig:storm_arch}
 \end{figure}
 
 
-A Storm cluster adopts the Master-Worker pattern. To set up a Storm topology, the user launches daemon processes on nodes of the cluster and submits the topology to the master node, also called Nimbus. The worker nodes receive task assignments from the master and execute the tasks assigned to them. The coordination between the master node and the worker nodes is handled by nodes running Apache Zookeeper. Figure \ref{fig:storm_arch} shows a graphical representation of Storm Architecture.
+A Storm cluster adopts the Master-Worker pattern. To set up a Storm topology, the user launches daemon processes on nodes of the cluster and submits the topology to the master node, also called Nimbus. The worker nodes receive task assignments from the master and execute the tasks assigned to them. The coordination between the master node and the worker nodes is handled by nodes running Apache Zookeeper. Figure \ref{fig:storm_arch} shows a graphical representation of Storm architecture.
 
 \subsection{Nimbus Node}
 
@@ -397,7 +404,7 @@ The master node runs a server daemon called Nimbus. The main role of Nimbus is t
 
 \begin{description}
 	\item[Validate the topology] \hfill \\
-	The topology is validated using a validator to ensure that the submitted topology is valid before trying to execute it. The user can use his own validator by implementing the \texttt{ITopologyValidator} interface or use the default validator provided by Storm.
+	The topology is validated using a validator to ensure the submitted topology is valid before trying to execute it. Programmers using Storm can write their own validator by implementing the \texttt{ITopologyValidator} interface.
 	\item[Distribute the topology source code] \hfill \\
 	Nimbus ensures that the workers involved in the topology computation have the source code by sending it to all nodes of the cluster.
 	\item[Schedule the topology] \hfill \\
@@ -442,7 +449,7 @@ The worker nodes run a daemon called Supervisor. There are 4 layers of abstracti
 \subsection{Zookeeper Nodes}
 \label{subsec:zookeeper}
 
-The Storm cluster contains a number of Zookeeper nodes which coordinate the communication between Nimbus and the worker nodes. Storm does this by storing the state of the cluster on the Zookeper nodes where both Nimbus and worker nodes can access it.
+A Storm cluster contains a number of Zookeeper nodes which coordinate the communication between Nimbus and the worker nodes. Storm does this by storing the state of the cluster on the Zookeper nodes where both Nimbus and worker nodes can access it.
 
 The cluster state contains worker assignments, information about topologies, and heartbeats sent by the worker nodes to be read by Nimbus. Apart from the cluster state, Storm is completely stateless. Hence, if the master node or a worker node fail the cluster continues executing and the node will get restarted if possible. The only time the cluster stops executing  completely is if all the Zookeper nodes die.
 
@@ -452,6 +459,12 @@ The cluster state contains worker assignments, information about topologies, and
 Since Storm topologies execute on a cluster all components need to be serialisable. This is achieved with Apache Thrift. Components are defined as Thrift objects and Thrift generates all the Java serialisation code automatically.
 
 Furthermore, since Nimbus is a Thrift service Thrift generates all the code required for remote procedure call (RPC) support. This allows defining topologies in any of the languages supported by Thrift and easy cross-language communication with the Nimbus service.
+
+\todo{multilang}
+
+\todo{metrics}
+
+\todo{hooks}
 \clearpage{}
 
 \clearpage{}\chapter{Bringing Storm to Multi-core}
@@ -825,7 +838,10 @@ The number of tuples processed by each component in Storm-MC and Apache Storm is
     4 & {52,285,327} & {52,283,540} & {458,187,555} & {805.5\%} & {804.1M} \\
 	5 & {55,326,941} & {55,325,167} & {484,844,652} & {998.7\%} & {806.0M} \\
 	6 & {56,747,319} & {56,744,629} & {497,285,149} & {1,195.3\%} & {824.8M} \\
-	10 & {40,341,798} & {40,336,962} & {353,490,567} & {1,967.4\%} & {2.7G} \\
+	7 & {51,048,092} & {51,044,774} & {447,330,207} & {1,314.8\%} & {686.5M} \\
+	8 & {51,892,349} & {51,889,982} & {454,739,674} & {1,502.0\%} & {687.1M} \\
+	9 & {55,312,654} & {55,308,442} & {484,696,841} & {1,656.8\%} & {694.9M} \\
+	10 & {54,377,002} & {54,374,432} & {476,512,544} & {1,822.5\%} & {702.0M} \\
 \end{tabular}
 \caption{Storm-MC: Component throughput in WordCount Topology.}
 \label{table:storm_mc_wordcount}
@@ -844,7 +860,10 @@ The number of tuples processed by each component in Storm-MC and Apache Storm is
     4 & {20,720,637} & {20,711,756} & {181,500,586} & {895.3\%} & {2.6G} \\
 	5 & {17,177,688} & {17,164,209} & {150,412,037} & {1,129.3\%} & {2.5G} \\
 	6 & {17,402,418} & {17,388,691} & {152,374,303} & {1,342.1\%} & {2.3G} \\
-	10 & {12,229,523} & {12,211,100} & {107,002,632} & {2,136.7\%} & {2.8G} \\
+	7 & {17,702,568} & {17,689,940} & {155,009,826} & {1,532.6\%} & {2.4G} \\
+	8 & {19,161,174} & {19,143,254} & {167,749,429} & {1,697.3\%} & {2.6G} \\
+	9 & {17,833,631} & {17,803,323} & {156,006,619} & {1,903.4\%} & {2.7G} \\
+	10 & {17,488,484} & {17,442,562} & {152,843,992} & {2,136.7\%} & {2.8G} \\
 \end{tabular}
 \caption{Apache Storm: Component throughput in WordCount Topology.}
 \label{table:storm_wordcount}
@@ -1073,7 +1092,6 @@ Storm-MC could be improved in a number of ways:
 \end{description}
 \clearpage{}
 
-\pagenumbering{Roman}
 
 \begin{appendices}
 	\clearpage{}\chapter{Listings}
