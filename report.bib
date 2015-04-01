@@ -1,26 +1,27 @@
 
+
 @article{Kumar:2013:HSD:2536274.2536314,
- author = {Kumar, K. Ashwin and Gluck, Jonathan and Deshpande, Amol and Lin, Jimmy},
- title = {Hone: "Scaling Down" Hadoop on Shared-memory Systems},
- journal = {Proc. VLDB Endow.},
- issue_date = {August 2013},
- volume = {6},
- number = {12},
- month = aug,
- year = {2013},
- issn = {2150-8097},
- pages = {1354--1357},
- numpages = {4},
- url = {http://dx.doi.org/10.14778/2536274.2536314},
- doi = {10.14778/2536274.2536314},
- acmid = {2536314},
- publisher = {VLDB Endowment}
+  author    = {K. Ashwin Kumar and
+               Jonathan Gluck and
+               Amol Deshpande and
+               Jimmy Lin},
+  title     = {Hone: "Scaling Down" Hadoop on Shared-Memory Systems},
+  journal   = {{PVLDB}},
+  volume    = {6},
+  number    = {12},
+  pages     = {1354--1357},
+  year      = {2013},
+  url       = {http://www.vldb.org/pvldb/vol6/p1354-kumar.pdf},
+  timestamp = {Mon, 14 Oct 2013 15:18:58 +0200},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/journals/pvldb/KumarGDL13},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
 }
 
 
 @article{Thompson_Farley_Barker_Gee_Stewart_2011,
  title={Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads},
  url={http://lmax-exchange.github.io/disruptor/files/Disruptor-1.0.pdf},
+ urldate={2015-03-25},
  author={Thompson, Martin and Farley, Dave and Barker, Michael and Gee, Patricia and Stewart, Andrew},
  year={2011},
  month=may
@@ -151,14 +152,19 @@
 }
 
 @article{golab2003issues,
-  title={Issues in data stream management},
-  author={Golab, Lukasz and {\"O}zsu, M Tamer},
-  journal={ACM Sigmod Record},
-  volume={32},
-  number={2},
-  pages={5--14},
-  year={2003},
-  publisher={ACM}
+  author    = {Lukasz Golab and
+               M. Tamer {\"{O}}zsu},
+  title     = {Issues in data stream management},
+  journal   = {{SIGMOD} Record},
+  volume    = {32},
+  number    = {2},
+  pages     = {5--14},
+  year      = {2003},
+  url       = {http://doi.acm.org/10.1145/776985.776986},
+  doi       = {10.1145/776985.776986},
+  timestamp = {Wed, 19 Sep 2012 09:16:25 +0200},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/journals/sigmod/GolabO03},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
 }
 
 @article{Gaber:2005:MDS:1083784.1083789,
@@ -285,11 +291,12 @@
   organization={Ieee}
 }
 
-@book{akhter2006multi,
+@INBOOK{akhter2006multi,
   title={Multi-core programming},
   author={Akhter, Shameen and Roberts, Jason},
   volume={33},
   year={2006},
+  PAGES={11},
   publisher={Intel press Hillsboro}
 }
 
@@ -349,16 +356,6 @@
   publisher={Pearson Education}
 }
 
-@misc{Aniello_Baldoni_Querzoni_2013,
- place={DEBS 2013, Arlington},
- title={Adaptive Online Scheduling in Storm},
- howpublished={http://www.orgs.ttu.edu/debs2013/presentations/DEBS13-Paper88-Querzoni.pdf},
- url={http://www.orgs.ttu.edu/debs2013/presentations/DEBS13-Paper88-Querzoni.pdf},
- author={Aniello, Leonardo and Baldoni, Roberto and Querzoni, Leonardo},
- year={2013},
- month=jul
-}
-
 @Online{InfoSphereStreams,
  title={{IBM} - {InfoSphere} {Streams}},
  label={{IBM} - {InfoSphere} {Streams}},
@@ -378,14 +375,19 @@
 }
 
 @article{dean2010mapreduce,
-  title={MapReduce: a flexible data processing tool},
-  author={Dean, Jeffrey and Ghemawat, Sanjay},
-  journal={Communications of the ACM},
-  volume={53},
-  number={1},
-  pages={72--77},
-  year={2010},
-  publisher={ACM}
+  author    = {Jeffrey Dean and
+               Sanjay Ghemawat},
+  title     = {MapReduce: a flexible data processing tool},
+  journal   = {Commun. {ACM}},
+  volume    = {53},
+  number    = {1},
+  pages     = {72--77},
+  year      = {2010},
+  url       = {http://doi.acm.org/10.1145/1629175.1629198},
+  doi       = {10.1145/1629175.1629198},
+  timestamp = {Mon, 26 Apr 2010 14:47:08 +0200},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/journals/cacm/DeanG10},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
 }
 
 @Online{ApacheHadoop,
@@ -531,10 +533,45 @@
   bibsource = {dblp computer science bibliography, http://dblp.org}
 }
 
-
-
 @article{dimsonhailstorm,
   title={Hailstorm: Distributed Stream Processing with Exactly Once Semantics},
   author={Dimson, Thomas and Ganjoo, Milind},
+  url={http://www.scs.stanford.edu/14sp-cs240h/projects/dimson_ganjoo.pdf},
+  urldate={2015-03-25},
   year={2014}
 }
+
+
+@inproceedings{Aniello_Baldoni_Querzoni_2013,
+  author    = {Leonardo Aniello and
+               Roberto Baldoni and
+               Leonardo Querzoni},
+  title     = {Adaptive online scheduling in storm},
+  booktitle = {The 7th {ACM} International Conference on Distributed Event-Based
+               Systems, {DEBS} '13, Arlington, TX, {USA} - June 29 - July 03, 2013},
+  pages     = {207--218},
+  year      = {2013},
+  crossref  = {DBLP:conf/debs/2013},
+  url       = {http://doi.acm.org/10.1145/2488222.2488267},
+  doi       = {10.1145/2488222.2488267},
+  timestamp = {Tue, 09 Jul 2013 20:25:39 +0200},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/debs/AnielloBQ13},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
+
+@proceedings{DBLP:conf/debs/2013,
+  editor    = {Sharma Chakravarthy and
+               Susan Darling Urban and
+               Peter Pietzuch and
+               Elke A. Rundensteiner},
+  title     = {The 7th {ACM} International Conference on Distributed Event-Based
+               Systems, {DEBS} '13, Arlington, TX, {USA} - June 29 - July 03, 2013},
+  publisher = {{ACM}},
+  year      = {2013},
+  url       = {http://dl.acm.org/citation.cfm?id=2488222},
+  isbn      = {978-1-4503-1758-0},
+  timestamp = {Tue, 09 Jul 2013 20:21:21 +0200},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/debs/2013},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
+
