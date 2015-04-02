@@ -88,6 +88,8 @@
 \project{4th Year Project Report}
 \date{\today}
 
+\pagenumbering{Roman}
+
 \abstract{In recent years the number of real-time data stream processing applications has been growing. However, data stream processing has been a province of distributed systems such as Apache Storm. This is because commodity hardware clusters offer good scale-out properties.
 
 On the other hand, chip makers have been able to pack more and more transistors into a single processor chip. This resulted in a steady increase in the number of cores in a single processor chip. Furthermore, it is possible that scale-out processors with high number of processor cores will be used for future throughput-based applications.
@@ -97,8 +99,6 @@ In this report we present Storm-MC, an API-compatible port of Apache Storm for m
 Through a series of benchmarks we show that running applications on Storm-MC can provide substantial improvement in throughput (up to 3.3x) compared to running them on Apache Storm in local mode.}
 
 \maketitle
-
-\pagenumbering{Roman}
 
 \section*{Acknowledgements}
 I would like to thank my supervisor, Dr. Stratis Viglas, for providing guidance every step of the way.
@@ -123,7 +123,7 @@ Finally, I would like to thank Daniela Kellerova who kept me sane while I worked
 	read_chunk('enron.R')
 @
 
-%\cleardoublepage
+\cleardoublepage
 \pagenumbering{arabic}
 
 \include{introduction}
