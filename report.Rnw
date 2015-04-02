@@ -142,10 +142,10 @@ Finally, I would like to thank Daniela Kellerova who kept me sane while I worked
 
 %\pagenumbering{Roman}
 
+\printbibliography
+
 \begin{appendices}
 	\include{appendix}
 \end{appendices}
-
-\printbibliography
 
 \end{document}
