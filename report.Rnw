@@ -1,6 +1,6 @@
 % to choose your degree
 % please un-comment just one of the following
-\documentclass[bsc,twoside,singlespacing,normalheadings,parskip]{infthesis}     % for BSc, BEng etc.
+\documentclass[bsc,deptreport,twoside,singlespacing,normalheadings,parskip]{infthesis}     % for BSc, BEng etc.
 % \documentclass[minf,frontabs,twoside,singlespacing,parskip]{infthesis}  % for MInf
 
 % APPENDIX
