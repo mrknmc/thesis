@@ -14,7 +14,7 @@ Moreover, tiled processors have emerged as competitors to traditional processors
 
 Seeing these trends, we believe there is a place for a real-time data stream processing system running on a single multi-core machine.
 
-It is generally believed that writing parallel software is hard. The traditional techniques of message passing and shared memory require the programmer to manage concurrency at a fairly low level. Furthermore, Apache Storm has become the \textit{de facto} tool used in stream processing on a cluster and according to their ``Powered By" page there are tens of companies already using Storm to process their real-time data streams \cite{PoweredBy}. We think that Storm's popularity and easy to use application programming interface (API) makes it the ideal candidate for porting to multi-core.
+It is generally believed that writing parallel software is hard. The traditional techniques of message passing and shared memory require the programmer to manage concurrency at a fairly low level. On the other hand, Apache Storm has become the \textit{de facto} tool used in stream processing on clusters because of its simple application programming interface (API). Furthermore, according to Storm's ``Powered~By" page there are tens of companies already using Storm to process their real-time data streams \cite{PoweredBy}. We think that Storm's popularity and easy to use API makes it the ideal candidate for porting to multi-core.
 
 \section{Project Contributions}
 
@@ -29,7 +29,7 @@ The remainder of the report is structured as follows:
 \begin{itemize}
 	\item Chapter 2 presents an overview of related literature and gives background on data stream processing and multi-core architectures.
 	\item Chapter 3 explains the concepts used in Apache Storm as well as the architecture of a Storm cluster.
-	\item Chapter 4 describes how Apache Storm was ported to multi-core and explains the design of Storm-MC.
+	\item Chapter 4 describes how Apache Storm was ported to multi-core and explains the design and implementation of Storm-MC.
 	\item Chapter 5 presents results of benchmarking Storm-MC against Apache Storm running in local mode.
-	\item Chapter 6 summarises this report and presents considerations for future work.
+	\item Chapter 6 summarises this report, presents considerations for future work, and lists challenges encountered while building Storm-MC.
 \end{itemize}

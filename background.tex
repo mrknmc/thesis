@@ -1,6 +1,6 @@
 \chapter{Background on Storm}
 
-In this chapter we give background information on Storm. This information is necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm (\ref{sec:storm_overview}), explain the concepts used in Storm (\ref{sec:concepts}), show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), and finally describe the serialisation used by Storm (\ref{sec:serialisation}).
+In this chapter we give background information on Storm. This information is necessary to understand the design of Storm-MC. We give a quick overview of Apache Storm (\ref{sec:storm_overview}), explain the concepts used in Storm (\ref{sec:concepts}), show an example Storm program (\ref{sec:example_topology}), give details about the underlying architecture of Storm (\ref{sec:storm_arch}), and finally describe the serialisation used in Storm (\ref{sec:serialisation}).
 
 \section{Storm Overview}
 \label{sec:storm_overview}
@@ -25,7 +25,9 @@ There are several core concepts used by Storm and hence by extension Storm-MC as
   The programmer connects spouts and bolts in a directed graph called topology which describes how the components interact with each other. The topology is then submitted to Storm for execution.
 \end{description}
 
-It should be noted that spouts and bolts can be implemented not only in Java but other languages such as Python and Ruby.
+Every component is represented by a set of tasks. These tasks can run in parallel and execute the function of the component.
+
+It should also be noted that spouts and bolts can be implemented not only in Java but other languages such as Python and Ruby.
 
 \subsection{Additional Concepts}
 
@@ -44,13 +46,13 @@ There are several additional concepts which describe how components of a topolog
   	\item[All] Replicate the entire stream to all the bolt tasks.
   	\item[Direct] The producer of the tuple decides which task of the bolt will receive this tuple.
   	\item[Global] Send the entire stream to a single bolt task.
-  	\item[Local or Shuffle] Prefer sending to executors in the same worker process, if that is not possible use same strategy as Shuffle.
+  	\item[Local or Shuffle] Prefer sending to tasks in the same node, if that is not possible use same strategy as Shuffle.
   \end{description}
 \end{description}
 
 Users are also able to specify their own custom grouping by implementing the \texttt{CustomStreamGrouping} interface.
 
-All the components of a Storm topology execute in parallel. The user can specify how much parallelism he wants associated with every component and Storm spawns the necessary number of threads. This is done through a configuration file, defined in YAML, which is submitted along with the topology.
+All the components of a Storm topology execute in parallel. The user can specify how much parallelism he wants associated with every component and Storm spawns the necessary number of threads. This is done through a configuration file, defined in YAML, which is then submitted along with the topology.
 
 There are two additional bolts running for every topology:
 
@@ -61,7 +63,7 @@ There are two additional bolts running for every topology:
 	The System bolt is useful in two ways:
 	\begin{description}
 		\item[Metrics] System bolt collects metrics on the local Java Virtual Machine (JVM). Other components can subscribe to these metrics and receive their values at  regular intervals.
-		\item[Ticks] Components of a topology can subscribe to receive tick tuples in regular intervals. These tuples can be used to trigger some event of a component.
+		\item[Ticks] Components of a topology can subscribe to receive tick tuples in regular intervals. These tuples can be used to trigger events at subscribed components.
 	\end{description}
 \end{description}
 
@@ -125,7 +127,7 @@ Nimbus is an Apache Thrift \cite{ApacheThrift} service (more on Thrift in sectio
 	\item[Submit a topology] \hfill \\
 	Clients can submit a topology defined in a Java Archive (JAR) file. The Nimbus service then ensures that the topology configuration and resources are distributed across the cluster and starts executing the topology as previously described.
 	\item[Kill a topology] \hfill \\
-	Nimbus can stop running a topology and remove it from the cluster. The cluster can still continue executing other topologies.
+	Nimbus can stop running a topology and remove it from the cluster. However, the cluster can still continue executing other topologies.
 	\item[Activate/deactivate a topology] \hfill \\
 	Topologies can be deactivated and reactivated by Nimbus. This could be useful if the spout temporarily cannot produce a stream and the user does not want the cluster to execute idly.
 	\item[Rebalance a topology] \hfill \\
@@ -162,3 +164,4 @@ The cluster state contains worker assignments, information about topologies, and
 Since Storm topologies execute on a cluster all components need to be serialisable. This is achieved with Apache Thrift. Components are defined as Thrift objects and Thrift generates all the Java serialisation code automatically.
 
 Furthermore, since Nimbus is a Thrift service Thrift generates all the code required for remote procedure call (RPC) support. This allows defining topologies in any of the languages supported by Thrift and easy cross-language communication with the Nimbus service.
+

@@ -1,20 +1,6 @@
 \chapter{Conclusion}
 
-This final chapter concludes with a summary of contributions of this project (\ref{sec:contribs}), discusses future work that could stem from this project (\ref{sec:future_work}), and presents challenges encountered while building Storm-MC (\ref{sec:challenges}).
-
-\section{Summary of Contributions}
-\label{sec:contribs}
-
-The primary contribution of this project is Storm-MC - a library aimed at data stream processing applications. The benefits of using Storm-MC are twofold:
-
-\begin{itemize}
-	\item It offers the same easy-to-use API as Apache Storm.
-	\item It is tailored to multi-core environments.
-\end{itemize}
-
-Since Storm-MC uses the same API as Apache Storm, applications written with Storm in mind can be ported to use Storm-MC with minimum amount of effort. Thus if an application requires parallelism satisfiable by a single multi-core machine, it can be executed on one machine instead of a cluster.
-
-Moreover, the Storm API allows programmers to create data stream processing applications on multi-core with an unprecedented ease. All of this comes with the superior performance Storm-MC offers compared to running Apache Storm in local mode, as shown in Section \ref{sec:performance}.
+This final chapter concludes with a discussion on future work that could stem from this project (\ref{sec:contribs}), describes challenges encountered while building Storm-MC (\ref{sec:challenges}), and presents a summary of contributions of this project (\ref{sec:contribs}).
 
 \section{Future Work}
 \label{sec:future_work}
@@ -27,13 +13,13 @@ Storm-MC could be improved in a number of ways. Following are ideas that were ou
 	\item[Higher Level Abstractions] \hfill \\
 	Defining components of a Storm-MC topology is fairly simple. Users of the library only need to define how components are connected and how they consume and produce tuples. However, this could be taken even further with the user specifying high-level functions and the Storm-MC library figuring out how to parallelise the work that needs to be carried out. In Apache Storm this is implemented with the Trident API which was not ported as part of this project.
 	\item[Automatic Parallelism] \hfill \\
-	Sometimes when configuring a topology it may be difficult to predict the rate at which spouts are going to produce tuples. If the rate is underestimated consumers could be lagging behind producers. On the other hand, if the rate is overestimated consumers could be idle, not doing any useful work. Thus it might be advantageous to have an automatic parallelism setting which could add or remove consumers based on the current tuple rate.
+	Sometimes when configuring a topology it may be difficult to predict the rate at which spouts are going to produce tuples. If the rate is underestimated consumers could be lagging behind producers. On the other hand, if the rate is overestimated consumers could be idle, not doing any useful work. Thus it could be advantageous to have an automatic parallelism setting which could add or remove consumers based on the current tuple rate.
 	
 	It may seem that this would be trivial to implement with a pool of threads representing one component. However, there are several problems that need to be considered. For example, fields grouping guarantees that tuples with the same field values go to the same executor. Changing the parallelism at runtime breaks this guarantee.
 	
 	Alternatively each executor could use a pool of threads. This comes with its own set of problems: the executor object would have to provide synchronised access to the pool which would only increase tuple latency.
 	\item[Performance Comparison with Distributed Storm] \hfill \\
-	The benchmarks in this report compared Storm-MC to Apache Storm running in local mode. It would be interesting to see how Storm-MC compares to Apache Storm running on a cluster. One could compare the number of nodes required in a cluster to the number of cores required in a multi-core server to achieve certain throughput for a given topology. This could provide insight into when it becomes advantageous to deploy the topology to a cluster.
+	The benchmarks in this report compared Storm-MC to Apache Storm running in local mode. It would be interesting to see how Storm-MC compares to Apache Storm running on a cluster. One could compare the number of nodes required in a cluster to the number of cores required in a multi-core server to achieve certain throughput for a given topology. Benchmarks like this could provide insight into when it becomes advantageous to deploy the topology to a cluster. These benchmarks were not included in this project because we did not have access to a cluster.
 \end{description}
 
 \section{Challenges}
@@ -47,7 +33,19 @@ In this section we discuss challenges we encountered while porting Apache Storm 
 	\item[Unfamiliarity with Clojure] \hfill \\
 	One of the main challenges while working on this project was learning a new programming language - Clojure. Since most of the implementation of Apache Storm is written in Clojure, this language had to be studied and its concepts well understood for us to be able to write code that worked with the existing codebase. By the end of the project writing Clojure has become second nature to us but initially progress was slow.
 	\item[Lack of Documentation] \hfill \\
-	Even though Apache Storm is a popular project documentation is available only for the high level concepts used within Storm. The implementation details are often obscured away in hard to understand functions. Since the documentation is lacking our knowledge of Storm had to be obtained by reading the source code of an initially unfamiliar language. By the end of the project the Storm-MC code became well documented and we might attempt back-porting to Apache Storm.
+	Even though Apache Storm is a popular project documentation is available only for the high level concepts used within Storm. The implementation details are often obscured away in hard to understand functions. Since the documentation is lacking our knowledge of Storm had to be obtained by reading the source code of an initially unfamiliar language. By the end of the project the Storm-MC codebase became well documented and we might attempt back-porting parts of it to Apache Storm.
 \end{description}
 
+\section{Summary of Contributions}
+\label{sec:contribs}
 
+The primary contribution of this project is Storm-MC - a library aimed at data stream processing applications. The benefits of using Storm-MC are twofold:
+
+\begin{itemize}
+	\item It offers the same easy-to-use API as Apache Storm.
+	\item It is tailored to multi-core environments.
+\end{itemize}
+
+Since Storm-MC uses the same API as Apache Storm, applications written with Storm in mind can be ported to use Storm-MC with minimum amount of effort. Thus if an application requires parallelism satisfiable by a single multi-core machine, it can be executed efficiently on one machine instead of a cluster.
+
+Moreover, the Storm API allows programmers to create data stream processing applications on multi-core with an unprecedented ease. All of this comes with the superior performance Storm-MC offers compared to running Apache Storm in local mode, as shown in Section \ref{sec:performance}.
